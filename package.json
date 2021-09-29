@@ -1,0 +1,20 @@
+{
+  "name": "app-staffing-api",
+  "version": "0.1.0",
+  "description": "Backend for https://github.com/bitovi/app-staffing/",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitovi/app-staffing-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bitovi/app-staffing-api/issues"
+  },
+  "homepage": "https://github.com/bitovi/app-staffing-api#readme",
+  "dependencies": {
+    "fastify": "^3.0.0"
+  }
+}

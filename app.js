@@ -16,6 +16,6 @@ fastify.listen(APP_PORT, function (err, address) {
     fastify.log.error(err)
     process.exit(1)
   }
-  // Server is now listening on ${address}
+
   console.log(`Server is now listening on ${address}`);
 });

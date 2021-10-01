@@ -1,0 +1,33 @@
+version: '3.5'
+
+networks:
+  network:
+    name: app-staffing-backend-network
+
+services:
+  db:
+    networks:
+      - network
+    container_name: app-staffing-backend-db
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: dbpassword
+
+  api:
+    networks:
+      - network
+    container_name: app-staffing-backend-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      APP_PORT: 3000
+    ports:
+      - 3000:3000
+    command: >
+      sh -c '\
+        npm start
+      '

@@ -11,7 +11,8 @@ fastify.get('/', function (request, reply) {
 });
 
 // Run the server!
-fastify.listen(APP_PORT, function (err, address) {
+// Host '0.0.0.0' so that docker networking works
+fastify.listen(APP_PORT, '0.0.0.0', function (err, address) {
   if (err) {
     fastify.log.error(err)
     process.exit(1)

@@ -20,6 +20,9 @@ services:
     networks:
       - network
     container_name: app-staffing-backend-api
+    volumes: 
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     build:
       context: .
       dockerfile: Dockerfile
@@ -27,7 +30,9 @@ services:
       APP_PORT: 3000
     ports:
       - 3000:3000
+      - 9229:9229
     command: >
       sh -c '\
-        npm start
+        npm i -g nodemon \
+        && nodemon --inspect=0.0.0.0:9229 app.js
       '

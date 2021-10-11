@@ -8,7 +8,7 @@ const { Model } = require("objection");
 
 class Project extends Model {
   static get tableName() {
-    return "projects";
+    return "project";
   }
 
   // Define Relationships with other Models
@@ -23,7 +23,7 @@ class Project extends Model {
         modelClass: Role,
         join: {
           from: "project.id",
-          to: "roles.projectId",
+          to: "role.projectId",
         },
       },
     };

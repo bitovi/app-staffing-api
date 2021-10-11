@@ -7,7 +7,7 @@ const { Model } = require("objection");
 
 class Skill extends Model {
   static get tableName() {
-    return "skills";
+    return "skill";
   }
 
   // Define Relationships with other Models
@@ -21,7 +21,7 @@ class Skill extends Model {
         relation: Model.HasManyRelation,
         modelClass: Role,
         join: {
-          from: "skills.id",
+          from: "skill.id",
           to: "role.skillId",
         },
       },
@@ -30,8 +30,8 @@ class Skill extends Model {
         relation: Model.HasManyRelation,
         modelClass: Employee,
         join: {
-          from: "skills.id",
-          to: "employees.skills",
+          from: "skill.id",
+          to: "employee.skills",
         },
       },
     };

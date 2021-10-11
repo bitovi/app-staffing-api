@@ -9,7 +9,7 @@ const { Model } = require("objection");
 
 class Employee extends Model {
   static get tableName() {
-    return "employees";
+    return "employee";
   }
 
   // Define Relationships with other Models
@@ -24,7 +24,7 @@ class Employee extends Model {
         modelClass: EmployeeRole,
         join: {
           from: "employee.roleId",
-          to: "employee_roles.employeeId",
+          to: "employee__role.employeeId",
         },
       },
 
@@ -34,8 +34,8 @@ class Employee extends Model {
         join: {
           from: "employee.id",
           through: {
-            from: "employee__skills.employeeId",
-            to: "employee__skills.skillId",
+            from: "employee__skill.employeeId",
+            to: "employee__skill.skillId",
           },
           to: "skill.id",
         },

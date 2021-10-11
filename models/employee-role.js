@@ -8,9 +8,9 @@ const { Model } = require("objection");
 //   assignmentEndDate?: string;
 // }
 
-class Assignment extends Model {
+class EmployeeRole extends Model {
   static get tableName() {
-    return "employee-roles";
+    return "employee__role";
   }
 
   // Define Relationships with other Models
@@ -24,8 +24,8 @@ class Assignment extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: Role,
         join: {
-          from: "employee__roles.roleId",
-          to: "roles.id",
+          from: "employee__role.roleId",
+          to: "role.id",
         },
       },
 
@@ -33,12 +33,12 @@ class Assignment extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: Employee,
         join: {
-          from: "employee__roles.employeeId",
-          to: "employees.id",
+          from: "employee__role.employeeId",
+          to: "employee.id",
         },
       },
     };
   }
 }
 
-module.exports = Assignment;
+module.exports = EmployeeRole;

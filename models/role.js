@@ -8,12 +8,11 @@ const { Model } = require("objection");
 //   startConfidence: string;
 //   endDate: string;
 //   endConfidence: string;
-
 // }
 
 class Role extends Model {
   static get tableName() {
-    return "roles";
+    return "role";
   }
 
   // Define Relationships with other Models
@@ -28,7 +27,7 @@ class Role extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: Role,
         join: {
-          from: "roles.projectId",
+          from: "role.projectId",
           to: "project.id",
         },
       },
@@ -37,8 +36,8 @@ class Role extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: Skill,
         join: {
-          from: "roles.skillId",
-          to: "skills.id",
+          from: "role.skillId",
+          to: "skill.id",
         },
       },
 
@@ -46,8 +45,8 @@ class Role extends Model {
         relation: Model.HasManyRelation,
         modelClass: EmployeeRole,
         join: {
-          from: "skills.id",
-          to: "employees.skills",
+          from: "skill.id",
+          to: "employee.skills",
         },
       },
 
@@ -55,10 +54,10 @@ class Role extends Model {
         relation: Model.ManyToManyRelation,
         modelClass: Employee,
         join: {
-          from: "skills.id",
+          from: "skill.id",
           through: {
-            from: "employee_roles.roleId",
-            to: "employee_roles.employeeId",
+            from: "employee__role.roleId",
+            to: "employee__role.employeeId",
           },
           to: "employees.id",
         },

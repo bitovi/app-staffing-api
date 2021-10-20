@@ -4,7 +4,8 @@
   "description": "Backend for https://github.com/bitovi/app-staffing/",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "migrate": "npx knex migrate:latest"
   },
   "repository": {
     "type": "git",

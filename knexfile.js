@@ -2,11 +2,11 @@ module.exports = {
   client: 'pg',
   connection: process.env.DATABASE_CONNECTION_STRING,
   migrations: {
-    directory: './migrations',
+    directory: './db/migrations',
     extension: 'js',
   },
   seeds: {
-    directory: './seeds',
+    directory: './db/seeds',
     extension: 'js',
   },
 }

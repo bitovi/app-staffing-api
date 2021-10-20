@@ -22,6 +22,8 @@ services:
     networks:
       - network
     container_name: app-staffing-backend-api
+    depends_on:
+      - db
     volumes: 
       - .:/usr/src/app
       - /usr/src/app/node_modules
@@ -34,16 +36,9 @@ services:
     ports:
       - 3000:3000
       - 9229:9229
-    # THIS DOES NOT WORK
-    # command: >
-    #   sh -c '\
-    #     npm run migrate \
-    #     && npm i -g nodemon \
-    #     && nodemon --inspect=0.0.0.0:9229 app.js
-    #   '
-    # THIS WORKS IF YOU SSH INTO THE CONTAINER AND RUN MIGRATION MANUALLY
     command: >
       sh -c '\
-        npm i -g nodemon \
+        npm run migrate \
+        && npm i -g nodemon \
         && nodemon --inspect=0.0.0.0:9229 app.js
       '

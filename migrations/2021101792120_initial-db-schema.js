@@ -6,5 +6,5 @@ exports.up = async (knex) => {
   }
   
   exports.down = async (knex) => {
-    await knex.schema.dropTable('name')
+    await knex.schema.dropTable('skill')
   }

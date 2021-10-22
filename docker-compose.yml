@@ -12,6 +12,8 @@ services:
     image: postgres
     ports:
       - 5432:5432
+    volumes:
+        - ./initdb-scripts:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: dbuser
       POSTGRES_PASSWORD: dbpassword
@@ -20,6 +22,8 @@ services:
     networks:
       - network
     container_name: app-staffing-backend-api
+    depends_on:
+      - db
     volumes: 
       - .:/usr/src/app
       - /usr/src/app/node_modules
@@ -28,11 +32,13 @@ services:
       dockerfile: Dockerfile
     environment:
       APP_PORT: 3000
+      DATABASE_CONNECTION_STRING: postgres://dbuser:dbpassword@db:5432/staffing
     ports:
       - 3000:3000
       - 9229:9229
     command: >
       sh -c '\
-        npm i -g nodemon \
+        npm run migrate \
+        && npm i -g nodemon \
         && nodemon --inspect=0.0.0.0:9229 app.js
       '

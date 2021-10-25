@@ -2,6 +2,42 @@ const { Model } = require("objection");
 const Employee = require("../../models/employee");
 const Project = require("../../models/project");
 const Skill = require("../../models/skill");
+const faker = require('faker');
+
+const fakesCache = new Map();
+function generateAndCacheFake(keyPrefix, key, generator){
+  const prefixedKey = `${keyPrefix}.${key}`;
+  let value;
+  
+  // retrieve value from cache by key (if provided)
+  if (key) {
+    value = fakesCache.get(prefixedKey);
+  }
+  
+  // generate fake value via provided generator (if needed)
+  if (!value) {
+    value = generator();
+  }
+
+  // cache value by key (if provided)
+  if (key) {
+    fakesCache.set(prefixedKey, value);
+  }
+
+  return value;
+}
+
+function fakeSkill(key) {
+  return generateAndCacheFake('skill', key, () => `${faker.random.word().toLowerCase()}.js`);
+}
+
+function fakeEmployee(key) {
+  return generateAndCacheFake('employee', key, () => faker.fake('{{name.firstName}} {{name.lastName}}'));
+}
+
+function fakeProject(key) {
+  return generateAndCacheFake('project', key, () => faker.company.companyName());
+}
 
 exports.seed = async (knex) => {
   // Give the knex instance to Objection
@@ -16,41 +52,9 @@ exports.seed = async (knex) => {
   await knex('skill').del();
 
   // insert seed data
-
-  // TODO: remove examples
-  // await knex('skill').insert([
-  //   { name: 'Skill 1'},
-  //   { name: 'Skill 2'},
-  //   { name: 'Skill 3'}
-  // ]);
-
-  ////////////////////////////////
-  // const skillA = await Skill.query().insert({ name: 'Skill A' });
-  // const skillB = await Skill.query().insert({ name: 'Skill B' });
-  // const skillC = await Skill.query().insert({ name: 'Skill C' });
-
-  // console.log(skillA);
-  // console.log(skillB);
-  // console.log(skillC);
-
-  ////////////////////////////////
-  // await Employee.query().insertGraph([
-  //   {
-  //     name: "Michael Haynie",
-  //     start_date: new Date(),
-  //     end_date: new Date(),
-  //     skills: [
-  //       { name: "Nunchuck" },
-  //       { name: "Bow Hunting" },
-  //       { name: "Computer Hacking" }
-  //     ]
-  //   }
-  // ]);
-
-  ////////////////////////////////////
   await Project.query().insertGraph([
     {
-      name: 'Project A',
+      name: fakeProject(),
       start_date: new Date(),
       end_date: new Date(),
 
@@ -62,8 +66,8 @@ exports.seed = async (knex) => {
           end_confidence: 1,
 
           skill: {
-            '#id': 'skillA',
-            name: 'Skill A'
+            '#id': fakeSkill(1),
+            name: fakeSkill(1)
           },
 
           employeeRoles: {
@@ -71,13 +75,13 @@ exports.seed = async (knex) => {
             assignment_end_date: new Date(),
             
             employee: {
-              name: 'Employee A',
+              name: fakeEmployee(1),
               start_date: new Date(),
               end_date: new Date(),
 
               skills: [
                 {
-                  '#ref': 'skillA'
+                  '#ref': fakeSkill(1)
                 }
               ]
             }

@@ -22,19 +22,19 @@ class EmployeeRole extends Model {
     return {
       employee: {
         relation: Model.BelongsToOneRelation,
-        modelClass: Role,
+        modelClass: Employee,
         join: {
-          from: "employee__role.roleId",
-          to: "role.id",
+          from: "employee__role.employee_id",
+          to: "employee.id",
         },
       },
 
       role: {
         relation: Model.BelongsToOneRelation,
-        modelClass: Employee,
+        modelClass: Role,
         join: {
-          from: "employee__role.employeeId",
-          to: "employee.id",
+          from: "employee__role.role_id",
+          to: "role.id",
         },
       },
     };

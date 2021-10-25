@@ -29,13 +29,13 @@ class Employee extends Model {
       },
 
       skills: {
-        relations: Model.HasManyRelation,
+        relation: Model.ManyToManyRelation,
         modelClass: Skill,
         join: {
           from: "employee.id",
           through: {
-            from: "employee__skill.employeeId",
-            to: "employee__skill.skillId",
+            from: "employee__skill.employee_id",
+            to: "employee__skill.skill_id",
           },
           to: "skill.id",
         },

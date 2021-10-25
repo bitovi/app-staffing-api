@@ -18,16 +18,17 @@ class Role extends Model {
   // Define Relationships with other Models
   static get relationMappings() {
     // Importing models here avoids require loops.
-    const Role = require("./role");
     const Skill = require("./skill");
+    const Employee = require("./employee");
     const EmployeeRole = require("./employee-role");
+    const Project = require("./project");
 
     return {
-      role: {
+      project: {
         relation: Model.BelongsToOneRelation,
-        modelClass: Role,
+        modelClass: Project,
         join: {
-          from: "role.projectId",
+          from: "role.project_id",
           to: "project.id",
         },
       },
@@ -36,7 +37,7 @@ class Role extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: Skill,
         join: {
-          from: "role.skillId",
+          from: "role.skill_id",
           to: "skill.id",
         },
       },
@@ -45,8 +46,8 @@ class Role extends Model {
         relation: Model.HasManyRelation,
         modelClass: EmployeeRole,
         join: {
-          from: "skill.id",
-          to: "employee.skills",
+          from: "role.id",
+          to: "employee__role.role_id",
         },
       },
 
@@ -54,12 +55,12 @@ class Role extends Model {
         relation: Model.ManyToManyRelation,
         modelClass: Employee,
         join: {
-          from: "skill.id",
+          from: "role.id",
           through: {
-            from: "employee__role.roleId",
-            to: "employee__role.employeeId",
+            from: "employee__role.role_id",
+            to: "employee__role.employee_id",
           },
-          to: "employees.id",
+          to: "employee.id",
         },
       },
     };

@@ -60,10 +60,10 @@ exports.seed = async (knex) => {
 
       roles: [
         {
-          start_date: new Date(),
-          start_confidence: 1,
-          end_date: new Date(),
-          end_confidence: 1,
+          start_date: new Date(faker.date.recent()),
+          start_confidence: faker.datatype.number(10),
+          end_date: new Date(faker.date.future()),
+          end_confidence: faker.datatype.number(10),
 
           skill: {
             '#id': fakeSkill(1),
@@ -71,13 +71,13 @@ exports.seed = async (knex) => {
           },
 
           employeeRoles: {
-            assignment_start_date: new Date(),
-            assignment_end_date: new Date(),
+            assignment_start_date: new Date(faker.date.recent()),
+            assignment_end_date: new Date(faker.date.future()),
             
             employee: {
               name: fakeEmployee(1),
-              start_date: new Date(),
-              end_date: new Date(),
+              start_date: new Date(faker.date.past()),
+              end_date: null,
 
               skills: [
                 {
@@ -88,7 +88,8 @@ exports.seed = async (knex) => {
           }
         }
       ]
-    }
+    },
+    // more projects
   ], { allowRefs: true });
 
   // Log seeded projects demonstrating most nested relations

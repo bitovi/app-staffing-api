@@ -15,7 +15,6 @@ class Project extends Model {
   static get relationMappings() {
     // Importing models here avoids require loops.
     const Role = require("./role");
-    const Employee = require("./employee");
 
     return {
       roles: {
@@ -23,7 +22,7 @@ class Project extends Model {
         modelClass: Role,
         join: {
           from: "project.id",
-          to: "role.projectId",
+          to: "role.project_id",
         },
       },
     };

@@ -13,8 +13,8 @@ class Skill extends Model {
   // Define Relationships with other Models
   static get relationMappings() {
     // Importing models here avoids require loops.
-    const Role = require("./Role");
-    const Employee = require("./Employee");
+    const Role = require("./role");
+    const Employee = require("./employee");
 
     return {
       roles: {

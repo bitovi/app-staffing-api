@@ -2,7 +2,7 @@ FROM node:14-buster
 
 WORKDIR /usr/src/app
 
-COPY . /usr/src/app
+COPY src /usr/src/app/src
 COPY package.json package.json
 COPY package-lock.json package-lock.json
 

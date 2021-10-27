@@ -25,7 +25,7 @@ services:
     depends_on:
       - db
     volumes: 
-      - .:/usr/src/app
+      - ./src:/usr/src/app/src
       - /usr/src/app/node_modules
     build:
       context: .
@@ -41,5 +41,5 @@ services:
         npm run migrate \
         && npm run seed \
         && npm i -g nodemon \
-        && nodemon --inspect=0.0.0.0:9229 app.js
+        && nodemon --inspect=0.0.0.0:9229 src/app.js
       '

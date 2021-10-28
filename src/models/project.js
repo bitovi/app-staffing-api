@@ -1,4 +1,4 @@
-const { Model } = require("objection");
+const { Model } = require('objection')
 
 // interface Project {
 //   id: ProjectId;
@@ -7,26 +7,26 @@ const { Model } = require("objection");
 // }
 
 class Project extends Model {
-  static get tableName() {
-    return "project";
+  static get tableName () {
+    return 'project'
   }
 
   // Define Relationships with other Models
-  static get relationMappings() {
+  static get relationMappings () {
     // Importing models here avoids require loops.
-    const Role = require("./role");
+    const Role = require('./role')
 
     return {
       roles: {
         relation: Model.HasManyRelation,
         modelClass: Role,
         join: {
-          from: "project.id",
-          to: "role.project_id",
-        },
-      },
-    };
+          from: 'project.id',
+          to: 'role.project_id'
+        }
+      }
+    }
   }
 }
 
-module.exports = Project;
+module.exports = Project

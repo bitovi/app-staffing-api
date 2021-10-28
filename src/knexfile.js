@@ -3,10 +3,10 @@ module.exports = {
   connection: process.env.DATABASE_CONNECTION_STRING,
   migrations: {
     directory: './db/migrations',
-    extension: 'js',
+    extension: 'js'
   },
   seeds: {
     directory: './db/seeds',
-    extension: 'js',
-  },
+    extension: 'js'
+  }
 }

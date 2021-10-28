@@ -1,4 +1,4 @@
-const { Model } = require("objection");
+const { Model } = require('objection')
 
 // interface Role {
 //   id: RoleId;
@@ -11,60 +11,60 @@ const { Model } = require("objection");
 // }
 
 class Role extends Model {
-  static get tableName() {
-    return "role";
+  static get tableName () {
+    return 'role'
   }
 
   // Define Relationships with other Models
-  static get relationMappings() {
+  static get relationMappings () {
     // Importing models here avoids require loops.
-    const Skill = require("./skill");
-    const Employee = require("./employee");
-    const EmployeeRole = require("./employee-role");
-    const Project = require("./project");
+    const Skill = require('./skill')
+    const Employee = require('./employee')
+    const EmployeeRole = require('./employee-role')
+    const Project = require('./project')
 
     return {
       project: {
         relation: Model.BelongsToOneRelation,
         modelClass: Project,
         join: {
-          from: "role.project_id",
-          to: "project.id",
-        },
+          from: 'role.project_id',
+          to: 'project.id'
+        }
       },
 
       skill: {
         relation: Model.BelongsToOneRelation,
         modelClass: Skill,
         join: {
-          from: "role.skill_id",
-          to: "skill.id",
-        },
+          from: 'role.skill_id',
+          to: 'skill.id'
+        }
       },
 
       employeeRoles: {
         relation: Model.HasManyRelation,
         modelClass: EmployeeRole,
         join: {
-          from: "role.id",
-          to: "employee__role.role_id",
-        },
+          from: 'role.id',
+          to: 'employee__role.role_id'
+        }
       },
 
       employees: {
         relation: Model.ManyToManyRelation,
         modelClass: Employee,
         join: {
-          from: "role.id",
+          from: 'role.id',
           through: {
-            from: "employee__role.role_id",
-            to: "employee__role.employee_id",
+            from: 'employee__role.role_id',
+            to: 'employee__role.employee_id'
           },
-          to: "employee.id",
-        },
-      },
-    };
+          to: 'employee.id'
+        }
+      }
+    }
   }
 }
 
-module.exports = Role;
+module.exports = Role

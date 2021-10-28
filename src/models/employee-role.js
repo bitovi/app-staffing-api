@@ -1,4 +1,4 @@
-const { Model } = require("objection");
+const { Model } = require('objection')
 
 // interface AssignedEmployee {
 //   id: AssignedEmployeeId;
@@ -9,36 +9,36 @@ const { Model } = require("objection");
 // }
 
 class EmployeeRole extends Model {
-  static get tableName() {
-    return "employee__role";
+  static get tableName () {
+    return 'employee__role'
   }
 
   // Define Relationships with other Models
-  static get relationMappings() {
+  static get relationMappings () {
     // Importing models here avoids require loops.
-    const Role = require("./role");
-    const Employee = require("./employee");
+    const Role = require('./role')
+    const Employee = require('./employee')
 
     return {
       employee: {
         relation: Model.BelongsToOneRelation,
         modelClass: Employee,
         join: {
-          from: "employee__role.employee_id",
-          to: "employee.id",
-        },
+          from: 'employee__role.employee_id',
+          to: 'employee.id'
+        }
       },
 
       role: {
         relation: Model.BelongsToOneRelation,
         modelClass: Role,
         join: {
-          from: "employee__role.role_id",
-          to: "role.id",
-        },
-      },
-    };
+          from: 'employee__role.role_id',
+          to: 'role.id'
+        }
+      }
+    }
   }
 }
 
-module.exports = EmployeeRole;
+module.exports = EmployeeRole

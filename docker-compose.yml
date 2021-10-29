@@ -1,13 +1,7 @@
 version: '3.5'
 
-networks:
-  network:
-    name: app-staffing-backend-network
-
 services:
   db:
-    networks:
-      - network
     container_name: app-staffing-backend-db
     image: postgres
     ports:
@@ -19,8 +13,6 @@ services:
       POSTGRES_PASSWORD: dbpassword
 
   api:
-    networks:
-      - network
     container_name: app-staffing-backend-api
     depends_on:
       - db
@@ -32,14 +24,11 @@ services:
       dockerfile: Dockerfile
     environment:
       APP_PORT: 3000
-      DATABASE_CONNECTION_STRING: postgres://dbuser:dbpassword@db:5432/staffing
     ports:
       - 3000:3000
       - 9229:9229
     command: >
       sh -c '\
-        npm run migrate \
-        && npm run seed \
-        && npm i -g nodemon \
+        npm i -g nodemon \
         && nodemon --inspect=0.0.0.0:9229 src/app.js
       '

@@ -4,6 +4,10 @@
   "description": "Backend for https://github.com/bitovi/app-staffing/",
   "main": "app.js",
   "scripts": {
+    "migrate": "knex migrate:latest",
+    "migrate:up": "knex migrate:up",
+    "migrate:down": "knex migrate:down",
+    "seed": "knex seed:run --knexfile knexfile.js",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "start": "node src/app.js",

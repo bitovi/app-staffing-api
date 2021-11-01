@@ -24,6 +24,7 @@ services:
       dockerfile: Dockerfile
     environment:
       APP_PORT: 3000
+      DATABASE_CONNECTION_STRING: postgres://dbuser:dbpassword@db:5432/staffing
     ports:
       - 3000:3000
       - 9229:9229

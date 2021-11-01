@@ -1,5 +1,5 @@
 const { Model } = require('objection')
-const Skill = require("./skill");
+const Skill = require('./skill')
 
 class Role extends Model {
   static get tableName () {

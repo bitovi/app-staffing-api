@@ -1,5 +1,6 @@
 version: '3.5'
-
+networks:
+  app-staffing-backend-network: {}
 services:
   db:
     container_name: app-staffing-backend-db
@@ -11,6 +12,8 @@ services:
     environment:
       POSTGRES_USER: dbuser
       POSTGRES_PASSWORD: dbpassword
+    networks:
+      - app-staffing-backend-network
 
   api:
     container_name: app-staffing-backend-api
@@ -31,5 +34,8 @@ services:
     command: >
       sh -c '\
         npm i -g nodemon \
+        && npm run migrate \
         && nodemon --inspect=0.0.0.0:9229 src/app.js
       '
+    networks:
+      - app-staffing-backend-network

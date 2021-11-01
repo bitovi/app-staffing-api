@@ -1,5 +1,4 @@
 const { Model } = require("objection");
-const Employee = require("../../src/models/employee");
 const faker = require("faker");
 
 const fakesCache = new Map();

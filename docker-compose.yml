@@ -1,7 +1,13 @@
 version: '3.5'
 
+networks:
+  network:
+    name: app-staffing-backend-network
+
 services:
   db:
+    networks:
+      - network
     container_name: app-staffing-backend-db
     image: postgres
     ports:
@@ -13,10 +19,12 @@ services:
       POSTGRES_PASSWORD: dbpassword
 
   api:
+    networks:
+      - network
     container_name: app-staffing-backend-api
     depends_on:
       - db
-    volumes: 
+    volumes:
       - ./src:/usr/src/app/src
       - /usr/src/app/node_modules
     build:
@@ -24,6 +32,7 @@ services:
       dockerfile: Dockerfile
     environment:
       APP_PORT: 3000
+      DATABASE_CONNECTION_STRING: postgres://dbuser:dbpassword@db:5432/staffing
     ports:
       - 3000:3000
       - 9229:9229

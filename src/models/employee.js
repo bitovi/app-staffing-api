@@ -1,6 +1,6 @@
 const { Model } = require('objection')
 
-class Employee extends Model {
+module.exports = class Employee extends Model {
   static get tableName () {
     return 'employee'
   }
@@ -10,6 +10,18 @@ class Employee extends Model {
     const Role = require('./role')
 
     return {
+      skills: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Skill,
+        join: {
+          from: 'employee.id',
+          through: {
+            from: 'employee__skill.employee_id',
+            to: 'employee__skill.skill_id'
+          },
+          to: 'skill.id'
+        }
+      },
       assignments: {
         relation: Model.HasManyRelation,
         modelClass: Assignment,
@@ -34,4 +46,22 @@ class Employee extends Model {
   }
 }
 
-module.exports = Employee
+  static get relationMappings () {
+    const Skill = require('./skill')
+
+    return {
+      skills: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Skill,
+        join: {
+          from: 'employee.id',
+          through: {
+            from: 'employee__skill.employee_id',
+            to: 'employee__skill.skill_id'
+          },
+          to: 'skill.id'
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,4 @@
 const { Model } = require('objection')
-const Project = require('../../models/project')
 const faker = require('faker')
 
 const fakesCache = new Map()

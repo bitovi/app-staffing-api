@@ -8,6 +8,7 @@ module.exports = class Employee extends Model {
   static get relationMappings () {
     const Assignment = require('./assignment')
     const Role = require('./role')
+    const Skill = require('./skill')
 
     return {
       skills: {

@@ -35,6 +35,7 @@ services:
       sh -c '\
         npm i -g nodemon \
         && npm run migrate \
+        && npm run seed \
         && nodemon --inspect=0.0.0.0:9229 src/app.js
       '
     networks:

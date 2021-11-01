@@ -4,18 +4,12 @@
   "description": "Backend for https://github.com/bitovi/app-staffing/",
   "main": "app.js",
   "scripts": {
-    "migrate": "knex migrate:latest",
-    "migrate:up": "knex migrate:up",
-    "migrate:down": "knex migrate:down",
-    "seed": "knex seed:run --knexfile knexfile.js",
+    "migrate": "knex migrate:latest --knexfile src/knexfile.js",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
-    "migrate": "knex migrate:latest",
-    "seed": "knex seed:run --knexfile src/db/knexfile.js",
+    "seed": "knex seed:run --knexfile src/knexfile.js",
     "start": "node src/app.js",
-    "test": "jest test/",
-    "migrate": "knex migrate:latest",
-    "seed": "knex seed:run --knexfile src/db/knexfile.js"
+    "test": "jest test/"
   },
   "repository": {
     "type": "git",

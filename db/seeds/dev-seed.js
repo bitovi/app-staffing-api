@@ -2,7 +2,6 @@
 const { Model } = require('objection')
 const Employee = require('../../src/models/employee')
 const faker = require('faker')
-const Employee = require('../../src/models/employee')
 
 const fakesCache = new Map()
 function generateAndCacheFake (keyPrefix, key, generator) {

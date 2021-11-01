@@ -1,26 +1,26 @@
-const { Model } = require("objection");
+const { Model } = require('objection')
 
 module.exports = class Employee extends Model {
-  static get tableName() {
-    return "employee";
+  static get tableName () {
+    return 'employee'
   }
 
-  static get relationMappings() {
-    const Skill = require("./skill");
+  static get relationMappings () {
+    const Skill = require('./skill')
 
     return {
       skills: {
         relation: Model.ManyToManyRelation,
         modelClass: Skill,
         join: {
-          from: "employee.id",
+          from: 'employee.id',
           through: {
-            from: "employee__skill.employee_id",
-            to: "employee__skill.skill_id",
+            from: 'employee__skill.employee_id',
+            to: 'employee__skill.skill_id'
           },
-          to: "skill.id",
-        },
-      },
-    };
+          to: 'skill.id'
+        }
+      }
+    }
   }
-};
+}

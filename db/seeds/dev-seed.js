@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 const { Model } = require('objection')
+const Employee = require('../../src/models/employee')
 const faker = require('faker')
 
 const fakesCache = new Map()
@@ -25,15 +27,23 @@ function generateAndCacheFake (keyPrefix, key, generator) {
 }
 
 function fakeSkill (key) {
-  return generateAndCacheFake('skill', key, () => `${faker.random.word().toLowerCase()}.js`)
+  return generateAndCacheFake(
+    'skill',
+    key,
+    () => `${faker.random.word().toLowerCase()}.js`
+  )
 }
 
 function fakeEmployee (key) {
-  return generateAndCacheFake('employee', key, () => faker.fake('{{name.firstName}} {{name.lastName}}'))
+  return generateAndCacheFake('employee', key, () =>
+    faker.fake('{{name.firstName}} {{name.lastName}}')
+  )
 }
 
 function fakeProject (key) {
-  return generateAndCacheFake('project', key, () => faker.company.companyName())
+  return generateAndCacheFake('project', key, () =>
+    faker.company.companyName()
+  )
 }
 
 exports.seed = async (knex) => {
@@ -47,4 +57,10 @@ exports.seed = async (knex) => {
   await knex('skill').del()
 
   // insert seed data
+  await Employee.query().insertGraph({
+    name: 'Michael Scott',
+    start_date: new Date(),
+    end_date: new Date(),
+    skills: [{ name: 'Node' }, { name: 'Angular' }, { name: 'React' }]
+  })
 }

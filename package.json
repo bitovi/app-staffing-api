@@ -5,8 +5,8 @@
   "main": "app.js",
   "scripts": {
     "migrate": "knex migrate:latest --knexfile src/knexfile.js",
-    "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "seed": "knex seed:run --knexfile src/knexfile.js",
     "start": "node src/app.js",
     "test": "jest test/"

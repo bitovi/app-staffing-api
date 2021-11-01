@@ -1,4 +1,5 @@
 const { Model } = require('objection')
+const Skill = require("./skill");
 
 class Role extends Model {
   static get tableName () {
@@ -12,7 +13,7 @@ class Role extends Model {
   static get jsonSchema () {
     return {
       type: 'object',
-      required: ['id', 'project_id'],
+      required: ['project_id'],
       properties: {
         id: { type: 'string', format: 'uuid' },
         start_date: { type: 'date' },
@@ -47,6 +48,18 @@ class Role extends Model {
             to: 'assignment.employee_id'
           },
           to: 'employee.id'
+        }
+      },
+      skills: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Skill,
+        join: {
+          from: 'skill.id',
+          through: {
+            from: 'role__skill.role_id',
+            to: 'role__skill.skill_id'
+          },
+          to: 'role.id'
         }
       }
     }

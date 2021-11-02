@@ -1,16 +1,36 @@
 const { Model } = require('objection')
 const Knex = require('knex')
+const { Serializer } = require('./json-api-serializer')
 const fastify = require('fastify')({
   logger: true
 })
 
-const projectRoutes = require('./routes/project.js')
-const roleRoutes = require('./routes/role.js')
-const skillRoutes = require('./routes/skill.js')
+// Custom Content-Type parser for JSON-API spec
+fastify.addContentTypeParser('application/vnd.api+json', { parseAs: 'string' }, (request, payload, done) => {
+  try {
+    const body = JSON.parse(payload)
+    const result = Serializer.deserialize(body.data?.type, body)
+    done(null, result)
+  } catch (error) {
+    error.status = 422
+    done(error)
+  }
+})
+// Custom Error handler for JSON-API spec
+fastify.setErrorHandler(function (error, request, reply) {
+  const status = error.status || 500
+  this.log.error(error)
+  reply.status(status).send({
+    status: status,
+    title: error.message
+  })
+})
 
 const config = require('./config')
 const knexfile = require('./knexfile')
 const APP_PORT = config.get('APP_PORT')
+
+const registerService = (def) => Object.values(def).forEach(route => fastify.route(route))
 
 const start = async () => {
   const knex = Knex(knexfile)
@@ -21,17 +41,10 @@ const start = async () => {
     reply.send({ hello: 'world' })
   })
 
-  for (const routeKey in projectRoutes) {
-    fastify.route(projectRoutes[routeKey])
-  }
-
-  for (const routeKey in roleRoutes) {
-    fastify.route(roleRoutes[routeKey])
-  }
-
-  for (const routeKey in skillRoutes) {
-    fastify.route(skillRoutes[routeKey])
-  }
+  registerService(require('./routes/role.js'))
+  registerService(require('./routes/skill.js'))
+  registerService(require('./routes/project.js'))
+  registerService(require('./routes/employee.js'))
 
   // Run the server!
   // Host '0.0.0.0' so that docker networking works

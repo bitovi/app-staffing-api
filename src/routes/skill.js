@@ -1,14 +1,5 @@
 const SkillModel = require('../models/skill')
-const JSONAPISerializer = require('json-api-serializer')
-
-// JSONAPISerializer Setup
-const Serializer = new JSONAPISerializer({
-  convertCase: 'kebab-case'
-})
-Serializer.register('skills', {
-  id: 'id',
-  name: 'name'
-})
+const { Serializer } = require('../json-api-serializer')
 
 const routes = {
   list: {

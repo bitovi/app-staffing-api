@@ -1,5 +1,4 @@
 const Employee = require('../models/employee')
-const createError = require('http-errors')
 const { Serializer } = require('../json-api-serializer')
 
 module.exports = {

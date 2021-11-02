@@ -1,7 +1,6 @@
 const { Model } = require('objection')
 const Knex = require('knex')
 const knexConfig = require('./knexfile')
-const employees = require('./services/employees')
 
 const knex = Knex(knexConfig)
 Model.knex(knex)
@@ -21,7 +20,7 @@ const start = () => {
     reply.send({ hello: 'world' })
   })
 
-  registerService(employees)
+  registerService(require('./services/employees'))
 
   // Run the server!
   // Host '0.0.0.0' so that docker networking works

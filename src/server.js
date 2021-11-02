@@ -24,10 +24,13 @@ const start = async () => {
     fastify.route(projectRoutes[routeKey])
   }
 
+<<<<<<< HEAD
   for (const routeKey in roleRoutes) {
     fastify.route(roleRoutes[routeKey])
   }
 
+=======
+>>>>>>> main
   // Run the server!
   // Host '0.0.0.0' so that docker networking works
   return fastify.listen(APP_PORT, '0.0.0.0')

@@ -10,32 +10,48 @@ Serializer.register('skills', {
   name: 'name'
 })
 
-function routes (fastify) {
-  // GET
-  fastify.get('/skills', async (request, reply) => {
-    const skills = await SkillModel
-      .query()
-
-    const serialized = Serializer.serialize('skills', skills)
-    reply.send(serialized)
-  })
-
-  fastify.get('/skills/:id', async (request, reply) => {
-    const skill = await SkillModel
-      .query().findById(request.params.id)
-
-    const serialized = Serializer.serialize('skills', skill)
-    reply.send(serialized)
-  })
-
-  // DELETE
-  fastify.delete('/skills/:id', async (request, reply) => {
-    await SkillModel.query().deleteById(request.params.id)
-    reply.code(204).send()
-  })
-
-  // POST
-  fastify.post('/skills', {
+const routes = {
+  readAll: {
+    method: 'GET',
+    url: '/skills',
+    handler: async (request, reply) => {
+      const skills = await SkillModel.query()
+      const serialized = Serializer.serialize('skills', skills)
+      reply.send(serialized)
+    }
+  },
+  read: {
+    method: 'GET',
+    url: '/skills/:id',
+    handler: async (request, reply) => {
+      const skill = await SkillModel
+        .query().findById(request.params.id)
+      const serialized = Serializer.serialize('skills', skill)
+      reply.send(serialized)
+    }
+  },
+  delete: {
+    method: 'DELETE',
+    url: '/skills/:id',
+    handler: async (request, reply) => {
+      await SkillModel.query().deleteById(request.params.id)
+      reply.code(204).send()
+    }
+  },
+  update: {
+    method: 'PATCH',
+    url: '/skills/:id',
+    handler: async (request, reply) => {
+      const skill = await SkillModel
+        .query().patchAndFetchById(request.params.id, request.body)
+      const serialized = Serializer.serialize('skills', skill)
+      reply.send(serialized)
+    },
+    schema: SkillModel.jsonSchemaPatch
+  },
+  create: {
+    method: 'POST',
+    url: '/skills',
     handler: async (request, reply) => {
       const skill = await SkillModel
         .query().insert(request.body)
@@ -43,22 +59,9 @@ function routes (fastify) {
       const serialized = Serializer.serialize('skills', skill)
       reply.send(serialized)
     },
-    schema:
-          SkillModel.jsonSchema
-  })
+    schema: SkillModel.jsonSchema
+  }
 
-  // PATCH
-  fastify.patch('/skills/:id', {
-    handler: async (request, reply) => {
-      const skill = await SkillModel
-        .query().patchAndFetchById(request.params.id, request.body)
-
-      const serialized = Serializer.serialize('skills', skill)
-      reply.send(serialized)
-    },
-    schema:
-        SkillModel.jsonSchemaPatch
-  })
 }
 
 module.exports = routes

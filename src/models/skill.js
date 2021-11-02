@@ -23,6 +23,13 @@ module.exports = class Skill extends Model {
     }
   }
 
+  // ??? Maybe
+  static get jsonSchemaPatch () {
+    const patchSchema = { ...this.jsonSchema }
+    patchSchema.required = []
+    return patchSchema
+  }
+
   static get relationMappings () {
     return {
       roles: {

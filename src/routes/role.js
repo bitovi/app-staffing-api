@@ -1,8 +1,6 @@
 const JSONAPISerializer = require('json-api-serializer')
 
-const Serializer = new JSONAPISerializer({
-  convertCase: 'kebab-case'
-})
+const Serializer = new JSONAPISerializer()
 
 const RolesModel = require('../models/role')
 

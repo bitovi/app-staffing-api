@@ -41,7 +41,7 @@ const start = () => {
     reply.send({ hello: 'world' })
   })
 
-  registerService(require('./services/employees'))
+  registerService(require('./routes/employee'))
 
   // Run the server!
   // Host '0.0.0.0' so that docker networking works

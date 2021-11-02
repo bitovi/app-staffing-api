@@ -1,41 +1,42 @@
 const { Model } = require('objection')
+const Role = require('./role')
 
-// interface Skill {
-//   id: SkillId;
-//   name: string;
-// }
-
-class Skill extends Model {
+module.exports = class Skill extends Model {
   static get tableName () {
     return 'skill'
   }
 
-  // Define Relationships with other Models
-  static get relationMappings () {
-    // Importing models here avoids require loops.
-    const Role = require('./role')
-    const Employee = require('./employee')
-
+  static get jsonSchema () {
     return {
-      roles: {
-        relation: Model.HasManyRelation,
-        modelClass: Role,
-        join: {
-          from: 'skill.id',
-          to: 'role.skillId'
+      type: 'object',
+      required: ['name'],
+
+      properties: {
+        id: {
+          type: 'string'
+        },
+        name: {
+          type: 'string'
         }
       },
+      additionalProperties: false
+    }
+  }
 
-      employees: {
-        relation: Model.HasManyRelation,
-        modelClass: Employee,
+  static get relationMappings () {
+    return {
+      roles: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Role,
         join: {
-          from: 'skill.id',
-          to: 'employee.skills'
+          from: 'role.id',
+          through: {
+            from: 'role__skill.skill_id',
+            to: 'role__skill.role_id'
+          },
+          to: 'skill.id'
         }
       }
     }
   }
 }
-
-module.exports = Skill

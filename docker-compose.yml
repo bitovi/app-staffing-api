@@ -1,13 +1,8 @@
 version: '3.5'
-
 networks:
-  network:
-    name: app-staffing-backend-network
-
+  app-staffing-backend-network: {}
 services:
   db:
-    networks:
-      - network
     container_name: app-staffing-backend-db
     image: postgres
     ports:
@@ -17,15 +12,16 @@ services:
     environment:
       POSTGRES_USER: dbuser
       POSTGRES_PASSWORD: dbpassword
+    networks:
+      - app-staffing-backend-network
 
   api:
-    networks:
-      - network
     container_name: app-staffing-backend-api
     depends_on:
       - db
     volumes: 
       - ./src:/usr/src/app/src
+      - ./db:/usr/src/app/db
       - /usr/src/app/node_modules
     build:
       context: .
@@ -38,8 +34,10 @@ services:
       - 9229:9229
     command: >
       sh -c '\
-        npm run migrate \
+        npm i -g nodemon \
+        && npm run migrate \
         && npm run seed \
-        && npm i -g nodemon \
         && nodemon --inspect=0.0.0.0:9229 src/app.js
       '
+    networks:
+      - app-staffing-backend-network

@@ -1,11 +1,5 @@
 const { Model } = require('objection')
 
-// interface Project {
-//   id: ProjectId;
-//   name: string;
-//   description: string;
-// }
-
 class Project extends Model {
   static get tableName () {
     return 'project'

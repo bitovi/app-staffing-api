@@ -1,66 +1,65 @@
 const { Model } = require('objection')
 
-// interface Role {
-//   id: RoleId;
-//   projectId: ProjectId
-//   skillId: SkillId;
-//   startDate: string;
-//   startConfidence: string;
-//   endDate: string;
-//   endConfidence: string;
-// }
-
 class Role extends Model {
   static get tableName () {
     return 'role'
   }
 
-  // Define Relationships with other Models
+  static get idColumn () {
+    return 'id'
+  }
+
+  static get jsonSchema () {
+    return {
+      type: 'object',
+      required: ['project_id'],
+      properties: {
+        id: { type: 'string', format: 'uuid' },
+        start_date: { type: 'string' },
+        start_confidence: { type: 'integer' },
+        end_date: { type: 'string' },
+        end_confidence: { type: 'integer' },
+        project_id: { type: 'string' }
+      }
+    }
+  }
+
   static get relationMappings () {
-    // Importing models here avoids require loops.
-    const Skill = require('./skill')
+    const Assignment = require('./assignment')
     const Employee = require('./employee')
-    const EmployeeRole = require('./employee-role')
-    const Project = require('./project')
+    const Skill = require('./skill')
 
     return {
-      project: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: Project,
-        join: {
-          from: 'role.project_id',
-          to: 'project.id'
-        }
-      },
-
-      skill: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: Skill,
-        join: {
-          from: 'role.skill_id',
-          to: 'skill.id'
-        }
-      },
-
-      employeeRoles: {
+      assignments: {
         relation: Model.HasManyRelation,
-        modelClass: EmployeeRole,
+        modelClass: Assignment,
         join: {
           from: 'role.id',
-          to: 'employee__role.role_id'
+          to: 'assignment.role_id'
         }
       },
-
       employees: {
         relation: Model.ManyToManyRelation,
         modelClass: Employee,
         join: {
           from: 'role.id',
           through: {
-            from: 'employee__role.role_id',
-            to: 'employee__role.employee_id'
+            from: 'assignment.role_id',
+            to: 'assignment.employee_id'
           },
           to: 'employee.id'
+        }
+      },
+      skills: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Skill,
+        join: {
+          from: 'skill.id',
+          through: {
+            from: 'role__skill.role_id',
+            to: 'role__skill.skill_id'
+          },
+          to: 'role.id'
         }
       }
     }

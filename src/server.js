@@ -4,6 +4,8 @@ const fastify = require('fastify')({
   logger: true
 })
 
+const projectRoutes = require('./routes/project.js')
+
 const config = require('./config')
 const knexfile = require('./knexfile')
 const APP_PORT = config.get('APP_PORT')
@@ -16,6 +18,10 @@ const start = async () => {
   fastify.get('/', (request, reply) => {
     reply.send({ hello: 'world' })
   })
+
+  for (const routeKey in projectRoutes) {
+    fastify.route(projectRoutes[routeKey])
+  }
 
   // Run the server!
   // Host '0.0.0.0' so that docker networking works

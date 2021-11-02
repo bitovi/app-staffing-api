@@ -1,9 +1,17 @@
+const { Model } = require('objection')
+const Knex = require('knex')
 const fastify = require('fastify')({
   logger: true
 })
-const APP_PORT = process.env.APP_PORT || 3000
 
-const start = () => {
+const config = require('./config')
+const knexfile = require('./knexfile')
+const APP_PORT = config.get('APP_PORT')
+
+const start = async () => {
+  const knex = Knex(knexfile)
+  Model.knex(knex)
+
   // Declare a route
   fastify.get('/', (request, reply) => {
     reply.send({ hello: 'world' })

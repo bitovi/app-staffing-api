@@ -1,7 +1,7 @@
 const { Model } = require('objection')
 const Knex = require('knex')
 const knexConfig = require('./knexfile')
-const employeesService = require('./services/employees')
+const employees = require('./services/employees')
 
 const knex = Knex(knexConfig)
 Model.knex(knex)
@@ -13,13 +13,15 @@ fastify.addContentTypeParser('application/vnd.api+json', { parseAs: 'string' }, 
 
 const APP_PORT = process.env.APP_PORT || 3000
 
-employeesService(fastify)
+const registerService = (def) => Object.values(def).forEach(route => fastify.route(route))
 
 const start = () => {
   // Declare a route
   fastify.get('/', (request, reply) => {
     reply.send({ hello: 'world' })
   })
+
+  registerService(employees)
 
   // Run the server!
   // Host '0.0.0.0' so that docker networking works

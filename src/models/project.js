@@ -5,6 +5,20 @@ class Project extends Model {
     return 'project'
   }
 
+  static get jsonSchema () {
+    return {
+      $id: 'project',
+      type: 'object',
+      required: ['name', 'start_date'],
+      properties: {
+        id: { type: 'string' },
+        name: { type: 'string' },
+        start_date: { type: 'date' },
+        end_date: { type: 'date' }
+      }
+    }
+  }
+
   // Define Relationships with other Models
   static get relationMappings () {
     // Importing models here avoids require loops.

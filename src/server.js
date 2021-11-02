@@ -1,16 +1,18 @@
 const { Model } = require('objection')
-const knexfile = require('./knexfile')
-const { skillRoutes } = require('./routes')
-
 const fastify = require('fastify')({
   logger: true
 })
-const APP_PORT = process.env.APP_PORT || 3000
 
-const start = () => {
-  // TODO: put in a better place?
-  // Give the knex instance to Objection
-  const knex = require('knex')(knexfile)
+const projectRoutes = require('./routes/project.js')
+const roleRoutes = require('./routes/role.js')
+const skillRoutes = require('./routes')
+
+const config = require('./config')
+const knexfile = require('./knexfile')
+const APP_PORT = config.get('APP_PORT')
+
+const start = async () => {
+  const knex = Knex(knexfile)
   Model.knex(knex)
 
   // Declare a route
@@ -18,7 +20,18 @@ const start = () => {
     reply.send({ hello: 'world' })
   })
 
-  skillRoutes(fastify)
+
+  for (const routeKey in projectRoutes) {
+    fastify.route(projectRoutes[routeKey])
+  }
+
+  for (const routeKey in roleRoutes) {
+    fastify.route(roleRoutes[routeKey])
+  }
+  
+  for (const routeKey in skillRoutes) {
+    fastify.route(skillRoutes[routeKey])
+  }
 
   // Run the server!
   // Host '0.0.0.0' so that docker networking works

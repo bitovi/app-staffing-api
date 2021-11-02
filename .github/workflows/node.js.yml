@@ -5,18 +5,37 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ main, node-training ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, node-training ]
+    branches: [ main ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    env:
+      DATABASE_CONNECTION_STRING: postgres://postgres:postgres@localhost:5432/test_staffing
+
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_staffing
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
+        node-version: [14.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -27,5 +46,6 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
+    - run: npm run migrate
     - run: npm run lint
     - run: npm test

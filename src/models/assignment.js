@@ -2,7 +2,7 @@ const { Model } = require('objection')
 
 module.exports = class Assignment extends Model {
   static get tableName () {
-    return 'assigment'
+    return 'assignment'
   }
 
   static get jsonSchema () {
@@ -20,12 +20,8 @@ module.exports = class Assignment extends Model {
         role_id: {
           type: 'string'
         },
-        start_date: {
-          type: 'string'
-        },
-        end_date: {
-          type: 'string'
-        }
+        start_date: { type: 'string' },
+        end_date: { type: 'string' }
       },
       additionalProperties: false
     }

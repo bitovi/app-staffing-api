@@ -16,7 +16,7 @@ describe('skills', () => {
     await stop()
   })
 
-  afterEach(async() => {
+  afterEach(async () => {
     await SkillModel.query().whereIn('id', skillsToCleanup).delete()
   })
 
@@ -32,7 +32,6 @@ describe('skills', () => {
     expect(instance).toBeTruthy()
     expect(instance.id).toEqual(skill.id)
     expect(instance.attributes.name).toEqual(skill.name)
-
   })
 
   test('GET /skills/:id', async () => {
@@ -109,4 +108,3 @@ describe('skills', () => {
     expect(resp.status).toBe(204)
   })
 })
-

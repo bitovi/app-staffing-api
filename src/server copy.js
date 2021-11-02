@@ -1,6 +1,11 @@
 const { Model } = require('objection')
 const Knex = require('knex')
+const knexConfig = require('./knexfile')
 const { Serializer } = require('./json-api-serializer')
+
+const knex = Knex(knexConfig)
+Model.knex(knex)
+
 const fastify = require('fastify')({
   logger: true
 })
@@ -26,39 +31,17 @@ fastify.setErrorHandler(function (error, request, reply) {
   })
 })
 
-const projectRoutes = require('./routes/project.js')
-const roleRoutes = require('./routes/role.js')
-const skillRoutes = require('./routes/skill.js')
-const employeeRoutes = require('./routes/employee.js')
+const APP_PORT = process.env.APP_PORT || 3000
 
-const config = require('./config')
-const knexfile = require('./knexfile')
-const APP_PORT = config.get('APP_PORT')
+const registerService = (def) => Object.values(def).forEach(route => fastify.route(route))
 
-const start = async () => {
-  const knex = Knex(knexfile)
-  Model.knex(knex)
-
+const start = () => {
   // Declare a route
   fastify.get('/', (request, reply) => {
     reply.send({ hello: 'world' })
   })
 
-  for (const routeKey in projectRoutes) {
-    fastify.route(projectRoutes[routeKey])
-  }
-
-  for (const routeKey in roleRoutes) {
-    fastify.route(roleRoutes[routeKey])
-  }
-
-  for (const routeKey in skillRoutes) {
-    fastify.route(skillRoutes[routeKey])
-  }
-
-  for (const routeKey in employeeRoutes) {
-    fastify.route(employeeRoutes[routeKey])
-  }
+  registerService(require('./services/employees'))
 
   // Run the server!
   // Host '0.0.0.0' so that docker networking works

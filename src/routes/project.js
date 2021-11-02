@@ -86,4 +86,4 @@ routes.push({
   }
 })
 
-module.exports = routes;
+module.exports = routes

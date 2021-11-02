@@ -1,6 +1,8 @@
+const config = require('./config')
+
 module.exports = {
   client: 'pg',
-  connection: process.env.DATABASE_CONNECTION_STRING,
+  connection: config.get('DATABASE_CONNECTION_STRING'),
   searchPath: ['knex', 'public'],
   migrations: {
     directory: '../db/migrations',

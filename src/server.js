@@ -11,7 +11,7 @@ const fastify = require('fastify')({
 })
 const APP_PORT = process.env.APP_PORT || 3000
 
-const projectRoutes = require('./routes/role.js');
+const roleRoutes = require('./routes/role.js');
 
 const start = () => {
   // Declare a route
@@ -19,8 +19,8 @@ const start = () => {
     reply.send({ hello: 'world' })
   })
 
-  for (const routeKey in projectRoutes) {
-    fastify.route(projectRoutes[routeKey])
+  for (const routeKey in roleRoutes) {
+    fastify.route(roleRoutes[routeKey])
   }
 
   // Run the server!

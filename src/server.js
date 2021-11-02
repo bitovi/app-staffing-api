@@ -1,4 +1,5 @@
 const { Model } = require('objection')
+const Knex = require('knex')
 const fastify = require('fastify')({
   logger: true
 })
@@ -20,7 +21,6 @@ const start = async () => {
     reply.send({ hello: 'world' })
   })
 
-
   for (const routeKey in projectRoutes) {
     fastify.route(projectRoutes[routeKey])
   }
@@ -28,7 +28,7 @@ const start = async () => {
   for (const routeKey in roleRoutes) {
     fastify.route(roleRoutes[routeKey])
   }
-  
+
   for (const routeKey in skillRoutes) {
     fastify.route(skillRoutes[routeKey])
   }

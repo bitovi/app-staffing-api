@@ -5,6 +5,7 @@ const fastify = require('fastify')({
 })
 
 const projectRoutes = require('./routes/project.js')
+const roleRoutes = require('./routes/role.js')
 
 const config = require('./config')
 const knexfile = require('./knexfile')
@@ -21,6 +22,10 @@ const start = async () => {
 
   for (const routeKey in projectRoutes) {
     fastify.route(projectRoutes[routeKey])
+  }
+
+  for (const routeKey in roleRoutes) {
+    fastify.route(roleRoutes[routeKey])
   }
 
   // Run the server!

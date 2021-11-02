@@ -3,8 +3,8 @@ const fastify = require('fastify')({
 })
 const APP_PORT = process.env.APP_PORT || 3000
 
-const routes = require('./routes/project.js')
-const schema = require('./schemas/project')
+const projectRoutes = require('./routes/project.js')
+const projectSchema = require('./schemas/project')
 
 const start = () => {
   // Declare a route
@@ -12,9 +12,9 @@ const start = () => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.addSchema(schema)
+  fastify.addSchema(projectSchema)
 
-  for (const route of routes) {
+  for (const route of projectRoutes) {
     fastify.route(route)
   }
 

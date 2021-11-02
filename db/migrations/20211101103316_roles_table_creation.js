@@ -3,11 +3,11 @@ exports.up = async (knex) => {
     table.uuid('id')
       .defaultTo(knex.raw('uuid_generate_v4()'))
       .primary()
-    table.date('start_date')
+    table.timestamp('start_date')
     table.integer('start_confidence')
-    table.date('end_date')
+    table.timestamp('end_date')
     table.integer('end_confidence')
-    table.integer('project_id').notNullable()
+    table.uuid('project_id').notNullable()
   })
 }
 

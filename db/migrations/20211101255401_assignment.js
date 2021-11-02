@@ -4,8 +4,8 @@ exports.up = async (knex) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'))
     table.uuid('employee_id').references('employee.id').notNullable()
     table.uuid('role_id').references('role.id').notNullable()
-    table.date('start_date').notNullable()
-    table.date('end_date')
+    table.timestamp('start_date').notNullable()
+    table.timestamp('end_date')
   })
 }
 

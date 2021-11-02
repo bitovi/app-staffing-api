@@ -15,9 +15,9 @@ class Role extends Model {
       required: ['project_id'],
       properties: {
         id: { type: 'string', format: 'uuid' },
-        start_date: { type: 'date' },
+        start_date: { type: 'string' },
         start_confidence: { type: 'integer' },
-        end_date: { type: 'date' },
+        end_date: { type: 'string' },
         end_confidence: { type: 'integer' },
         project_id: { type: 'string' }
       }

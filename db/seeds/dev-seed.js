@@ -62,34 +62,73 @@ exports.seed = async (knex) => {
   // insert seed data
   await Project.query().insertGraph([
     {
-      name: fakeProject(),
+      name: fakeProject(1),
       start_date: new Date(),
       end_date: new Date(),
 
       roles: [
         {
-          start_date: new Date(faker.date.recent()),
+          start_date: new Date(faker.date.recent()).toISOString(),
           start_confidence: faker.datatype.number(10),
-          end_date: new Date(faker.date.future()),
+          end_date: new Date(faker.date.future()).toISOString(),
           end_confidence: faker.datatype.number(10),
 
-          skills: {
+          skills: [{
             '#id': fakeSkill(1),
             name: fakeSkill(1)
-          },
+          }],
 
           assignments: [{
-            start_date: new Date(faker.date.recent()),
-            end_date: new Date(faker.date.future()),
+            start_date: new Date(faker.date.recent()).toISOString(),
+            end_date: new Date(faker.date.future()).toISOString(),
 
             employee: {
               name: fakeEmployee(1),
-              start_date: new Date(faker.date.past()),
+              start_date: new Date(faker.date.past()).toISOString(),
               end_date: null,
 
               skills: [
                 {
                   '#ref': fakeSkill(1)
+                }
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      name: fakeProject(2),
+      start_date: new Date(),
+      end_date: new Date(),
+
+      roles: [
+        {
+          start_date: new Date(faker.date.recent()).toISOString(),
+          start_confidence: faker.datatype.number(10),
+          end_date: new Date(faker.date.future()).toISOString(),
+          end_confidence: faker.datatype.number(10),
+
+          skills: [{
+            '#id': fakeSkill(2),
+            name: fakeSkill(2)
+          }, {
+            '#id': fakeSkill(3),
+            name: fakeSkill(3)
+          }],
+
+          assignments: [{
+            start_date: new Date(faker.date.recent()).toISOString(),
+            end_date: new Date(faker.date.future()).toISOString(),
+
+            employee: {
+              name: fakeEmployee(2),
+              start_date: new Date(faker.date.past()).toISOString(),
+              end_date: new Date(),
+
+              skills: [
+                {
+                  '#ref': fakeSkill(2)
                 }
               ]
             }

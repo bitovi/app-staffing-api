@@ -4,8 +4,8 @@ exports.up = async (knex) => {
       .defaultTo(knex.raw('uuid_generate_v4()'))
       .primary()
     table.string('name').notNullable()
-    table.date('start_date').nullable()
-    table.date('end_date').nullable()
+    table.timestamp('start_date').nullable()
+    table.timestamp('end_date').nullable()
   })
 }
 

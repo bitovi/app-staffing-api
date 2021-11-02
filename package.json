@@ -24,6 +24,7 @@
     "convict": "^6.2.1",
     "faker": "^5.5.3",
     "fastify": "^3.0.0",
+    "http-errors": "^1.8.0",
     "json-api-serializer": "^2.6.6",
     "knex": "^0.21.21",
     "objection": "^2.2.17",

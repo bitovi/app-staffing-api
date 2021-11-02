@@ -5,6 +5,19 @@ module.exports = class Employee extends Model {
     return 'employee'
   }
 
+  static get jsonSchema () {
+    return {
+      type: 'object',
+      required: ['name'],
+      properties: {
+        id: { type: 'string', format: 'uuid' },
+        name: { type: 'string' },
+        start_date: { type: 'string' },
+        end_date: { type: 'string' }
+      }
+    }
+  }
+
   static get relationMappings () {
     const Assignment = require('./assignment')
     const Role = require('./role')

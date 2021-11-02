@@ -6,7 +6,7 @@ const fastify = require('fastify')({
 
 const projectRoutes = require('./routes/project.js')
 const roleRoutes = require('./routes/role.js')
-const skillRoutes = require('./routes')
+const skillRoutes = require('./routes/skill.js')
 
 const config = require('./config')
 const knexfile = require('./knexfile')

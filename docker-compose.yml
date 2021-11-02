@@ -32,13 +32,12 @@ services:
     ports:
       - 3000:3000
       - 9229:9229
-    command: tail -f /dev/null
-    # command: >
-    #   sh -c '\
-    #     npm i -g nodemon \
-    #     && npm run migrate \
-    #     && npm run seed \
-    #     && nodemon --inspect=0.0.0.0:9229 src/app.js
-    #   '
+    command: >
+      sh -c '\
+        npm i -g nodemon \
+        && npm run migrate \
+        && npm run seed \
+        && nodemon --inspect=0.0.0.0:9229 src/app.js
+      '
     networks:
       - app-staffing-backend-network

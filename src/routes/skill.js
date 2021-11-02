@@ -11,7 +11,7 @@ Serializer.register('skills', {
 })
 
 const routes = {
-  readAll: {
+  list: {
     method: 'GET',
     url: '/skills',
     handler: async (request, reply) => {
@@ -20,7 +20,7 @@ const routes = {
       reply.send(serialized)
     }
   },
-  read: {
+  get: {
     method: 'GET',
     url: '/skills/:id',
     handler: async (request, reply) => {

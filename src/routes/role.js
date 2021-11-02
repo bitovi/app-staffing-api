@@ -26,7 +26,7 @@ const routes = {
        const { body, url } = request
        if (body.id) reply.send().status(403)
        const newRole = await RolesModel.query().insert(body)
-       const data = Serializer.serialize('roles', newRole)
+       const data = Serializer.serialize('role', newRole)
        const location = `${url}/${newRole.id}`
        reply.status(201).header('Location', location).send(data)
      }
@@ -36,7 +36,7 @@ const routes = {
      url: '/roles',
      handler: async function (_, reply) {
        const roles = await RolesModel.query()
-       const data = Serializer.serialize('roles', roles.map(role => role.toJSON()))
+       const data = Serializer.serialize('role', roles.map(role => role.toJSON()))
        reply.send(data)
      }
    },
@@ -47,7 +47,7 @@ const routes = {
        const id = request.params.id
        try {
          const role = await RolesModel.query().findById(id)
-         const data = Serializer.serialize('roles', role.toJSON())
+         const data = Serializer.serialize('role', role.toJSON())
          reply.send(data)
        } catch (e) {
          reply.status(404).send()
@@ -62,7 +62,7 @@ const routes = {
        const { body } = request
        try {
          const role = await RolesModel.query().patchAndFetchById(id, body)
-         const data = Serializer.serialize('roles', role.toJSON())
+         const data = Serializer.serialize('role', role.toJSON())
          reply.send(data)
        } catch (e) {
          reply.status(404).send()

@@ -1,23 +1,28 @@
-const knexConfigFile = "./knexfile.js";
-const knexConfig = require(knexConfigFile);
-
-const Knex = require("knex");
-const { Model } = require("objection");
-const knex = Knex(knexConfig);
-Model.knex(knex);
-
+const { Model } = require('objection')
+const Knex = require('knex')
 const fastify = require('fastify')({
   logger: true
 })
-const APP_PORT = process.env.APP_PORT || 3000
 
-const roleRoutes = require('./routes/role.js');
+const projectRoutes = require('./routes/project.js')
+const roleRoutes = require('./routes/role.js')
 
-const start = () => {
+const config = require('./config')
+const knexfile = require('./knexfile')
+const APP_PORT = config.get('APP_PORT')
+
+const start = async () => {
+  const knex = Knex(knexfile)
+  Model.knex(knex)
+
   // Declare a route
   fastify.get('/', (request, reply) => {
     reply.send({ hello: 'world' })
   })
+
+  for (const routeKey in projectRoutes) {
+    fastify.route(projectRoutes[routeKey])
+  }
 
   for (const routeKey in roleRoutes) {
     fastify.route(roleRoutes[routeKey])

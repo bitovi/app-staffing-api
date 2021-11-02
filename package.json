@@ -9,6 +9,7 @@
     "lint:fix": "eslint . --fix",
     "seed": "knex seed:run --knexfile src/knexfile.js",
     "start": "node src/app.js",
+    "pretest": "npm run migrate",
     "test": "jest test/"
   },
   "repository": {
@@ -20,6 +21,7 @@
   },
   "homepage": "https://github.com/bitovi/app-staffing-api#readme",
   "dependencies": {
+    "convict": "^6.2.1",
     "faker": "^5.5.3",
     "fastify": "^3.0.0",
     "knex": "^0.21.21",

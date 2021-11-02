@@ -18,7 +18,7 @@ fastify.addContentTypeParser('application/vnd.api+json', { parseAs: 'string' }, 
 })
 // Custom Error handler for JSON-API spec
 fastify.setErrorHandler(function (error, request, reply) {
-  const status = error.status || 500
+  const status = error.status || error.statusCode || 500
   this.log.error(error)
   reply.status(status).send({
     status: status,

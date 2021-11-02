@@ -1,17 +1,5 @@
-const JSONAPISerializer = require('json-api-serializer')
-
-const Serializer = new JSONAPISerializer({
-  convertCase: 'kebab-case'
-})
-
+const { Serializer } = require("../json-api-serializer");
 const ProjectModel = require('../models/project')
-
-Serializer.register('projects', {
-  id: 'id',
-  name: 'name',
-  start_date: 'start_date',
-  end_date: 'end_date'
-})
 
 const routes = {
   create: {
@@ -25,7 +13,7 @@ const routes = {
       if (body.id) reply.send().status(403)
 
       const newProject = await ProjectModel.query().insert(body)
-      const data = Serializer.serialize('projects', newProject)
+      const data = Serializer.serialize('project', newProject)
       const location = `${url}/${newProject.id}`
       reply.status(201).header('Location', location).send(data)
     }
@@ -35,7 +23,7 @@ const routes = {
     url: '/projects',
     handler: async function (_, reply) {
       const projects = await ProjectModel.query()
-      const data = Serializer.serialize('projects', projects.map(project => project.toJSON()))
+      const data = Serializer.serialize('project', projects.map(project => project.toJSON()))
       reply.send(data)
     }
   },
@@ -46,7 +34,7 @@ const routes = {
       const id = request.params.id
       try {
         const project = await ProjectModel.query().findById(id)
-        const data = Serializer.serialize('projects', project.toJSON())
+        const data = Serializer.serialize('project', project.toJSON())
         reply.send(data)
       } catch (e) {
         reply.status(404).send()
@@ -59,9 +47,10 @@ const routes = {
     handler: async function (request, reply) {
       const id = request.params.id
       const { body } = request
+      console.log("BODY:", body)
       try {
         const project = await ProjectModel.query().patchAndFetchById(id, body)
-        const data = Serializer.serialize('projects', project.toJSON())
+        const data = Serializer.serialize('project', project.toJSON())
         reply.send(data)
       } catch (e) {
         reply.status(404).send()

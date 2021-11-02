@@ -1,0 +1,183 @@
+const fetch = require("node-fetch");
+const config = require('../src/config');
+const Project = require("../src/models/project");
+const { start, stop } = require('../src/server')
+
+const URL = `http://localhost:${config.get('APP_PORT')}`
+
+beforeAll(async () => {
+  await start()
+});
+
+afterAll(async () => {
+  await stop()
+});
+
+afterEach(async () => {
+  await Project.query().delete();
+})
+
+describe("POST", () => {
+  test("should create a project record", async () => {
+    const body = {
+      data: {
+        type: "project",
+        attributes: {
+          name: "Micheal Scott",
+          start_date: new Date().toISOString(),
+          end_date: new Date().toISOString()
+        }
+      }
+    }
+    const response = await fetch(`${URL}/projects`, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/vnd.api+json"
+      }
+    })
+
+    const result = await response.json();
+
+    expect(response.status).toBe(201)
+    expect(result).toEqual(expect.objectContaining(result));
+  })
+
+  test("should throw validation error", async () => {
+    const body = {
+      data: {
+        type: "project",
+        attributes: {
+          start_date: new Date().toISOString()
+        }
+      }
+    }
+
+    const response = await fetch(`${URL}/projects`, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/vnd.api+json"
+      }
+    });
+
+    const result = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(result).toEqual({ title: "name: is a required property", status: 400 });
+  })
+})
+
+describe("GET many", () => {
+  test("should return many projects", async () => {
+    const records = [{
+      name: "Skunk Works",
+      start_date: new Date().toISOString()
+    }, {
+      name: "The Montauk Project",
+      start_date: new Date().toISOString()
+    }, {
+      name: "Dunder Mifflin Paper",
+      start_date: new Date().toISOString()
+    }];
+    await Project.query().insertGraph(records)
+
+    const response = await fetch(`${URL}/projects`, {
+      headers: {
+        "Content-Type": "application/vnd.api+json"
+      }
+    });
+
+    const result = await response.json();
+
+    records.forEach((record, index) => {
+      expect(result.data[index].attributes).toEqual(expect.objectContaining(record))
+    })
+  })
+})
+
+describe("GET one", () => {
+  test("should return a project", async () => {
+    const record = {
+      id: "3de0fe0c-9d74-4f6e-b0d0-5ab435f5f472",
+      name: "Veridian Dynamics",
+      start_date: new Date().toISOString()
+    }
+    await Project.query().insert(record)
+
+    const response = await fetch(`${URL}/projects/${record.id}`, {
+      headers: {
+        "Content-Type": "application/vnd.api+json"
+      }
+    });
+
+    const result = await response.json();
+    expect(result.data.id).toBe(record.id);
+
+    expect(result.data.attributes).toEqual(expect.objectContaining({ name: record.name, start_date: record.start_date }))
+  })
+})
+
+describe("PATCH", () => {
+  test("should update a project record", async () => {
+    const record = {
+      id: "65c091c0-d4f9-4ce0-bf44-ba00cd9b0ac3",
+      name: "Evil Corp",
+      start_date: new Date().toISOString()
+    }
+    await Project.query().insert(record)
+
+    const body = {
+      data: {
+        type: "project",
+        attributes: {
+          name: "Not Evil Corp (really!)"
+        }
+      }
+    }
+    const response = await fetch(`${URL}/projects/${record.id}`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/vnd.api+json"
+      }
+    })
+
+    const result = await response.json();
+
+    expect(response.status).toBe(200)
+    expect(result.data.attributes).toEqual(expect.objectContaining(body.data.attributes));
+  })
+
+  test("should unset field", async () => {
+    const record = {
+      id: "65c091c0-d4f9-4ce0-bf44-ba00cd9b0ac3",
+      name: "Evil Corp",
+      start_date: new Date().toISOString(),
+      end_date: new Date().toISOString()
+    }
+    await Project.query().insert(record)
+
+    const body = {
+      data: {
+        type: "project",
+        attributes: {
+          end_date: null
+        }
+      }
+    }
+
+    const response = await fetch(`${URL}/projects/${record.id}`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/vnd.api+json"
+      }
+    });
+
+    const result = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(result.data.attributes).toEqual(expect.objectContaining(body.data.attributes));
+  })
+})

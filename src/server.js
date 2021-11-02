@@ -4,7 +4,6 @@ const fastify = require('fastify')({
 const APP_PORT = process.env.APP_PORT || 3000
 
 const projectRoutes = require('./routes/project.js')
-const projectSchema = require('./schemas/project')
 
 const start = () => {
   // Declare a route
@@ -12,10 +11,8 @@ const start = () => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.addSchema(projectSchema)
-
-  for (const route of projectRoutes) {
-    fastify.route(route)
+  for (const routeKey in projectRoutes) {
+    fastify.route(projectRoutes[routeKey])
   }
 
   // Run the server!

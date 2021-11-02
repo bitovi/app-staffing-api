@@ -1,5 +1,4 @@
 exports.up = async (knex) => {
-  await knex.raw('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
   await knex.schema.createTable('role', function (table) {
     table.uuid('id')
       .defaultTo(knex.raw('uuid_generate_v4()'))

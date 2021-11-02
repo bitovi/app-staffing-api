@@ -1,5 +1,4 @@
 const { Model } = require('objection')
-const Skill = require('./skill')
 
 class Role extends Model {
   static get tableName () {
@@ -28,6 +27,7 @@ class Role extends Model {
   static get relationMappings () {
     const Assignment = require('./assignment')
     const Employee = require('./employee')
+    const Skill = require('./skill')
 
     return {
       assignments: {

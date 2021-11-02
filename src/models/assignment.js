@@ -2,7 +2,7 @@ const { Model } = require('objection')
 
 module.exports = class Assignment extends Model {
   static get tableName () {
-    return 'assigment'
+    return 'assignment'
   }
 
   static get jsonSchema () {

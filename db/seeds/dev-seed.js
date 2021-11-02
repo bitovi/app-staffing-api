@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { Model } = require('objection')
-const Employee = require('../../src/models/employee')
+const Project = require('../../src/models/project')
 const faker = require('faker')
 
 const fakesCache = new Map()
@@ -51,16 +51,52 @@ exports.seed = async (knex) => {
   Model.knex(knex)
 
   // delete data in reverse dependency order to avoid fk issues
+  await knex('assignment').del()
+  await knex('role__skill').del()
   await knex('role').del()
   await knex('project').del()
+  await knex('employee__skill').del()
   await knex('employee').del()
   await knex('skill').del()
 
   // insert seed data
-  await Employee.query().insertGraph({
-    name: 'Michael Scott',
-    start_date: new Date(),
-    end_date: new Date(),
-    skills: [{ name: 'Node' }, { name: 'Angular' }, { name: 'React' }]
-  })
+  await Project.query().insertGraph([
+    {
+      name: fakeProject(),
+      start_date: new Date(),
+      end_date: new Date(),
+
+      roles: [
+        {
+          start_date: new Date(faker.date.recent()),
+          start_confidence: faker.datatype.number(10),
+          end_date: new Date(faker.date.future()),
+          end_confidence: faker.datatype.number(10),
+
+          skills: {
+            '#id': fakeSkill(1),
+            name: fakeSkill(1)
+          },
+
+          assignments: [{
+            start_date: new Date(faker.date.recent()),
+            end_date: new Date(faker.date.future()),
+
+            employee: {
+              name: fakeEmployee(1),
+              start_date: new Date(faker.date.past()),
+              end_date: null,
+
+              skills: [
+                {
+                  '#ref': fakeSkill(1)
+                }
+              ]
+            }
+          }]
+        }
+      ]
+    }
+    // more projects
+  ], { allowRefs: true })
 }

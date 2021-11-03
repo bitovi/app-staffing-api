@@ -82,7 +82,7 @@ exports.seed = async (knex) => {
             start_date: new Date(faker.date.recent()).toISOString(),
             end_date: new Date(faker.date.future()).toISOString(),
 
-            employee: {
+            employees: [{
               name: fakeEmployee(1),
               start_date: new Date(faker.date.past()).toISOString(),
               end_date: null,
@@ -92,7 +92,7 @@ exports.seed = async (knex) => {
                   '#ref': fakeSkill(1)
                 }
               ]
-            }
+            }]
           }]
         }
       ]
@@ -121,7 +121,7 @@ exports.seed = async (knex) => {
             start_date: new Date(faker.date.recent()).toISOString(),
             end_date: new Date(faker.date.future()).toISOString(),
 
-            employee: {
+            employees: [{
               name: fakeEmployee(2),
               start_date: new Date(faker.date.past()).toISOString(),
               end_date: new Date(),
@@ -131,7 +131,7 @@ exports.seed = async (knex) => {
                   '#ref': fakeSkill(2)
                 }
               ]
-            }
+            }]
           }]
         }
       ]

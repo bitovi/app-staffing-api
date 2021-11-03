@@ -5,6 +5,8 @@ const Role = require('../../src/models/role')
 const { start, stop } = require('../../src/server')
 const URL = `http://localhost:${config.get('APP_PORT')}/roles`
 
+let roleIdsToDelete = []
+
 beforeAll(async () => {
   await start()
 })
@@ -13,10 +15,15 @@ afterAll(async () => {
   await stop()
 })
 
+afterEach(async () => {
+  await Role.query().whereIn('id', roleIdsToDelete).delete()
+  roleIdsToDelete = []
+})
+
 describe('Role Component Tests', () => {
   describe('POST', () => {
     it('should create role', async () => {
-      const role = {
+      const testBody = {
         data: {
           type: 'role',
           attributes: {
@@ -30,7 +37,7 @@ describe('Role Component Tests', () => {
       }
 
       const response = await fetch(URL, {
-        body: JSON.stringify(role),
+        body: JSON.stringify(testBody),
         method: 'POST',
         headers: {
           'Content-Type': 'application/vnd.api+json',
@@ -38,28 +45,37 @@ describe('Role Component Tests', () => {
         }
       })
 
+      expect(response.status).toEqual(201)
+
       const result = await response.json()
 
-      expect(response.status).toEqual(201)
-      expect(result.data.attributes).toEqual(role.data.attributes)
+      roleIdsToDelete.push(result.data.id)
+
+      expect(result.data.attributes).toEqual(testBody.data.attributes)
     })
   })
 
   describe('GET', () => {
     it('list should get all records', async () => {
+      await createRoleHelper()
       const response = await fetch(URL)
+
+      expect(response.status).toEqual(200)
 
       const result = await response.json()
 
       const roleCount = await Role.query().count()
-      expect(response.status).toEqual(200)
+
       expect(result.data.length.toString()).toEqual(roleCount[0].count)
     })
 
     it('get should find record', async () => {
+      await createRoleHelper()
       const testRole = (await Role.query())[0]
 
       const response = await fetch(`${URL}/${testRole.id}`)
+
+      expect(response.status).toEqual(200)
 
       const result = await response.json()
 
@@ -69,7 +85,7 @@ describe('Role Component Tests', () => {
 
   describe('PATCH', () => {
     it('should update fields', async () => {
-      const testRole = (await Role.query())[0]
+      const testRole = await createRoleHelper()
 
       const newStartConf = (!testRole.start_confidence ? 0 : testRole.start_confidence) + 1
       const role = {
@@ -100,18 +116,35 @@ describe('Role Component Tests', () => {
 
   describe('DELETE', () => {
     it('should delete record', async () => {
-      const testRole = await Role.query().insert({
-        project_id: '21993255-c4cd-4e02-bc29-51ea62c62cff'
-      })
+      const testRole = await createRoleHelper()
 
       const response = await fetch(`${URL}/${testRole.id}`, {
         method: 'DELETE'
       })
 
+      expect(response.status).toEqual(204)
+
       const deletedRole = await Role.query().findById(testRole.id)
 
-      expect(response.status).toEqual(204)
       expect(deletedRole).toBeUndefined()
     })
   })
 })
+
+/**
+ * Helper to create a test role and push it to the cleanup array.
+ */
+const createRoleHelper = async () => {
+  const testRole = {
+    project_id: '21993255-c4cd-4e02-bc29-51ea62c62cfc',
+    start_date: '2021-11-02',
+    start_confidence: 1,
+    end_date: '2021-11-03',
+    end_confidence: 5
+  }
+
+  const createdRole = await Role.query().insert(testRole)
+  roleIdsToDelete.push(createdRole.id)
+
+  return createdRole
+}

@@ -4,7 +4,7 @@ const Project = require('../src/models/project')
 const { start, stop } = require('../src/server')
 
 const URL = `http://localhost:${config.get('APP_PORT')}`
-const recordIds = []
+let recordIds = []
 
 beforeAll(async () => {
   await start()
@@ -16,7 +16,7 @@ afterAll(async () => {
 
 afterEach(async () => {
   await Project.query().whereIn('id', recordIds).delete()
-  records = []
+  recordIds = []
 })
 
 describe('POST', () => {

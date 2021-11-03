@@ -1,10 +1,6 @@
 const RolesModel = require('../models/role')
 const { Serializer } = require('../json-api-serializer')
-
-function getincludeStr (q) {
-  const inc = '[' + (q?.include || '') + ']'
-  return inc
-}
+const { getIncludeStr } = require('../utils')
 
 const routes = {
   create: {
@@ -25,7 +21,7 @@ const routes = {
     method: 'GET',
     url: '/roles',
     handler: async function (request, reply) {
-      const includeStr = getincludeStr(request.query)
+      const includeStr = getIncludeStr(request.query)
       const roles = await RolesModel.query().withGraphFetched(includeStr)
       const data = Serializer.serialize('roles', roles.map(role => role.toJSON()))
       reply.send(data)
@@ -36,7 +32,7 @@ const routes = {
     url: '/roles/:id',
     handler: async function (request, reply) {
       const id = request.params.id
-      const includeStr = getincludeStr(request.query)
+      const includeStr = getIncludeStr(request.query)
 
       try {
         const role = await RolesModel.query().findById(id).withGraphFetched(includeStr)

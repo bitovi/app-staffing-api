@@ -15,7 +15,9 @@ Serializer.register('roles', {
   id: 'id',
   relationships: {
     assignments: { type: 'assignments' },
-    projects: { type: 'projects' }
+    projects: { type: 'projects' },
+    skills: { type: 'skills' },
+    employees: { type: 'employees' }
   }
 })
 

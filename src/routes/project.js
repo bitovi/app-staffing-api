@@ -47,13 +47,12 @@ const routes = {
     method: 'PATCH',
     url: '/projects/:id',
     handler: async function (request, reply) {
-      const id = request.params.id
-      const { body } = request
       try {
-        const project = await ProjectModel.query().patchAndFetchById(id, body)
+        const project = await ProjectModel.query().upsertGraph(request.body, { insertMissing: true })
         const data = Serializer.serialize('projects', project.toJSON())
         reply.send(data)
       } catch (e) {
+        console.log(e)
         reply.status(404).send()
       }
     }

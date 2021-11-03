@@ -1,20 +1,10 @@
-const fetch = require('node-fetch')
-const config = require('../../src/config')
-
-const { start, stop } = require('../../src/server')
-const URL = `http://localhost:${config.get('APP_PORT')}/skills`
+const app = require('../../src/server')()
 const SkillModel = require('../../src/models/skill')
+
+const URL = '/skills'
 
 describe('skills', () => {
   const skillsToCleanup = []
-
-  beforeAll(async () => {
-    await start()
-  })
-
-  afterAll(async () => {
-    await stop()
-  })
 
   afterEach(async () => {
     await SkillModel.query().whereIn('id', skillsToCleanup).delete()
@@ -25,8 +15,11 @@ describe('skills', () => {
 
     skillsToCleanup.push(skill.id)
 
-    const resp = await fetch(URL)
-    const json = await resp.json()
+    const resp = await app.inject({
+      url: URL,
+      method: 'GET'
+    })
+    const json = JSON.parse(resp.body)
     const instance = json.data.find(s => s.id === skill.id)
 
     expect(instance).toBeTruthy()
@@ -39,8 +32,11 @@ describe('skills', () => {
 
     skillsToCleanup.push(skill.id)
 
-    const resp = await fetch(`${URL}/${skill.id}`)
-    const json = await resp.json()
+    const resp = await app.inject({
+      url: `${URL}/${skill.id}`,
+      method: 'GET'
+    })
+    const json = JSON.parse(resp.body)
 
     expect(json.data).toBeTruthy()
     expect(json.data.id).toEqual(skill.id)
@@ -48,12 +44,13 @@ describe('skills', () => {
   })
 
   test('POST /skills', async () => {
-    const resp = await fetch(URL, {
+    const resp = await app.inject({
+      url: URL,
       method: 'POST',
       headers: {
         'Content-Type': 'application/vnd.api+json'
       },
-      body: JSON.stringify({
+      payload: JSON.stringify({
         data: {
           type: 'skills',
           attributes: {
@@ -62,7 +59,7 @@ describe('skills', () => {
         }
       })
     })
-    const json = await resp.json()
+    const json = JSON.parse(resp.body)
     expect(json.data).toBeTruthy()
     expect(json.data.attributes.name).toEqual('Node')
 
@@ -74,12 +71,13 @@ describe('skills', () => {
 
     skillsToCleanup.push(skill.id)
 
-    const resp = await fetch(`${URL}/${skill.id}`, {
+    const resp = await app.inject({
+      url: `${URL}/${skill.id}`,
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/vnd.api+json'
       },
-      body: JSON.stringify({
+      payload: JSON.stringify({
         data: {
           type: 'skills',
           attributes: {
@@ -88,7 +86,7 @@ describe('skills', () => {
         }
       })
     })
-    const json = await resp.json()
+    const json = JSON.parse(resp.body)
     expect(json.data).toBeTruthy()
     expect(json.data.id).toEqual(skill.id)
     expect(json.data.attributes.name).toEqual('React')
@@ -99,12 +97,13 @@ describe('skills', () => {
 
     skillsToCleanup.push(skill.id)
 
-    const resp = await fetch(`${URL}/${skill.id}`, {
+    const resp = await app.inject({
+      url: `${URL}/${skill.id}`,
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/vnd.api+json'
       }
     })
-    expect(resp.status).toBe(204)
+    expect(resp.statusCode).toBe(204)
   })
 })

@@ -1,4 +1,3 @@
-const app = require('../../src/server')()
 const SkillModel = require('../../src/models/skill')
 
 const URL = '/skills'
@@ -15,7 +14,7 @@ describe('skills', () => {
 
     skillsToCleanup.push(skill.id)
 
-    const resp = await app.inject({
+    const resp = await global.app.inject({
       url: URL,
       method: 'GET'
     })
@@ -32,7 +31,7 @@ describe('skills', () => {
 
     skillsToCleanup.push(skill.id)
 
-    const resp = await app.inject({
+    const resp = await global.app.inject({
       url: `${URL}/${skill.id}`,
       method: 'GET'
     })
@@ -44,7 +43,7 @@ describe('skills', () => {
   })
 
   test('POST /skills', async () => {
-    const resp = await app.inject({
+    const resp = await global.app.inject({
       url: URL,
       method: 'POST',
       headers: {
@@ -71,7 +70,7 @@ describe('skills', () => {
 
     skillsToCleanup.push(skill.id)
 
-    const resp = await app.inject({
+    const resp = await global.app.inject({
       url: `${URL}/${skill.id}`,
       method: 'PATCH',
       headers: {
@@ -97,7 +96,7 @@ describe('skills', () => {
 
     skillsToCleanup.push(skill.id)
 
-    const resp = await app.inject({
+    const resp = await global.app.inject({
       url: `${URL}/${skill.id}`,
       method: 'DELETE',
       headers: {

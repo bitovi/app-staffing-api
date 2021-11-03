@@ -31,6 +31,10 @@ const build = () => {
       title: error.message
     })
   })
+  fastify.addHook('onClose', async (server, done) => {
+    await knex.destroy()
+    done()
+  })
 
   const registerService = (def) => Object.values(def).forEach(route => fastify.route(route))
 

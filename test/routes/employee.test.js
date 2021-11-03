@@ -12,7 +12,7 @@ test('should be able to insert employees', async () => {
   // create employees
   const payload = {
     data: {
-      type: 'employee',
+      type: 'employees',
       attributes: {
         name: 'random' + Math.random()
       }
@@ -98,7 +98,7 @@ test('should be able to update an employee', async () => {
     headers: { 'Content-Type': 'application/vnd.api+json' },
     body: JSON.stringify({
       data: {
-        type: 'employee',
+        type: 'employees',
         id: employee1.id,
         attributes: {
           name: newName

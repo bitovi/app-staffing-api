@@ -1,5 +1,4 @@
 const Role = require('../../src/models/role')
-const app = require('../../src/server')()
 
 const URL = '/roles'
 
@@ -19,7 +18,7 @@ describe('Role Component Tests', () => {
         }
       }
 
-      const response = await app.inject({
+      const response = await global.app.inject({
         url: URL,
         payload: JSON.stringify(role),
         method: 'POST',
@@ -38,7 +37,7 @@ describe('Role Component Tests', () => {
 
   describe('GET', () => {
     it('list should get all records', async () => {
-      const response = await app.inject({
+      const response = await global.app.inject({
         method: 'GET',
         url: URL
       })
@@ -53,7 +52,7 @@ describe('Role Component Tests', () => {
     it('get should find record', async () => {
       const testRole = (await Role.query())[0]
 
-      const response = await app.inject({
+      const response = await global.app.inject({
         url: `${URL}/${testRole.id}`,
         method: 'GET'
       })
@@ -78,7 +77,7 @@ describe('Role Component Tests', () => {
         }
       }
 
-      const response = await app.inject({
+      const response = await global.app.inject({
         url: `${URL}/${testRole.id}`,
         payload: JSON.stringify(role),
         method: 'PATCH',
@@ -102,7 +101,7 @@ describe('Role Component Tests', () => {
         project_id: '21993255-c4cd-4e02-bc29-51ea62c62cff'
       })
 
-      const response = await app.inject({
+      const response = await global.app.inject({
         url: `${URL}/${testRole.id}`,
         method: 'DELETE'
       })

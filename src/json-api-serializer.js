@@ -7,6 +7,10 @@ Serializer.register('employee', {
   id: 'id'
 })
 
+Serializer.register('role', {
+  id: 'id'
+})
+
 Serializer.register('skills', {
   id: 'id',
   name: 'name'

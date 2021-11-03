@@ -1,12 +1,18 @@
 const Employee = require('../../src/models/employee')
+const Skills = require('../../src/models/skill')
 const BASE_URL = '/employees'
 
 let employeeIdsToCleanup = []
+let skillsIdsToCleanup = []
 
-afterAll(async () => {
-  await Employee.query().whereIn('id', employeeIdsToCleanup).delete()
-  employeeIdsToCleanup = []
-})
+// afterAll(async () => {
+//   if (skillsIdsToCleanup.length) {
+//     await Skills.query().whereIn('id', skillsIdsToCleanup).delete().debug()
+//   }
+//   await Employee.query().whereIn('id', employeeIdsToCleanup).delete()
+//   employeeIdsToCleanup = []
+//   skillsIdsToCleanup = []
+// })
 
 test('should be able to insert employees', async () => {
   // create employees
@@ -63,6 +69,87 @@ test('should be able to get employees', async () => {
 
   const ourEmployees = employees.filter(employee => targetEmployeeIds.includes(employee.id))
   expect(ourEmployees.length).toBe(2)
+})
+
+test('should be able to get employees with relationships', async () => {
+  const react = {
+    id: createUUID(),
+    name: 'react'
+  }
+  const node = {
+    id: createUUID(),
+    name: 'node'
+  }
+  const michealScott = {
+    id: createUUID(),
+    name: 'Micheal Scott',
+    skills: [react]
+  }
+  const dwightSchrute = {
+    id: createUUID(),
+    name: 'Dwight Schrute',
+    skills: [node]
+  }
+  const records = [
+    michealScott,
+    dwightSchrute
+  ]
+
+  await Employee.query().upsertGraph(records, { insertMissing: true })
+
+  employeeIdsToCleanup.push(michealScott.id, dwightSchrute.id)
+  skillsIdsToCleanup.push(react.id, node.id)
+
+  const resp = await global.app.inject({
+    url: BASE_URL,
+    query: {
+      include: 'skills'
+    },
+    method: 'GET',
+    headers: { 'Content-Type': 'application/vnd.api+json' }
+  })
+  const json = JSON.parse(resp.body)
+
+  const michealResult = json.data.find(({ id }) => michealScott.id === id)
+
+  expect(michealResult.attributes).toEqual(expect.objectContaining({ name: michealScott.name }))
+  expect(michealResult.relationships.skills.data).toEqual([expect.objectContaining({ id: react.id })])
+
+  const dwightResult = json.data.find(({ id }) => dwightSchrute.id === id)
+
+  expect(dwightResult.attributes).toEqual(expect.objectContaining({ name: dwightSchrute.name }))
+  expect(dwightResult.relationships.skills.data).toEqual([expect.objectContaining({ id: node.id })])
+})
+
+test('should be able to get one employee with relationships', async () => {
+  const react = {
+    id: createUUID(),
+    name: 'react'
+  }
+  const michealScott = {
+    id: createUUID(),
+    name: 'Micheal Scott',
+    skills: [react]
+  }
+  await Employee.query().upsertGraph(michealScott, { insertMissing: true })
+
+  const resp = await global.app.inject({
+    url: `${BASE_URL}/${michealScott.id}`,
+    query: {
+      include: 'skills'
+    },
+    method: 'GET',
+    headers: { 'Content-Type': 'application/vnd.api+json' }
+  })
+  const json = JSON.parse(resp.body)
+
+  console.log(JSON.stringify(json, null, 2))
+
+  expect(json.data.id).toBe(michealScott.id)
+  expect(json.data.attributes).toEqual(expect.objectContaining({
+    name: michealScott.name
+  }))
+  expect(json.data.relationships.skills.data).toEqual([expect.objectContaining({ id: react.id })])
 })
 
 test('should be able to get one employee', async () => {

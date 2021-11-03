@@ -12,6 +12,11 @@
     "pretest": "npm run migrate",
     "test": "jest test/"
   },
+  "standard": {
+    "env": [
+      "jest"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bitovi/app-staffing-api.git"

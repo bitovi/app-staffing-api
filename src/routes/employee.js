@@ -2,12 +2,17 @@ const Employee = require('../models/employee')
 const { Serializer } = require('../json-api-serializer')
 const { getIncludeStr } = require('../utils')
 
+function getincludeStr (q) {
+  return '[' + (q?.include || '') + ']'
+}
+
 module.exports = {
   list: {
     url: '/employees',
     method: 'GET',
     async handler (request, reply) {
-      const data = await Employee.query()
+      const includeStr = getincludeStr(request.query)
+      const data = await Employee.query().withGraphFetched(includeStr)
       const result = Serializer.serialize('employees', data, {
         count: data.length
       })
@@ -18,8 +23,10 @@ module.exports = {
     url: '/employees/:id',
     method: 'GET',
     async handler (request, reply) {
-      const includeStr = getIncludeStr(request.query)
-      const data = await Employee.query().findById(request.params.id).withGraphFetched(includeStr)
+      const includeStr = getincludeStr(request.query)
+      const data = await Employee.query()
+        .findById(request.params.id)
+        .withGraphFetched(includeStr)
       if (!data) {
         return reply.code(404).send()
       }

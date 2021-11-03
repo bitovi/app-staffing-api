@@ -1,19 +1,9 @@
-const fetch = require('node-fetch')
 const config = require('../../src/config')
 const Role = require('../../src/models/role')
 
-const { start, stop } = require('../../src/server')
 const URL = `http://localhost:${config.get('APP_PORT')}/roles`
 
 let roleIdsToDelete = []
-
-beforeAll(async () => {
-  await start()
-})
-
-afterAll(async () => {
-  await stop()
-})
 
 afterEach(async () => {
   await Role.query().whereIn('id', roleIdsToDelete).delete()
@@ -36,7 +26,8 @@ describe('Role Component Tests', () => {
         }
       }
 
-      const response = await fetch(URL, {
+      const response = await global.app.inject({
+        url: URL,
         body: JSON.stringify(testBody),
         method: 'POST',
         headers: {
@@ -45,9 +36,9 @@ describe('Role Component Tests', () => {
         }
       })
 
-      expect(response.status).toEqual(201)
+      expect(response.statusCode).toEqual(201)
 
-      const result = await response.json()
+      const result = JSON.parse(response.body)
 
       roleIdsToDelete.push(result.data.id)
 
@@ -67,7 +58,8 @@ describe('Role Component Tests', () => {
         }
       }
 
-      const response = await fetch(URL, {
+      const response = await global.app.inject({
+        url: URL,
         body: JSON.stringify(testBody),
         method: 'POST',
         headers: {
@@ -76,18 +68,21 @@ describe('Role Component Tests', () => {
         }
       })
 
-      expect(response.status).toEqual(400)
+      expect(response.statusCode).toEqual(400)
     })
   })
 
   describe('GET', () => {
     it('list should get all records', async () => {
       await createRoleHelper()
-      const response = await fetch(URL)
+      const response = await global.app.inject({
+        url: URL,
+        method: 'GET'
+      })
 
-      expect(response.status).toEqual(200)
+      expect(response.statusCode).toEqual(200)
 
-      const result = await response.json()
+      const result = JSON.parse(response.body)
 
       const roleCount = await Role.query().count()
 
@@ -98,20 +93,26 @@ describe('Role Component Tests', () => {
       await createRoleHelper()
       const testRole = (await Role.query())[0]
 
-      const response = await fetch(`${URL}/${testRole.id}`)
+      const response = await global.app.inject({
+        url: `${URL}/${testRole.id}`,
+        method: 'GET'
+      })
 
-      expect(response.status).toEqual(200)
+      expect(response.statusCode).toEqual(200)
 
-      const result = await response.json()
+      const result = JSON.parse(response.body)
 
       expect(result.data.id).toEqual(testRole.id)
     })
 
     it('get should return 404 when record not found', async () => {
       const fakeId = '21993255-c4cd-4e02-bc29-51ea62c62cfc'
-      const response = await fetch(`${URL}/${fakeId}`)
+      const response = await global.app.inject({
+        url: `${URL}/${fakeId}`,
+        method: 'GET'
+      })
 
-      expect(response.status).toEqual(404)
+      expect(response.statusCode).toEqual(404)
     })
   })
 
@@ -129,7 +130,8 @@ describe('Role Component Tests', () => {
         }
       }
 
-      const response = await fetch(`${URL}/${testRole.id}`, {
+      const response = await global.app.inject({
+        url: `${URL}/${testRole.id}`,
         body: JSON.stringify(role),
         method: 'PATCH',
         headers: {
@@ -138,9 +140,9 @@ describe('Role Component Tests', () => {
         }
       })
 
-      expect(response.status).toEqual(200)
+      expect(response.statusCode).toEqual(200)
 
-      const result = await response.json()
+      const result = JSON.parse(response.body)
 
       expect(result.data.attributes.start_confidence).toEqual(newStartConf)
     })
@@ -156,7 +158,8 @@ describe('Role Component Tests', () => {
       }
       const fakeId = '21993255-c4cd-4e02-bc29-51ea62c62cfc'
 
-      const response = await fetch(`${URL}/${fakeId}`, {
+      const response = await global.app.inject({
+        url: `${URL}/${fakeId}`,
         body: JSON.stringify(role),
         method: 'PATCH',
         headers: {
@@ -165,7 +168,7 @@ describe('Role Component Tests', () => {
         }
       })
 
-      expect(response.status).toEqual(404)
+      expect(response.statusCode).toEqual(404)
     })
   })
 
@@ -173,11 +176,12 @@ describe('Role Component Tests', () => {
     it('should delete record', async () => {
       const testRole = await createRoleHelper()
 
-      const response = await fetch(`${URL}/${testRole.id}`, {
+      const response = await global.app.inject({
+        url: `${URL}/${testRole.id}`,
         method: 'DELETE'
       })
 
-      expect(response.status).toEqual(204)
+      expect(response.statusCode).toEqual(204)
 
       const deletedRole = await Role.query().findById(testRole.id)
 
@@ -186,11 +190,12 @@ describe('Role Component Tests', () => {
 
     it('should return 404 if record not found', async () => {
       const fakeId = '21993255-c4cd-4e02-bc29-51ea62c62cfc'
-      const response = await fetch(`${URL}/${fakeId}`, {
+      const response = await global.app.inject({
+        url: `${URL}/${fakeId}`,
         method: 'DELETE'
       })
 
-      expect(response.status).toEqual(404)
+      expect(response.statusCode).toEqual(404)
     })
   })
 })

@@ -1,12 +1,15 @@
 'use strict'
 
-const { Model } = require('objection')
-const Knex = require('knex')
-const knexfile = require('./knexfile')
-const { start } = require('./server')
+const server = require('./server')()
+const config = require('./config')
+const APP_PORT = config.get('APP_PORT')
 
-const knex = Knex(knexfile)
-
-Model.knex(knex)
-
-start()
+server
+  .listen(APP_PORT, '0.0.0.0')
+  .then(address => {
+    console.log(`Server is now listening on ${address}`)
+  })
+  .catch(err => {
+    server.log.error(err)
+    process.exit(1)
+  })

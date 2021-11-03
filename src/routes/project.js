@@ -1,4 +1,4 @@
-const { Serializer } = require("../json-api-serializer");
+const { Serializer } = require('../json-api-serializer')
 const ProjectModel = require('../models/project')
 
 const routes = {
@@ -47,7 +47,6 @@ const routes = {
     handler: async function (request, reply) {
       const id = request.params.id
       const { body } = request
-      console.log("BODY:", body)
       try {
         const project = await ProjectModel.query().patchAndFetchById(id, body)
         const data = Serializer.serialize('project', project.toJSON())

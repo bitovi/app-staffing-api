@@ -1,11 +1,11 @@
 const { Model } = require('objection')
 
 class Project extends Model {
-  static get tableName() {
+  static get tableName () {
     return 'project'
   }
 
-  static get jsonSchema() {
+  static get jsonSchema () {
     return {
       $id: 'project',
       type: 'object',
@@ -20,7 +20,7 @@ class Project extends Model {
   }
 
   // Define Relationships with other Models
-  static get relationMappings() {
+  static get relationMappings () {
     // Importing models here avoids require loops.
     const Role = require('./role')
 

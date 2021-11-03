@@ -8,7 +8,12 @@ Serializer.register('employee', {
 })
 
 Serializer.register('role', {
-  id: 'id'
+  id: 'id',
+  start_date: 'start_date',
+  start_confidence: 'start_confidence',
+  end_date: 'end_date',
+  end_confidence: 'end_confidence',
+  project_id: 'project_id'
 })
 
 Serializer.register('skills', {

@@ -1,17 +1,5 @@
-const JSONAPISerializer = require('json-api-serializer')
-
-const Serializer = new JSONAPISerializer()
-
 const RolesModel = require('../models/role')
-
-Serializer.register('role', {
-  id: 'id',
-  start_date: 'start_date',
-  start_confidence: 'start_confidence',
-  end_date: 'end_date',
-  end_confidence: 'end_confidence',
-  project_id: 'project_id'
-})
+const { Serializer } = require('../json-api-serializer')
 
 function getincludeStr (q) {
   const inc = '[' + (q?.include || '') + ']'

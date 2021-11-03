@@ -1,4 +1,5 @@
 const Employee = require('../../src/models/employee')
+const Skill = require('../../src/models/skill')
 const Skills = require('../../src/models/skill')
 const BASE_URL = '/employees'
 
@@ -44,6 +45,43 @@ test('should be able to insert employees', async () => {
   // Check insert worked
   expect(body.data.attributes.name).toBe(payload.data.attributes.name)
   expect(id).toBeTruthy()
+})
+
+test('should be able to insert employees with a relationship to an existing skill', async () => {
+  const skill = await Skill.query().insert({
+    name: 'vuejs'
+  })
+
+  const payload = {
+    data: {
+      type: 'employees',
+      attributes: {
+        name: 'Jim Halpert'
+      },
+      relationships: {
+        skills: {
+          data: [
+            { id: skill.id, type: 'skills' }
+          ]
+        }
+      }
+    }
+  }
+
+  const response = await global.app.inject({
+    url: BASE_URL,
+    method: 'POST',
+    payload: JSON.stringify(payload),
+    headers: { 'Content-Type': 'application/vnd.api+json' }
+  })
+
+  const body = JSON.parse(response.body)
+
+  employeeIdsToCleanup.push(body.data.id)
+  skillsIdsToCleanup.push(skill.id)
+
+  expect(body.data.attributes).toEqual(expect.objectContaining(payload.data.attributes))
+  expect(body.data.relationships.skills.data).toEqual([expect.objectContaining({ id: skill.id, type: 'skills' })])
 })
 
 test('should be able to get employees', async () => {
@@ -147,8 +185,6 @@ test('should be able to get one employee with relationships', async () => {
     headers: { 'Content-Type': 'application/vnd.api+json' }
   })
   const json = JSON.parse(resp.body)
-
-  console.log(JSON.stringify(json, null, 2))
 
   expect(json.data.id).toBe(michealScott.id)
   expect(json.data.attributes).toEqual(expect.objectContaining({

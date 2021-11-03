@@ -2,16 +2,12 @@ const Employee = require('../models/employee')
 const { Serializer } = require('../json-api-serializer')
 const { getIncludeStr } = require('../utils')
 
-function getincludeStr (q) {
-  return '[' + (q?.include || '') + ']'
-}
-
 module.exports = {
   list: {
     url: '/employees',
     method: 'GET',
     async handler (request, reply) {
-      const includeStr = getincludeStr(request.query)
+      const includeStr = getIncludeStr(request.query)
       const data = await Employee.query().withGraphFetched(includeStr)
       const result = Serializer.serialize('employees', data, {
         count: data.length
@@ -23,7 +19,7 @@ module.exports = {
     url: '/employees/:id',
     method: 'GET',
     async handler (request, reply) {
-      const includeStr = getincludeStr(request.query)
+      const includeStr = getIncludeStr(request.query)
       const data = await Employee.query()
         .findById(request.params.id)
         .withGraphFetched(includeStr)
@@ -38,7 +34,8 @@ module.exports = {
     url: '/employees',
     method: 'POST',
     async handler (request, reply) {
-      const data = await Employee.query().insertAndFetch(request.body)
+      const intermediate = { ...request.body, ...(request.body.skills && { skills: request.body.skills.map(id => ({ id })) }) }
+      const data = await Employee.query().upsertGraphAndFetch(intermediate, { relate: true })
       const result = Serializer.serialize('employees', data)
       reply.code(201).send(result)
     }

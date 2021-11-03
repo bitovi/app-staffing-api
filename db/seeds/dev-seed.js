@@ -46,7 +46,16 @@ function fakeProject (key) {
   )
 }
 
-exports.seed = async (knex) => {
+function fakeRole (key, mixin = {}) {
+  return generateAndCacheFake('role', key, () => Object.assign({}, mixin, {
+    start_date: new Date(faker.date.recent()).toISOString(),
+    start_confidence: faker.datatype.number(10),
+    end_date: new Date(faker.date.future()).toISOString(),
+    end_confidence: faker.datatype.number(10)
+  }))
+}
+
+const seed = async (knex) => {
   // Give the knex instance to Objection
   Model.knex(knex)
 
@@ -138,4 +147,12 @@ exports.seed = async (knex) => {
     }
     // more projects
   ], { allowRefs: true })
+}
+
+module.exports = {
+  fakeSkill,
+  fakeEmployee,
+  fakeProject,
+  fakeRole,
+  seed
 }

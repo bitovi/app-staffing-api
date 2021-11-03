@@ -1,17 +1,7 @@
-const fetch = require('node-fetch')
-const config = require('../../src/config')
 const Role = require('../../src/models/role')
+const app = require('../../src/server')()
 
-const { start, stop } = require('../../src/server')
-const URL = `http://localhost:${config.get('APP_PORT')}/roles`
-
-beforeAll(async () => {
-  await start()
-})
-
-afterAll(async () => {
-  await stop()
-})
+const URL = '/roles'
 
 describe('Role Component Tests', () => {
   describe('POST', () => {
@@ -29,8 +19,9 @@ describe('Role Component Tests', () => {
         }
       }
 
-      const response = await fetch(URL, {
-        body: JSON.stringify(role),
+      const response = await app.inject({
+        url: URL,
+        payload: JSON.stringify(role),
         method: 'POST',
         headers: {
           'Content-Type': 'application/vnd.api+json',
@@ -38,30 +29,36 @@ describe('Role Component Tests', () => {
         }
       })
 
-      const result = await response.json()
+      const result = JSON.parse(response.body)
 
-      expect(response.status).toEqual(201)
+      expect(response.statusCode).toEqual(201)
       expect(result.data.attributes).toEqual(role.data.attributes)
     })
   })
 
   describe('GET', () => {
     it('list should get all records', async () => {
-      const response = await fetch(URL)
+      const response = await app.inject({
+        method: 'GET',
+        url: URL
+      })
 
-      const result = await response.json()
+      const result = JSON.parse(response.body)
 
       const roleCount = await Role.query().count()
-      expect(response.status).toEqual(200)
+      expect(response.statusCode).toEqual(200)
       expect(result.data.length.toString()).toEqual(roleCount[0].count)
     })
 
     it('get should find record', async () => {
       const testRole = (await Role.query())[0]
 
-      const response = await fetch(`${URL}/${testRole.id}`)
+      const response = await app.inject({
+        url: `${URL}/${testRole.id}`,
+        method: 'GET'
+      })
 
-      const result = await response.json()
+      const result = JSON.parse(response.body)
 
       expect(result.data.id).toEqual(testRole.id)
     })
@@ -81,8 +78,9 @@ describe('Role Component Tests', () => {
         }
       }
 
-      const response = await fetch(`${URL}/${testRole.id}`, {
-        body: JSON.stringify(role),
+      const response = await app.inject({
+        url: `${URL}/${testRole.id}`,
+        payload: JSON.stringify(role),
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/vnd.api+json',
@@ -90,9 +88,9 @@ describe('Role Component Tests', () => {
         }
       })
 
-      expect(response.status).toEqual(200)
+      expect(response.statusCode).toEqual(200)
 
-      const result = await response.json()
+      const result = JSON.parse(response.body)
 
       expect(result.data.attributes.start_confidence).toEqual(newStartConf)
     })
@@ -104,13 +102,14 @@ describe('Role Component Tests', () => {
         project_id: '21993255-c4cd-4e02-bc29-51ea62c62cff'
       })
 
-      const response = await fetch(`${URL}/${testRole.id}`, {
+      const response = await app.inject({
+        url: `${URL}/${testRole.id}`,
         method: 'DELETE'
       })
 
       const deletedRole = await Role.query().findById(testRole.id)
 
-      expect(response.status).toEqual(204)
+      expect(response.statusCode).toEqual(204)
       expect(deletedRole).toBeUndefined()
     })
   })

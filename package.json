@@ -10,7 +10,7 @@
     "seed": "knex seed:run --knexfile src/knexfile.js",
     "start": "node src/app.js",
     "pretest": "npm run migrate",
-    "test": "jest --forceExit test/ --runInBand"
+    "test": "jest test/ --forceExit"
   },
   "repository": {
     "type": "git",
@@ -37,7 +37,6 @@
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.1",
-    "jest": "^27.3.1",
-    "node-fetch": "^2.6.5"
+    "jest": "^27.3.1"
   }
 }

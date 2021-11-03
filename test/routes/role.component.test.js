@@ -76,7 +76,7 @@ describe('Role Component Tests', () => {
         }
       })
 
-      expect(response.status).toEqual(500)
+      expect(response.status).toEqual(400)
     })
   })
 

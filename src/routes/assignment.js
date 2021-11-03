@@ -1,9 +1,6 @@
 const Assignment = require('../models/assignment')
 const { Serializer } = require('../json-api-serializer')
-
-function getIncludeStr (q) {
-  return '[' + (q?.include || '') + ']'
-}
+const { getIncludeStr } = require('../utils')
 
 module.exports = {
   list: {

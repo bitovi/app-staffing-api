@@ -1,5 +1,6 @@
 const { Serializer } = require('../json-api-serializer')
 const ProjectModel = require('../models/project')
+const { getIncludeStr } = require('../utils')
 
 const routes = {
   create: {
@@ -13,7 +14,7 @@ const routes = {
       if (body.id) reply.send().status(403)
 
       const newProject = await ProjectModel.query().insert(body)
-      const data = Serializer.serialize('project', newProject)
+      const data = Serializer.serialize('projects', newProject)
       const location = `${url}/${newProject.id}`
       reply.status(201).header('Location', location).send(data)
     }
@@ -23,7 +24,7 @@ const routes = {
     url: '/projects',
     handler: async function (_, reply) {
       const projects = await ProjectModel.query()
-      const data = Serializer.serialize('project', projects.map(project => project.toJSON()))
+      const data = Serializer.serialize('projects', projects.map(project => project.toJSON()))
       reply.send(data)
     }
   },
@@ -33,8 +34,9 @@ const routes = {
     handler: async function (request, reply) {
       const id = request.params.id
       try {
-        const project = await ProjectModel.query().findById(id)
-        const data = Serializer.serialize('project', project.toJSON())
+        const includeStr = getIncludeStr(request.query)
+        const project = await ProjectModel.query().findById(id).withGraphFetched(includeStr)
+        const data = Serializer.serialize('projects', project.toJSON())
         reply.send(data)
       } catch (e) {
         reply.status(404).send()
@@ -49,7 +51,7 @@ const routes = {
       const { body } = request
       try {
         const project = await ProjectModel.query().patchAndFetchById(id, body)
-        const data = Serializer.serialize('project', project.toJSON())
+        const data = Serializer.serialize('projects', project.toJSON())
         reply.send(data)
       } catch (e) {
         reply.status(404).send()

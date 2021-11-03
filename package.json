@@ -10,7 +10,7 @@
     "seed": "knex seed:run --knexfile src/knexfile.js",
     "start": "node src/app.js",
     "pretest": "npm run migrate",
-    "test": "jest test/ --runInBand —-forceExit"
+    "test": "jest --forceExit test/ --runInBand"
   },
   "repository": {
     "type": "git",

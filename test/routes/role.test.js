@@ -19,7 +19,7 @@ afterEach(async () => {
   await Skill.query().whereIn('id', skillIdsToDelete).delete()
   await Role.query().whereIn('id', roleIdsToDelete).delete()
   await Project.query().whereIn('id', projectIdsToDelete).delete()
-  
+
   employeeIdsToDelete = []
   assignmentIdsToDelete = []
   skillIdsToDelete = []

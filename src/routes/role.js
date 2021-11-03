@@ -10,7 +10,7 @@ Serializer.register('role', {
   start_confidence: 'start_confidence',
   end_date: 'end_date',
   end_confidence: 'end_confidence',
-  role_id: 'role_id'
+  project_id: 'project_id'
 })
 
 const routes = {
@@ -22,7 +22,6 @@ const routes = {
     },
     handler: async function (request, reply) {
       const { body, url } = request
-      if (body.id) reply.send().status(403)
       const newRole = await RolesModel.query().insert(body)
       const data = Serializer.serialize('role', newRole)
       const location = `${url}/${newRole.id}`

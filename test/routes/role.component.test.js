@@ -53,6 +53,31 @@ describe('Role Component Tests', () => {
 
       expect(result.data.attributes).toEqual(testBody.data.attributes)
     })
+
+    it('should return 500 when no project_id is present on body', async () => {
+      const testBody = {
+        data: {
+          type: 'role',
+          attributes: {
+            start_date: '2021-11-02',
+            start_confidence: 1,
+            end_date: '2021-11-03',
+            end_confidence: 5
+          }
+        }
+      }
+
+      const response = await fetch(URL, {
+        body: JSON.stringify(testBody),
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/vnd.api+json',
+          Accept: 'application/vnd.api+json'
+        }
+      })
+
+      expect(response.status).toEqual(500)
+    })
   })
 
   describe('GET', () => {
@@ -80,6 +105,13 @@ describe('Role Component Tests', () => {
       const result = await response.json()
 
       expect(result.data.id).toEqual(testRole.id)
+    })
+
+    it('get should return 404 when record not found', async () => {
+      const fakeId = '21993255-c4cd-4e02-bc29-51ea62c62cfc'
+      const response = await fetch(`${URL}/${fakeId}`)
+
+      expect(response.status).toEqual(404)
     })
   })
 
@@ -112,6 +144,29 @@ describe('Role Component Tests', () => {
 
       expect(result.data.attributes.start_confidence).toEqual(newStartConf)
     })
+
+    it('should return 404 when record not found', async () => {
+      const role = {
+        data: {
+          type: 'role',
+          attributes: {
+            start_confidence: 999
+          }
+        }
+      }
+      const fakeId = '21993255-c4cd-4e02-bc29-51ea62c62cfc'
+
+      const response = await fetch(`${URL}/${fakeId}`, {
+        body: JSON.stringify(role),
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/vnd.api+json',
+          Accept: 'application/vnd.api+json'
+        }
+      })
+
+      expect(response.status).toEqual(404)
+    })
   })
 
   describe('DELETE', () => {
@@ -127,6 +182,15 @@ describe('Role Component Tests', () => {
       const deletedRole = await Role.query().findById(testRole.id)
 
       expect(deletedRole).toBeUndefined()
+    })
+
+    it('should return 404 if record not found', async () => {
+      const fakeId = '21993255-c4cd-4e02-bc29-51ea62c62cfc'
+      const response = await fetch(`${URL}/${fakeId}`, {
+        method: 'DELETE'
+      })
+
+      expect(response.status).toEqual(404)
     })
   })
 })

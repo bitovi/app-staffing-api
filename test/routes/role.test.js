@@ -107,49 +107,58 @@ describe('Role Component Tests', () => {
       expect(result.data.attributes).not.toHaveProperty('employees')
     })
 
-    it('get should find record with skills relationships', async () => {
+    it('get should find record with relationship skills', async () => {
       await createRoleHelper()
       const testRole = (await Role.query())[0]
 
-      const response = await fetch(`${URL}/${testRole.id}?include=skills`)
+      const response = await global.app.inject({
+        url: `${URL}/${testRole.id}?include=skills`,
+        method: 'GET'
+      })
 
-      expect(response.status).toEqual(200)
+      expect(response.statusCode).toEqual(200)
 
-      const result = await response.json()
+      const result = JSON.parse(response.body)
 
       expect(result.data.id).toEqual(testRole.id)
       expect(result.data.attributes).toHaveProperty('skills')
       expect(result.data.attributes).not.toHaveProperty('employees')
     })
 
-    it('get should find record with employees relationships', async () => {
+    it('get should find record with relationship employees', async () => {
       await createRoleHelper()
       const testRole = (await Role.query())[0]
 
-      const response = await fetch(`${URL}/${testRole.id}?include=employees`)
+      const response = await global.app.inject({
+        url: `${URL}/${testRole.id}?include=employees`,
+        method: 'GET'
+      })
 
-      expect(response.status).toEqual(200)
+      expect(response.statusCode).toEqual(200)
 
-      const result = await response.json()
+      const result = JSON.parse(response.body)
 
       expect(result.data.id).toEqual(testRole.id)
-      expect(result.data.attributes).toHaveProperty('employees')
       expect(result.data.attributes).not.toHaveProperty('skills')
+      expect(result.data.attributes).toHaveProperty('employees')
     })
 
-    it('get should find record with multiple relationships, skills and employees', async () => {
+    it('get should find record with multiple relationship', async () => {
       await createRoleHelper()
       const testRole = (await Role.query())[0]
 
-      const response = await fetch(`${URL}/${testRole.id}?include=employees,skills`)
+      const response = await global.app.inject({
+        url: `${URL}/${testRole.id}?include=skills,employees`,
+        method: 'GET'
+      })
 
-      expect(response.status).toEqual(200)
+      expect(response.statusCode).toEqual(200)
 
-      const result = await response.json()
+      const result = JSON.parse(response.body)
 
       expect(result.data.id).toEqual(testRole.id)
-      expect(result.data.attributes).toHaveProperty('employees')
       expect(result.data.attributes).toHaveProperty('skills')
+      expect(result.data.attributes).toHaveProperty('employees')
     })
 
     it('get should return 404 when record not found', async () => {

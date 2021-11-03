@@ -18,6 +18,9 @@ module.exports = {
     method: 'GET',
     async handler (request, reply) {
       const data = await Employee.query().findById(request.params.id)
+      if (!data) {
+        return reply.code(404).send()
+      }
       const result = Serializer.serialize('employee', data)
       reply.send(result)
     }
@@ -28,7 +31,7 @@ module.exports = {
     async handler (request, reply) {
       const data = await Employee.query().insertAndFetch(request.body)
       const result = Serializer.serialize('employee', data)
-      reply.send(result)
+      reply.code(201).send(result)
     }
   },
   patch: {

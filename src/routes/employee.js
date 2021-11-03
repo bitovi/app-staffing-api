@@ -1,5 +1,6 @@
 const Employee = require('../models/employee')
 const { Serializer } = require('../json-api-serializer')
+const { getIncludeStr } = require('../utils')
 
 module.exports = {
   list: {
@@ -17,7 +18,8 @@ module.exports = {
     url: '/employees/:id',
     method: 'GET',
     async handler (request, reply) {
-      const data = await Employee.query().findById(request.params.id)
+      const includeStr = getIncludeStr(request.query)
+      const data = await Employee.query().findById(request.params.id).withGraphFetched(includeStr)
       if (!data) {
         return reply.code(404).send()
       }
@@ -38,7 +40,7 @@ module.exports = {
     url: '/employees/:id',
     method: 'PATCH',
     async handler (request, reply) {
-      // if (request.body.data.type !== 'employee') return reply.code(400).send('data.type is required')
+      // if (request.body.data.type !== 'employees') return reply.code(400).send('data.type is required')
 
       const data = await Employee.query().patchAndFetchById(
         request.params.id,

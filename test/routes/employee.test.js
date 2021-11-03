@@ -5,14 +5,16 @@ const BASE_URL = '/employees'
 let employeeIdsToCleanup = []
 let skillsIdsToCleanup = []
 
-// afterAll(async () => {
-//   if (skillsIdsToCleanup.length) {
-//     await Skills.query().whereIn('id', skillsIdsToCleanup).delete().debug()
-//   }
-//   await Employee.query().whereIn('id', employeeIdsToCleanup).delete()
-//   employeeIdsToCleanup = []
-//   skillsIdsToCleanup = []
-// })
+afterAll(async () => {
+  // needed promise all to prevent the app from hanging 🙃
+  await Promise.all([
+    Employee.query().whereIn('id', employeeIdsToCleanup).delete(),
+    Skills.query().whereIn('id', skillsIdsToCleanup).delete()
+  ])
+
+  employeeIdsToCleanup = []
+  skillsIdsToCleanup = []
+})
 
 test('should be able to insert employees', async () => {
   // create employees
@@ -132,6 +134,9 @@ test('should be able to get one employee with relationships', async () => {
     skills: [react]
   }
   await Employee.query().upsertGraph(michealScott, { insertMissing: true })
+
+  employeeIdsToCleanup.push(michealScott.id)
+  skillsIdsToCleanup.push(react.id)
 
   const resp = await global.app.inject({
     url: `${BASE_URL}/${michealScott.id}`,

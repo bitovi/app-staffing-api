@@ -1,13 +1,30 @@
 const config = require('../../src/config')
 const Role = require('../../src/models/role')
+const Project = require('../../src/models/project')
+const Employee = require('../../src/models/employee')
+const Skill = require('../../src/models/skill')
+const Assignment = require('../../src/models/assignment')
 
 const URL = `http://localhost:${config.get('APP_PORT')}/roles`
 
 let roleIdsToDelete = []
+let employeeIdsToDelete = []
+let skillIdsToDelete = []
+let projectIdsToDelete = []
+let assignmentIdsToDelete = []
 
 afterEach(async () => {
+  await Employee.query().whereIn('id', employeeIdsToDelete).delete()
+  await Assignment.query().whereIn('id', assignmentIdsToDelete).delete()
+  await Skill.query().whereIn('id', skillIdsToDelete).delete()
   await Role.query().whereIn('id', roleIdsToDelete).delete()
+  await Project.query().whereIn('id', projectIdsToDelete).delete()
+
+  employeeIdsToDelete = []
+  assignmentIdsToDelete = []
+  skillIdsToDelete = []
   roleIdsToDelete = []
+  projectIdsToDelete = []
 })
 
 describe('Role Component Tests', () => {
@@ -167,12 +184,13 @@ describe('Role Component Tests', () => {
       expect(response.statusCode).toEqual(404)
     })
 
+    // @TODO: This test doesnt work yet
     it.skip('get should find record with relationship with sub relationship', async () => {
       await createRoleWithRelationsHelper()
       const testRole = (await Role.query())[0]
 
       const response = await global.app.inject({
-        url: `${URL}/${testRole.id}?include=employees.skills`,
+        url: `${URL}/${testRole.id}?include=employeells`,
         method: 'GET'
       })
 
@@ -291,5 +309,60 @@ const createRoleHelper = async () => {
 }
 
 const createRoleWithRelationsHelper = async () => {
-  return null
+  const knex = Skill.knex()
+
+  const createdEmployee = await Employee.query().insert(
+    {
+      name: 'Test User',
+      start_date: '2016-01-01',
+      end_date: null
+    }
+  )
+
+  const createdSkill = await Skill.query().insert({
+    name: 'my-test-skill.js'
+  })
+
+  const employeeSkill = await knex('employee__skill').insert({
+    employee_id: createdEmployee.id,
+    skill_id: createdSkill.id
+  })
+
+  const createdProject = await Project.query().insert({
+    name: 'Test Project',
+    start_date: new Date().toDateString(),
+    end_date: new Date().toDateString()
+  })
+
+  const createdRole = await Role.query().insert({
+    project_id: createdProject.id,
+    start_date: '2021-11-02',
+    start_confidence: 1,
+    end_date: '2021-11-03',
+    end_confidence: 5
+  })
+
+  const roleSkill = await knex('role__skill').insert({
+    role_id: createdRole.id,
+    skill_id: createdSkill.id
+  })
+
+  const createdAssignment = await Assignment.query().insert({
+    role_id: createdRole.id,
+    employee_id: createdEmployee.id,
+    start_date: '2022-03-01',
+    end_date: '2022-03-01'
+  })
+
+  console.log('employeeSkill', employeeSkill)
+  console.log('roleSkill', roleSkill)
+  console.log('createdAssignment', createdAssignment)
+  console.log('createdProject', createdProject)
+
+  roleIdsToDelete.push(createdRole.id)
+  employeeIdsToDelete.push(createdEmployee.id)
+  skillIdsToDelete.push(createdSkill.id)
+  assignmentIdsToDelete.push(createdAssignment.id)
+
+  return [createdRole, createdSkill, roleSkill, createdAssignment, employeeSkill]
 }

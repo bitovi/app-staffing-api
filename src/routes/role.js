@@ -1,17 +1,6 @@
-const JSONAPISerializer = require('json-api-serializer')
-
-const Serializer = new JSONAPISerializer()
+const { Serializer } = require('../json-api-serializer')
 
 const RolesModel = require('../models/role')
-
-Serializer.register('role', {
-  id: 'id',
-  start_date: 'start_date',
-  start_confidence: 'start_confidence',
-  end_date: 'end_date',
-  end_confidence: 'end_confidence',
-  project_id: 'project_id'
-})
 
 const routes = {
   create: {
@@ -23,7 +12,7 @@ const routes = {
     handler: async function (request, reply) {
       const { body, url } = request
       const newRole = await RolesModel.query().insert(body)
-      const data = Serializer.serialize('role', newRole)
+      const data = Serializer.serialize('roles', newRole)
       const location = `${url}/${newRole.id}`
       reply.status(201).header('Location', location).send(data)
     }
@@ -33,7 +22,7 @@ const routes = {
     url: '/roles',
     handler: async function (_, reply) {
       const roles = await RolesModel.query()
-      const data = Serializer.serialize('role', roles.map(role => role.toJSON()))
+      const data = Serializer.serialize('roles', roles.map(role => role.toJSON()))
       reply.send(data)
     }
   },
@@ -44,7 +33,7 @@ const routes = {
       const id = request.params.id
       try {
         const role = await RolesModel.query().findById(id)
-        const data = Serializer.serialize('role', role.toJSON())
+        const data = Serializer.serialize('roles', role.toJSON())
         reply.send(data)
       } catch (e) {
         reply.status(404).send()
@@ -59,7 +48,7 @@ const routes = {
       const { body } = request
       try {
         const role = await RolesModel.query().patchAndFetchById(id, body)
-        const data = Serializer.serialize('role', role.toJSON())
+        const data = Serializer.serialize('roles', role.toJSON())
         reply.send(data)
       } catch (e) {
         reply.status(404).send()

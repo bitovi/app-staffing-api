@@ -7,7 +7,7 @@ module.exports = {
     method: 'GET',
     async handler (request, reply) {
       const data = await Employee.query()
-      const result = Serializer.serialize('employee', data, {
+      const result = Serializer.serialize('employees', data, {
         count: data.length
       })
       reply.send(result)
@@ -21,7 +21,7 @@ module.exports = {
       if (!data) {
         return reply.code(404).send()
       }
-      const result = Serializer.serialize('employee', data)
+      const result = Serializer.serialize('employees', data)
       reply.send(result)
     }
   },
@@ -30,7 +30,7 @@ module.exports = {
     method: 'POST',
     async handler (request, reply) {
       const data = await Employee.query().insertAndFetch(request.body)
-      const result = Serializer.serialize('employee', data)
+      const result = Serializer.serialize('employees', data)
       reply.code(201).send(result)
     }
   },
@@ -44,7 +44,7 @@ module.exports = {
         request.params.id,
         request.body
       )
-      const result = Serializer.serialize('employee', data)
+      const result = Serializer.serialize('employees', data)
       reply.send(result)
     }
   },
@@ -53,7 +53,7 @@ module.exports = {
     method: 'DELETE',
     async handler (request, reply) {
       await Employee.query().deleteById(request.params.id)
-      const result = Serializer.serialize('employee', {})
+      const result = Serializer.serialize('employees', {})
       reply.code(204)
       reply.send(result)
     }

@@ -47,6 +47,7 @@ const build = () => {
   registerService(require('./routes/skill.js'))
   registerService(require('./routes/project.js'))
   registerService(require('./routes/employee.js'))
+  registerService(require('./routes/assignment.js'))
 
   return fastify
 }

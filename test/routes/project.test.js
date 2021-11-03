@@ -1,18 +1,7 @@
-const fetch = require('node-fetch')
-const config = require('../src/config')
-const Project = require('../src/models/project')
-const { start, stop } = require('../src/server')
+const Project = require('../../src/models/project')
 
-const URL = `http://localhost:${config.get('APP_PORT')}`
+const URL = '/projects'
 let recordIds = []
-
-beforeAll(async () => {
-  await start()
-})
-
-afterAll(async () => {
-  await stop()
-})
 
 afterEach(async () => {
   await Project.query().whereIn('id', recordIds).delete()
@@ -31,7 +20,8 @@ describe('POST', () => {
         }
       }
     }
-    const response = await fetch(`${URL}/projects`, {
+    const response = await global.app.inject({
+      url: URL,
       method: 'POST',
       body: JSON.stringify(body),
       headers: {
@@ -39,11 +29,11 @@ describe('POST', () => {
       }
     })
 
-    const result = await response.json()
+    const result = JSON.parse(response.body)
 
     recordIds.push(result.data.id)
 
-    expect(response.status).toBe(201)
+    expect(response.statusCode).toBe(201)
     expect(result.data.attributes).toEqual(expect.objectContaining(body.data.attributes))
   })
 
@@ -57,7 +47,8 @@ describe('POST', () => {
       }
     }
 
-    const response = await fetch(`${URL}/projects`, {
+    const response = await global.app.inject({
+      url: URL,
       method: 'POST',
       body: JSON.stringify(body),
       headers: {
@@ -65,9 +56,9 @@ describe('POST', () => {
       }
     })
 
-    const result = await response.json()
+    const result = JSON.parse(response.body)
 
-    expect(response.status).toBe(400)
+    expect(response.statusCode).toBe(400)
     expect(result).toEqual({ title: 'name: is a required property', status: 400 })
   })
 })
@@ -88,13 +79,15 @@ describe('GET many', () => {
 
     recordIds.push(...savedRecords.map(({ id }) => id))
 
-    const response = await fetch(`${URL}/projects`, {
+    const response = await global.app.inject({
+      url: URL,
+      method: 'GET',
       headers: {
         'Content-Type': 'application/vnd.api+json'
       }
     })
 
-    const result = await response.json()
+    const result = JSON.parse(response.body)
 
     records.forEach(record => {
       expect(result.data).toEqual(expect.arrayContaining(
@@ -115,13 +108,15 @@ describe('GET one', () => {
 
     recordIds.push(record.id)
 
-    const response = await fetch(`${URL}/projects/${record.id}`, {
+    const response = await global.app.inject({
+      url: `${URL}/${record.id}`,
+      method: 'GET',
       headers: {
         'Content-Type': 'application/vnd.api+json'
       }
     })
 
-    const result = await response.json()
+    const result = JSON.parse(response.body)
     expect(result.data.id).toBe(record.id)
 
     expect(result.data.attributes).toEqual(expect.objectContaining({ name: record.name, start_date: record.start_date }))
@@ -147,7 +142,8 @@ describe('PATCH', () => {
         }
       }
     }
-    const response = await fetch(`${URL}/projects/${record.id}`, {
+    const response = await global.app.inject({
+      url: `${URL}/${record.id}`,
       method: 'PATCH',
       body: JSON.stringify(body),
       headers: {
@@ -155,9 +151,9 @@ describe('PATCH', () => {
       }
     })
 
-    const result = await response.json()
+    const result = JSON.parse(response.body)
 
-    expect(response.status).toBe(200)
+    expect(response.statusCode).toBe(200)
     expect(result.data.attributes).toEqual(expect.objectContaining(body.data.attributes))
   })
 
@@ -181,7 +177,8 @@ describe('PATCH', () => {
       }
     }
 
-    const response = await fetch(`${URL}/projects/${record.id}`, {
+    const response = await global.app.inject({
+      url: `${URL}/${record.id}`,
       method: 'PATCH',
       body: JSON.stringify(body),
       headers: {
@@ -189,9 +186,9 @@ describe('PATCH', () => {
       }
     })
 
-    const result = await response.json()
+    const result = JSON.parse(response.body)
 
-    expect(response.status).toBe(200)
+    expect(response.statusCode).toBe(200)
     expect(result.data.attributes).toEqual(expect.objectContaining(body.data.attributes))
   })
 })
@@ -208,24 +205,26 @@ describe('DELETE', () => {
 
     recordIds.push(record.id)
 
-    const response = await fetch(`${URL}/projects/${record.id}`, {
+    const response = await global.app.inject({
+      url: `${URL}/${record.id}`,
       method: 'DELETE'
     })
 
-    const result = await response.text()
+    const result = response.body
 
     expect(result).toBe('')
-    expect(response.status).toBe(204)
+    expect(response.statusCode).toBe(204)
   })
 
   test('should return 404', async () => {
-    const response = await fetch(`${URL}/projects/ba0ad8bd-08b1-4229-bab1-9657e3453ea8`, {
+    const response = await global.app.inject({
+      url: `${URL}/ba0ad8bd-08b1-4229-bab1-9657e3453ea8`,
       method: 'DELETE'
     })
 
-    const result = await response.text()
+    const result = response.body
 
     expect(result).toBe('')
-    expect(response.status).toBe(404)
+    expect(response.statusCode).toBe(404)
   })
 })

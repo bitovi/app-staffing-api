@@ -16,7 +16,7 @@ const routes = {
     handler: async function (request, reply) {
       const { body, url } = request
       const newRole = await RolesModel.query().insert(body)
-      const data = Serializer.serialize('role', newRole)
+      const data = Serializer.serialize('roles', newRole)
       const location = `${url}/${newRole.id}`
       reply.status(201).header('Location', location).send(data)
     }
@@ -27,7 +27,7 @@ const routes = {
     handler: async function (request, reply) {
       const includeStr = getincludeStr(request.query)
       const roles = await RolesModel.query().withGraphFetched(includeStr)
-      const data = Serializer.serialize('role', roles.map(role => role.toJSON()))
+      const data = Serializer.serialize('roles', roles.map(role => role.toJSON()))
       reply.send(data)
     }
   },
@@ -40,7 +40,7 @@ const routes = {
 
       try {
         const role = await RolesModel.query().findById(id).withGraphFetched(includeStr)
-        const data = Serializer.serialize('role', role.toJSON())
+        const data = Serializer.serialize('roles', role.toJSON())
         reply.send(data)
       } catch (e) {
         reply.status(404).send()
@@ -55,7 +55,7 @@ const routes = {
       const { body } = request
       try {
         const role = await RolesModel.query().patchAndFetchById(id, body)
-        const data = Serializer.serialize('role', role.toJSON())
+        const data = Serializer.serialize('roles', role.toJSON())
         reply.send(data)
       } catch (e) {
         reply.status(404).send()

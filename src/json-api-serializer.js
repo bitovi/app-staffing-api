@@ -3,33 +3,41 @@ const Serializer = new JSONAPISerializer()
 
 exports.Serializer = Serializer
 
-Serializer.register('employee', {
-  id: 'id'
-})
-
-Serializer.register('role', {
+Serializer.register('employees', {
   id: 'id',
   relationships: {
-    skills: {
-      type: 'skills'
-    },
-    assignments: {
-      type: 'assignments'
-    },
-    employees: {
-      type: 'employee'
-    }
+    roles: { type: 'roles' },
+    skills: { type: 'skills' }
+  }
+})
+
+Serializer.register('roles', {
+  id: 'id',
+  relationships: {
+    assignments: { type: 'assignments' },
+    projects: { type: 'projects' }
   }
 })
 
 Serializer.register('skills', {
-  id: 'id'
+  id: 'id',
+  relationships: {
+    employees: { type: 'employees' },
+    roles: { type: 'roles' }
+  }
+})
+
+Serializer.register('projects', {
+  id: 'id',
+  relationships: {
+    roles: { type: 'roles' }
+  }
 })
 
 Serializer.register('assignments', {
-  id: 'id'
-})
-
-Serializer.register('project', {
-  id: 'id'
+  id: 'id',
+  relationships: {
+    employees: { type: 'employees' },
+    roles: { type: 'roles' }
+  }
 })

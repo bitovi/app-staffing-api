@@ -26,6 +26,7 @@ class Role extends Model {
 
   static get relationMappings () {
     const Assignment = require('./assignment')
+    const Project = require('./project')
     const Employee = require('./employee')
     const Skill = require('./skill')
 
@@ -36,6 +37,14 @@ class Role extends Model {
         join: {
           from: 'role.id',
           to: 'assignment.role_id'
+        }
+      },
+      projects: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Project,
+        join: {
+          from: 'role.project_id',
+          to: 'project.id'
         }
       },
       employees: {

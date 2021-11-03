@@ -12,7 +12,7 @@ describe('POST', () => {
   test('should create a project record', async () => {
     const body = {
       data: {
-        type: 'project',
+        type: 'projects',
         attributes: {
           name: 'Micheal Scott',
           start_date: new Date().toISOString(),
@@ -40,7 +40,7 @@ describe('POST', () => {
   test('should throw validation error', async () => {
     const body = {
       data: {
-        type: 'project',
+        type: 'projects',
         attributes: {
           start_date: new Date().toISOString()
         }
@@ -136,7 +136,7 @@ describe('PATCH', () => {
 
     const body = {
       data: {
-        type: 'project',
+        type: 'projects',
         attributes: {
           name: 'Not Evil Corp (really!)'
         }
@@ -170,7 +170,7 @@ describe('PATCH', () => {
 
     const body = {
       data: {
-        type: 'project',
+        type: 'projects',
         attributes: {
           end_date: null
         }

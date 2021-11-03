@@ -105,6 +105,53 @@ describe('Role Component Tests', () => {
       const result = await response.json()
 
       expect(result.data.id).toEqual(testRole.id)
+      expect(result.data.attributes).not.toHaveProperty('skills')
+      expect(result.data.attributes).not.toHaveProperty('employees')
+    })
+
+    it('get should find record with skills relationships', async () => {
+      await createRoleHelper()
+      const testRole = (await Role.query())[0]
+
+      const response = await fetch(`${URL}/${testRole.id}?include=skills`)
+
+      expect(response.status).toEqual(200)
+
+      const result = await response.json()
+
+      expect(result.data.id).toEqual(testRole.id)
+      expect(result.data.attributes).toHaveProperty('skills')
+      expect(result.data.attributes).not.toHaveProperty('employees')
+    })
+
+    it('get should find record with employees relationships', async () => {
+      await createRoleHelper()
+      const testRole = (await Role.query())[0]
+
+      const response = await fetch(`${URL}/${testRole.id}?include=employees`)
+
+      expect(response.status).toEqual(200)
+
+      const result = await response.json()
+
+      expect(result.data.id).toEqual(testRole.id)
+      expect(result.data.attributes).toHaveProperty('employees')
+      expect(result.data.attributes).not.toHaveProperty('skills')
+    })
+
+    it('get should find record with multiple relationships, skills and employees', async () => {
+      await createRoleHelper()
+      const testRole = (await Role.query())[0]
+
+      const response = await fetch(`${URL}/${testRole.id}?include=employees,skills`)
+
+      expect(response.status).toEqual(200)
+
+      const result = await response.json()
+
+      expect(result.data.id).toEqual(testRole.id)
+      expect(result.data.attributes).toHaveProperty('employees')
+      expect(result.data.attributes).toHaveProperty('skills')
     })
 
     it('get should return 404 when record not found', async () => {

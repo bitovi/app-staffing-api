@@ -13,6 +13,11 @@ Serializer.register('role', {
   project_id: 'project_id'
 })
 
+function getincludeStr (q) {
+  const inc = '[' + (q?.include || '') + ']'
+  return inc
+}
+
 const routes = {
   create: {
     method: 'POST',
@@ -31,8 +36,9 @@ const routes = {
   list: {
     method: 'GET',
     url: '/roles',
-    handler: async function (_, reply) {
-      const roles = await RolesModel.query()
+    handler: async function (request, reply) {
+      const includeStr = getincludeStr(request.query)
+      const roles = await RolesModel.query().withGraphFetched(includeStr)
       const data = Serializer.serialize('role', roles.map(role => role.toJSON()))
       reply.send(data)
     }
@@ -42,8 +48,10 @@ const routes = {
     url: '/roles/:id',
     handler: async function (request, reply) {
       const id = request.params.id
+      const includeStr = getincludeStr(request.query)
+
       try {
-        const role = await RolesModel.query().findById(id)
+        const role = await RolesModel.query().findById(id).withGraphFetched(includeStr)
         const data = Serializer.serialize('role', role.toJSON())
         reply.send(data)
       } catch (e) {

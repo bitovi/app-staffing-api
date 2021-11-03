@@ -9,21 +9,27 @@ Serializer.register('employee', {
 
 Serializer.register('role', {
   id: 'id',
-  start_date: 'start_date',
-  start_confidence: 'start_confidence',
-  end_date: 'end_date',
-  end_confidence: 'end_confidence',
-  project_id: 'project_id'
+  relationships: {
+    skills: {
+      type: 'skills'
+    },
+    assignments: {
+      type: 'assignments'
+    },
+    employees: {
+      type: 'employee'
+    }
+  }
 })
 
 Serializer.register('skills', {
-  id: 'id',
-  name: 'name'
+  id: 'id'
+})
+
+Serializer.register('assignments', {
+  id: 'id'
 })
 
 Serializer.register('project', {
-  id: 'id',
-  name: 'name',
-  start_date: 'start_date',
-  end_date: 'end_date'
+  id: 'id'
 })

@@ -1,13 +1,30 @@
 const config = require('../../src/config')
 const Role = require('../../src/models/role')
+const Project = require('../../src/models/project')
+const Employee = require('../../src/models/employee')
+const Skill = require('../../src/models/skill')
+const Assignment = require('../../src/models/assignment')
 
 const URL = `http://localhost:${config.get('APP_PORT')}/roles`
 
 let roleIdsToDelete = []
+let employeeIdsToDelete = []
+let skillIdsToDelete = []
+let projectIdsToDelete = []
+let assignmentIdsToDelete = []
 
 afterEach(async () => {
+  await Employee.query().whereIn('id', employeeIdsToDelete).delete()
+  await Assignment.query().whereIn('id', assignmentIdsToDelete).delete()
+  await Skill.query().whereIn('id', skillIdsToDelete).delete()
   await Role.query().whereIn('id', roleIdsToDelete).delete()
+  await Project.query().whereIn('id', projectIdsToDelete).delete()
+  
+  employeeIdsToDelete = []
+  assignmentIdsToDelete = []
+  skillIdsToDelete = []
   roleIdsToDelete = []
+  projectIdsToDelete = []
 })
 
 describe('Role Component Tests', () => {
@@ -120,9 +137,11 @@ describe('Role Component Tests', () => {
 
       const result = JSON.parse(response.body)
 
+      expect(result.data).toBeTruthy()
+      expect(result.data.relationships).toBeTruthy()
       expect(result.data.id).toEqual(testRole.id)
-      expect(result.data.attributes).toHaveProperty('skills')
-      expect(result.data.attributes).not.toHaveProperty('employees')
+      expect(result.data.relationships).toHaveProperty('skills')
+      expect(result.data.relationships).not.toHaveProperty('employees')
     })
 
     it('get should find record with relationship employees', async () => {
@@ -138,9 +157,11 @@ describe('Role Component Tests', () => {
 
       const result = JSON.parse(response.body)
 
+      expect(result.data).toBeTruthy()
+      expect(result.data.relationships).toBeTruthy()
       expect(result.data.id).toEqual(testRole.id)
-      expect(result.data.attributes).not.toHaveProperty('skills')
-      expect(result.data.attributes).toHaveProperty('employees')
+      expect(result.data.relationships).not.toHaveProperty('skills')
+      expect(result.data.relationships).toHaveProperty('employees')
     })
 
     it('get should find record with multiple relationship', async () => {
@@ -156,9 +177,31 @@ describe('Role Component Tests', () => {
 
       const result = JSON.parse(response.body)
 
+      expect(result.data).toBeTruthy()
+      expect(result.data.relationships).toBeTruthy()
       expect(result.data.id).toEqual(testRole.id)
-      expect(result.data.attributes).toHaveProperty('skills')
-      expect(result.data.attributes).toHaveProperty('employees')
+      expect(result.data.relationships).toHaveProperty('skills')
+      expect(result.data.relationships).toHaveProperty('employees')
+    })
+
+    it.skip('get should find record with relationship with sub relationship', async () => {
+      await createRoleWithRelationsHelper()
+      const testRole = (await Role.query())[0]
+
+      const response = await global.app.inject({
+        url: `${URL}/${testRole.id}?include=employees.skills`,
+        method: 'GET'
+      })
+
+      expect(response.statusCode).toEqual(200)
+
+      const result = JSON.parse(response.body)
+
+      expect(result.data).toBeTruthy()
+      expect(result.data.relationships).toBeTruthy()
+      expect(result.data.id).toEqual(testRole.id)
+      expect(result.data.relationships).toHaveProperty('skills')
+      expect(result.data.relationships).toHaveProperty('employees')
     })
 
     it('get should return 404 when record not found', async () => {
@@ -272,4 +315,39 @@ const createRoleHelper = async () => {
   roleIdsToDelete.push(createdRole.id)
 
   return createdRole
+}
+
+const createRoleWithRelationsHelper = async () => {
+  const createdEmployee = await Employee.query().insert(
+    {
+      name: 'Test User',
+      start_date: '2016-01-01',
+      end_date: null
+    }
+  )
+
+  employeeIdsToDelete.push(createdEmployee.id)
+
+  const createdSkill = await Skill.query().insert({
+    name: 'my-test-skill.js'
+  })
+
+  skillIdsToDelete.push(createdSkill.id)
+
+  await Project.query().insert({
+    name: 'Test Project',
+    start_date: new Date().toDateString(),
+    end_date: new Date().toDateString()
+  })
+
+  // const createdAssignment = await Assignment.query.insert({
+  //   role_id: createdRole.id,
+  //   employee_id: createdEmployee.id,
+  //   start_date: '2022-03-01',
+  //   end_date: '2022-03-01'
+  // })
+
+  await Skill.raw(`INSERT INTO employee__skill (employee_id, skill_id) VALUES (${createdEmployee.id}, ${createdSkill.id});`)
+
+  return {}
 }

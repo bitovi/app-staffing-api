@@ -56,7 +56,7 @@ const routes = {
       const { body } = request
       try {
         // const role = await RolesModel.query().patchAndFetchById(id, body)
-        const role = await RolesModel.query().upsertGraphAndFetch(body, {
+        const role = await RolesModel.query().upsertGraph(body, {
           update: false, insertMissing: true
         })
         const data = Serializer.serialize('roles', role.toJSON())
@@ -64,9 +64,6 @@ const routes = {
       } catch (e) {
         reply.status(404).send()
       }
-    },
-    schema: {
-      body: RolesModel.getSchema
     }
   },
   delete: {

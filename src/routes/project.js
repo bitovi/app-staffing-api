@@ -22,8 +22,9 @@ const routes = {
   list: {
     method: 'GET',
     url: '/projects',
-    handler: async function (_, reply) {
-      const projects = await ProjectModel.query()
+    handler: async function (request, reply) {
+      const includeStr = getIncludeStr(request.query)
+      const projects = await ProjectModel.query().withGraphFetched(includeStr)
       const data = Serializer.serialize('projects', projects.map(project => project.toJSON()))
       reply.send(data)
     }
@@ -39,7 +40,7 @@ const routes = {
         const data = Serializer.serialize('projects', project.toJSON())
         reply.send(data)
       } catch (e) {
-        reply.status(404).send()
+        reply.status(500).send()
       }
     }
   },
@@ -47,14 +48,12 @@ const routes = {
     method: 'PATCH',
     url: '/projects/:id',
     handler: async function (request, reply) {
-      const id = request.params.id
-      const { body } = request
       try {
-        const project = await ProjectModel.query().patchAndFetchById(id, body)
-        const data = Serializer.serialize('projects', project.toJSON())
-        reply.send(data)
+        await ProjectModel.query().upsertGraph(request.body, { insertMissing: true, update: false })
+        reply.send()
       } catch (e) {
-        reply.status(404).send()
+        console.log(e)
+        reply.status(500).send()
       }
     }
   },

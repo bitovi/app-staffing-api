@@ -1,11 +1,27 @@
 const Project = require('../../src/models/project')
+const Role = require('../../src/models/role')
+const Assignment = require('../../src/models/assignment')
+const Employee = require('../../src/models/employee')
 
 const URL = '/projects'
-let recordIds = []
+let projectIds = []
 
 afterEach(async () => {
-  await Project.query().whereIn('id', recordIds).delete()
-  recordIds = []
+  await Assignment.query().whereIn('id', [
+    'e35f80b9-2440-4eee-b8ea-d97630f492d3',
+    'f35f80b9-2440-4eee-b8ea-d97630f492df'
+  ]).delete()
+  await Role.query().whereIn('id', [
+    '2579ed35-f963-4d21-a460-af64269e901b',
+    'f579ed35-f963-4d21-a460-af64269e901f'
+  ]).delete()
+  await Project.query().whereIn('id', projectIds).delete()
+  await Employee.query().whereIn('id', [
+    '96a0c021-81dd-4ad6-a62c-cd6bca7a7396',
+    'f6a0c021-81dd-4ad6-a62c-cd6bca7a739f'
+  ]).delete()
+
+  projectIds = []
 })
 
 describe('POST', () => {
@@ -31,7 +47,7 @@ describe('POST', () => {
 
     const result = JSON.parse(response.body)
 
-    recordIds.push(result.data.id)
+    projectIds.push(result.data.id)
 
     expect(response.statusCode).toBe(201)
     expect(result.data.attributes).toEqual(expect.objectContaining(body.data.attributes))
@@ -55,10 +71,10 @@ describe('POST', () => {
         'Content-Type': 'application/vnd.api+json'
       }
     })
+    expect(response.statusCode).toBe(400)
 
     const result = JSON.parse(response.body)
 
-    expect(response.statusCode).toBe(400)
     expect(result).toEqual({ title: 'name: is a required property', status: 400 })
   })
 })
@@ -77,7 +93,7 @@ describe('GET many', () => {
     }]
     const savedRecords = await Project.query().insertGraph(records)
 
-    recordIds.push(...savedRecords.map(({ id }) => id))
+    projectIds.push(...savedRecords.map(({ id }) => id))
 
     const response = await global.app.inject({
       url: URL,
@@ -95,21 +111,36 @@ describe('GET many', () => {
       ))
     })
   })
-})
 
-describe('GET one', () => {
-  test('should return a project', async () => {
-    const record = {
-      id: '3de0fe0c-9d74-4f6e-b0d0-5ab435f5f472',
-      name: 'Veridian Dynamics',
+  test('should return projects with relations', async () => {
+    const project = {
+      id: 'fde0fe0c-9d74-4f6e-b0d0-5ab435f5f47f',
+      name: 'Coolest project ever',
       start_date: new Date().toISOString()
     }
-    await Project.query().insert(record)
+    const role = {
+      id: 'f579ed35-f963-4d21-a460-af64269e901f',
+      project_id: project.id
+    }
+    const employee = {
+      id: 'f6a0c021-81dd-4ad6-a62c-cd6bca7a739f',
+      name: 'Emp loyee'
+    }
+    const assignment = {
+      id: 'f35f80b9-2440-4eee-b8ea-d97630f492df',
+      employee_id: employee.id,
+      role_id: role.id,
+      start_date: new Date().toISOString()
+    }
+    await Employee.query().insert(employee)
+    await Project.query().insert(project)
+    await Role.query().insert(role)
+    await Assignment.query().insert(assignment)
 
-    recordIds.push(record.id)
+    projectIds.push(project.id)
 
     const response = await global.app.inject({
-      url: `${URL}/${record.id}`,
+      url: `${URL}?include=roles.assignments.employees`,
       method: 'GET',
       headers: {
         'Content-Type': 'application/vnd.api+json'
@@ -117,33 +148,113 @@ describe('GET one', () => {
     })
 
     const result = JSON.parse(response.body)
-    expect(result.data.id).toBe(record.id)
+    const testData = result.data.find(record => record.id === project.id)
 
-    expect(result.data.attributes).toEqual(expect.objectContaining({ name: record.name, start_date: record.start_date }))
+    expect(testData.id).toBe(project.id)
+
+    expect(testData.attributes).toEqual(expect.objectContaining({ name: project.name, start_date: project.start_date }))
+
+    const includedIds = result.included.map(({ id }) => id)
+    expect(includedIds).toContain('f579ed35-f963-4d21-a460-af64269e901f')
+    expect(includedIds).toContain('f6a0c021-81dd-4ad6-a62c-cd6bca7a739f')
+    expect(includedIds).toContain('f35f80b9-2440-4eee-b8ea-d97630f492df')
+  })
+})
+
+describe('GET one', () => {
+  test('should return a project', async () => {
+    const project = {
+      id: '3de0fe0c-9d74-4f6e-b0d0-5ab435f5f472',
+      name: 'Veridian Dynamics',
+      start_date: new Date().toISOString()
+    }
+    await Project.query().insert(project)
+
+    projectIds.push(project.id)
+
+    const response = await global.app.inject({
+      url: `${URL}/${project.id}`,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/vnd.api+json'
+      }
+    })
+
+    const result = JSON.parse(response.body)
+    expect(result.data.id).toBe(project.id)
+
+    expect(result.data.attributes).toEqual(expect.objectContaining({ name: project.name, start_date: project.start_date }))
+  })
+
+  test('should return a project with relations', async () => {
+    const project = {
+      id: '3de0fe0c-9d74-4f6e-b0d0-5ab435f5f471',
+      name: 'Coolest project ever',
+      start_date: new Date().toISOString()
+    }
+    const role = {
+      id: '2579ed35-f963-4d21-a460-af64269e901b',
+      project_id: project.id
+    }
+    const employee = {
+      id: '96a0c021-81dd-4ad6-a62c-cd6bca7a7396',
+      name: 'Emp loyee'
+    }
+    const assignment = {
+      id: 'e35f80b9-2440-4eee-b8ea-d97630f492d3',
+      employee_id: employee.id,
+      role_id: role.id,
+      start_date: new Date().toISOString()
+    }
+    await Employee.query().insert(employee)
+    await Project.query().insert(project)
+    await Role.query().insert(role)
+    await Assignment.query().insert(assignment)
+
+    projectIds.push(project.id)
+
+    const response = await global.app.inject({
+      url: `${URL}/${project.id}?include=roles.assignments.employees`,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/vnd.api+json'
+      }
+    })
+
+    const result = JSON.parse(response.body)
+    expect(result.data.id).toBe(project.id)
+
+    expect(result.data.attributes).toEqual(expect.objectContaining({ name: project.name, start_date: project.start_date }))
+    expect(result.included.map(({ id }) => id).sort()).toEqual([
+      '2579ed35-f963-4d21-a460-af64269e901b',
+      '96a0c021-81dd-4ad6-a62c-cd6bca7a7396',
+      'e35f80b9-2440-4eee-b8ea-d97630f492d3'
+    ])
   })
 })
 
 describe('PATCH', () => {
   test('should update a project record', async () => {
-    const record = {
-      id: '65c091c0-d4f9-4ce0-bf44-ba00cd9b0ac3',
+    const project = {
+      id: '65c091c0-d4f9-4ce0-bf44-ba00cd9b0ac9',
       name: 'Evil Corp',
       start_date: new Date().toISOString()
     }
-    await Project.query().insert(record)
+    await Project.query().insert(project)
 
-    recordIds.push(record.id)
+    projectIds.push(project.id)
 
     const body = {
       data: {
         type: 'projects',
+        id: project.id,
         attributes: {
           name: 'Not Evil Corp (really!)'
         }
       }
     }
     const response = await global.app.inject({
-      url: `${URL}/${record.id}`,
+      url: `${URL}/${project.id}`,
       method: 'PATCH',
       body: JSON.stringify(body),
       headers: {
@@ -151,26 +262,27 @@ describe('PATCH', () => {
       }
     })
 
-    const result = JSON.parse(response.body)
-
     expect(response.statusCode).toBe(200)
-    expect(result.data.attributes).toEqual(expect.objectContaining(body.data.attributes))
+
+    const updatedRow = await Project.query().findById(project.id)
+    expect(updatedRow).toEqual(expect.objectContaining(body.data.attributes))
   })
 
   test('should unset field', async () => {
-    const record = {
-      id: '65c091c0-d4f9-4ce0-bf44-ba00cd9b0ac3',
+    const project = {
+      id: '65c091c0-d4f9-4ce0-bf44-ba00cd9b0acf',
       name: 'Evil Corp',
       start_date: new Date().toISOString(),
       end_date: new Date().toISOString()
     }
-    await Project.query().insert(record)
+    await Project.query().insert(project)
 
-    recordIds.push(record.id)
+    projectIds.push(project.id)
 
     const body = {
       data: {
         type: 'projects',
+        id: project.id,
         attributes: {
           end_date: null
         }
@@ -178,7 +290,7 @@ describe('PATCH', () => {
     }
 
     const response = await global.app.inject({
-      url: `${URL}/${record.id}`,
+      url: `${URL}/${project.id}`,
       method: 'PATCH',
       body: JSON.stringify(body),
       headers: {
@@ -186,27 +298,118 @@ describe('PATCH', () => {
       }
     })
 
-    const result = JSON.parse(response.body)
+    expect(response.statusCode).toBe(200)
+
+    const updatedRow = await Project.query().findById(project.id)
+
+    expect(updatedRow).toEqual(expect.objectContaining(body.data.attributes))
+  })
+
+  test('should reset relationships', async () => {
+    const project = {
+      id: '19dbf187-cd4f-46fd-9731-82a077310627',
+      name: 'New Project',
+      start_date: new Date().toISOString()
+    }
+    await Project.query().insert(project)
+
+    projectIds.push(project.id)
+
+    const body = {
+      included: [
+        {
+          type: 'roles',
+          id: '2579ed35-f963-4d21-a460-af64269e901b',
+          attributes: {
+            start_confidence: 3
+          }
+        },
+        {
+          type: 'assignments',
+          id: 'e35f80b9-2440-4eee-b8ea-d97630f492d3',
+          attributes: {
+            start_date: new Date().toISOString()
+          }
+        },
+        {
+          type: 'employees',
+          id: '96a0c021-81dd-4ad6-a62c-cd6bca7a7396',
+          attributes: {
+            name: 'kevin'
+          }
+        }
+      ],
+      data: {
+        type: 'projects',
+        id: '19dbf187-cd4f-46fd-9731-82a077310627',
+        attributes: {
+          name: 'New name'
+        },
+        relationships: {
+          roles: {
+            data: [
+              {
+                type: 'roles',
+                id: '2579ed35-f963-4d21-a460-af64269e901b',
+                relationships: {
+                  assignments: {
+                    data: [
+                      {
+                        type: 'assignments',
+                        id: 'e35f80b9-2440-4eee-b8ea-d97630f492d3',
+                        relationships: {
+                          employees: {
+                            data: [
+                              {
+                                type: 'employees',
+                                id: '96a0c021-81dd-4ad6-a62c-cd6bca7a7396'
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+    const response = await global.app.inject({
+      url: `${URL}/${project.id}`,
+      method: 'PATCH',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/vnd.api+json'
+      }
+    })
 
     expect(response.statusCode).toBe(200)
-    expect(result.data.attributes).toEqual(expect.objectContaining(body.data.attributes))
+
+    const updatedRow = await Project.query().findById(project.id)
+    const linkedRole = await Role.query().findById('2579ed35-f963-4d21-a460-af64269e901b')
+
+    expect(updatedRow).toEqual(expect.objectContaining(body.data.attributes))
+    expect(linkedRole.project_id).toEqual(project.id)
   })
 })
 
 describe('DELETE', () => {
   test('should delete record', async () => {
-    const record = {
+    const project = {
       id: '10c6ff63-f9cd-4856-a348-a9f719e1def4',
       name: 'Evil Corp',
       start_date: new Date().toISOString(),
       end_date: new Date().toISOString()
     }
-    await Project.query().insert(record)
+    await Project.query().insert(project)
 
-    recordIds.push(record.id)
+    projectIds.push(project.id)
 
     const response = await global.app.inject({
-      url: `${URL}/${record.id}`,
+      url: `${URL}/${project.id}`,
       method: 'DELETE'
     })
 

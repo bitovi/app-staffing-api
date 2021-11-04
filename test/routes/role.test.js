@@ -185,24 +185,24 @@ describe('Role Component Tests', () => {
     })
 
     // @TODO: This test doesnt work yet
-    it.skip('get should find record with relationship with sub relationship', async () => {
-      await createRoleWithRelationsHelper()
-      const testRole = (await Role.query())[0]
+    it('get should find record with relationship with sub relationship', async () => {
+      debugger;
+      const testRole = await createRoleWithRelationsHelper()
 
       const response = await global.app.inject({
-        url: `${URL}/${testRole.id}?include=employeells`,
+        url: `${URL}/${testRole.id}?include=employees.skills`,
         method: 'GET'
       })
 
       expect(response.statusCode).toEqual(200)
 
-      const result = JSON.parse(response.body)
+      const result = response.json();
 
       expect(result.data).toBeTruthy()
       expect(result.data.relationships).toBeTruthy()
       expect(result.data.id).toEqual(testRole.id)
-      expect(result.data.relationships).toHaveProperty('skills')
       expect(result.data.relationships).toHaveProperty('employees')
+      expect(result.included.filter(el=>el.type === 'skills').length).toBe(1)
     })
   })
 
@@ -364,5 +364,6 @@ const createRoleWithRelationsHelper = async () => {
   skillIdsToDelete.push(createdSkill.id)
   assignmentIdsToDelete.push(createdAssignment.id)
 
-  return [createdRole, createdSkill, roleSkill, createdAssignment, employeeSkill]
+  return createdRole
+  //[createdRole, createdSkill, roleSkill, createdAssignment, employeeSkill]
 }

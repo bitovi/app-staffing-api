@@ -5,7 +5,7 @@ const BASE_URL = '/employees'
 let employeeIdsToCleanup = []
 let skillsIdsToCleanup = []
 
-describe('Employee', () => {
+describe('Employee Component Tests', () => {
   afterAll(async () => {
     await Skills.query().whereIn('id', skillsIdsToCleanup).delete()
     await Employee.query().whereIn('id', employeeIdsToCleanup).delete()
@@ -231,14 +231,94 @@ describe('Employee', () => {
         }
       })
     })
-    const json = JSON.parse(resp.body)
 
-    const employee = json.data
-    expect(json.title).toBeUndefined()
-    expect(resp.statusCode).toBe(200)
+    const employee = await Employee.query().findById(employee1.id)
+    expect(resp.statusCode).toBe(204)
 
     expect(employee.id).toBe(employee1.id)
-    expect(employee.attributes.name).toBe(newName)
+    expect(employee.name).toBe(newName)
+  })
+
+  test('it should relate an existing employee', async () => {
+    const employee1 = await Employee.query().insertAndFetch({
+      name: 'random' + Math.random()
+    })
+
+    employeeIdsToCleanup.push(employee1.id)
+
+    const react = {
+      id: createUUID(),
+      name: 'react'
+    }
+
+    const skill = await Skills.query().insertAndFetch(react)
+
+    const payload = {
+      data: {
+        type: 'employees',
+        id: employee1.id,
+        relationships: {
+          skills: {
+            data: [
+              { id: skill.id, type: 'skills' }
+            ]
+          }
+        }
+      }
+    }
+
+    const response = await global.app.inject({
+      method: 'PATCH',
+      url: `${BASE_URL}/${employee1.id}`,
+      headers: { 'Content-Type': 'application/vnd.api+json' },
+      payload: JSON.stringify(payload)
+    })
+
+    expect(response.statusCode).toEqual(204)
+
+    const employee = await Employee.query().findById(employee1.id).withGraphJoined('skills')
+
+    expect(employee.skills).toEqual([expect.objectContaining({ id: react.id })])
+  })
+
+  test('it should unrelate an existing employee with skills', async () => {
+    const employee1 = await Employee.query().insertAndFetch({
+      name: 'random' + Math.random()
+    })
+
+    employeeIdsToCleanup.push(employee1.id)
+
+    const react = {
+      id: createUUID(),
+      name: 'react'
+    }
+
+    const skill = await Skills.query().insertAndFetch(react)
+
+    const fetchedEmployee = await Employee.query().upsertGraphAndFetch({ ...employee1, skills: [{ id: skill.id }] }, { relate: true })
+
+    const payload = {
+      data: {
+        type: 'employees',
+        id: fetchedEmployee.id,
+        relationships: {
+          skills: {
+            data: []
+          }
+        }
+      }
+    }
+
+    await global.app.inject({
+      method: 'PATCH',
+      url: `${BASE_URL}/${fetchedEmployee.id}`,
+      headers: { 'Content-Type': 'application/vnd.api+json' },
+      payload: JSON.stringify(payload)
+    })
+
+    const employee = await Employee.query().findById(employee1.id).withGraphJoined('skills')
+
+    expect(employee.skills).toEqual([])
   })
 
   test('should be able to delete an employee', async () => {

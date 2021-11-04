@@ -7,7 +7,16 @@ Serializer.register('employees', {
   id: 'id',
   relationships: {
     roles: { type: 'roles' },
-    skills: { type: 'skills' }
+    skills: {
+      type: 'skills',
+      deserialize: (data) => {
+        if (data) {
+          const { id } = data
+          return { id }
+        }
+        return data
+      }
+    }
   }
 })
 
@@ -39,5 +48,12 @@ Serializer.register('assignments', {
   relationships: {
     employees: { type: 'employees' },
     roles: { type: 'roles' }
+  }
+})
+
+Serializer.register('employee', 'employeeRelation', {
+  id: 'id',
+  skills: {
+
   }
 })

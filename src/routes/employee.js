@@ -34,8 +34,7 @@ module.exports = {
     url: '/employees',
     method: 'POST',
     async handler (request, reply) {
-      const intermediate = { ...request.body, ...(request.body.skills && { skills: request.body.skills.map(id => ({ id })) }) }
-      const data = await Employee.query().upsertGraphAndFetch(intermediate, { relate: true })
+      const data = await Employee.query().upsertGraphAndFetch(request.body, { relate: true })
       const result = Serializer.serialize('employees', data)
       reply.code(201).send(result)
     }
@@ -44,14 +43,15 @@ module.exports = {
     url: '/employees/:id',
     method: 'PATCH',
     async handler (request, reply) {
-      // if (request.body.data.type !== 'employees') return reply.code(400).send('data.type is required')
+      await Employee.query().upsertGraph(
+        request.body,
+        {
+          update: false,
+          relate: true,
+          unrelate: true
+        })
 
-      const data = await Employee.query().patchAndFetchById(
-        request.params.id,
-        request.body
-      )
-      const result = Serializer.serialize('employees', data)
-      reply.send(result)
+      reply.status(204).send()
     }
   },
   delete: {

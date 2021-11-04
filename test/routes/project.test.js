@@ -62,10 +62,10 @@ describe('POST', () => {
         'Content-Type': 'application/vnd.api+json'
       }
     })
+    expect(response.statusCode).toBe(400)
 
     const result = JSON.parse(response.body)
 
-    expect(response.statusCode).toBe(400)
     expect(result).toEqual({ title: 'name: is a required property', status: 400 })
   })
 })
@@ -179,7 +179,7 @@ describe('GET one', () => {
 describe('PATCH', () => {
   test('should update a project record', async () => {
     const project = {
-      id: '65c091c0-d4f9-4ce0-bf44-ba00cd9b0ac3',
+      id: '65c091c0-d4f9-4ce0-bf44-ba00cd9b0ac9',
       name: 'Evil Corp',
       start_date: new Date().toISOString()
     }
@@ -190,6 +190,7 @@ describe('PATCH', () => {
     const body = {
       data: {
         type: 'projects',
+        id: project.id,
         attributes: {
           name: 'Not Evil Corp (really!)'
         }
@@ -204,15 +205,16 @@ describe('PATCH', () => {
       }
     })
 
+    expect(response.statusCode).toBe(200)
+
     const result = JSON.parse(response.body)
 
-    expect(response.statusCode).toBe(200)
     expect(result.data.attributes).toEqual(expect.objectContaining(body.data.attributes))
   })
 
   test('should unset field', async () => {
     const project = {
-      id: '65c091c0-d4f9-4ce0-bf44-ba00cd9b0ac3',
+      id: '65c091c0-d4f9-4ce0-bf44-ba00cd9b0acf',
       name: 'Evil Corp',
       start_date: new Date().toISOString(),
       end_date: new Date().toISOString()
@@ -224,6 +226,7 @@ describe('PATCH', () => {
     const body = {
       data: {
         type: 'projects',
+        id: project.id,
         attributes: {
           end_date: null
         }
@@ -239,9 +242,10 @@ describe('PATCH', () => {
       }
     })
 
+    expect(response.statusCode).toBe(200)
+
     const result = JSON.parse(response.body)
 
-    expect(response.statusCode).toBe(200)
     expect(result.data.attributes).toEqual(expect.objectContaining(body.data.attributes))
   })
 

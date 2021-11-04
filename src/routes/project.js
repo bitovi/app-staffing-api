@@ -49,7 +49,7 @@ const routes = {
     url: '/projects/:id',
     handler: async function (request, reply) {
       try {
-        const project = await ProjectModel.query().upsertGraphAndFetch(request.body, { insertMissing: true })
+        const project = await ProjectModel.query().upsertGraphAndFetch(request.body, { insertMissing: true, update: false })
         const data = Serializer.serialize('projects', project.toJSON())
         reply.send(data)
       } catch (e) {

@@ -7,10 +7,19 @@ const URL = '/projects'
 let projectIds = []
 
 afterEach(async () => {
-  await Assignment.query().whereIn('id', ['e35f80b9-2440-4eee-b8ea-d97630f492d3']).delete()
-  await Role.query().whereIn('id', ['2579ed35-f963-4d21-a460-af64269e901b']).delete()
+  await Assignment.query().whereIn('id', [
+    'e35f80b9-2440-4eee-b8ea-d97630f492d3',
+    'f35f80b9-2440-4eee-b8ea-d97630f492df'
+  ]).delete()
+  await Role.query().whereIn('id', [
+    '2579ed35-f963-4d21-a460-af64269e901b',
+    'f579ed35-f963-4d21-a460-af64269e901f'
+  ]).delete()
   await Project.query().whereIn('id', projectIds).delete()
-  await Employee.query().whereIn('id', ['96a0c021-81dd-4ad6-a62c-cd6bca7a7396']).delete()
+  await Employee.query().whereIn('id', [
+    '96a0c021-81dd-4ad6-a62c-cd6bca7a7396',
+    'f6a0c021-81dd-4ad6-a62c-cd6bca7a739f'
+  ]).delete()
 
   projectIds = []
 })
@@ -101,6 +110,54 @@ describe('GET many', () => {
         [expect.objectContaining({ attributes: expect.objectContaining(record) })]
       ))
     })
+  })
+
+  test('should return projects with relations', async () => {
+    const project = {
+      id: 'fde0fe0c-9d74-4f6e-b0d0-5ab435f5f47f',
+      name: 'Coolest project ever',
+      start_date: new Date().toISOString()
+    }
+    const role = {
+      id: 'f579ed35-f963-4d21-a460-af64269e901f',
+      project_id: project.id
+    }
+    const employee = {
+      id: 'f6a0c021-81dd-4ad6-a62c-cd6bca7a739f',
+      name: 'Emp loyee'
+    }
+    const assignment = {
+      id: 'f35f80b9-2440-4eee-b8ea-d97630f492df',
+      employee_id: employee.id,
+      role_id: role.id,
+      start_date: new Date().toISOString()
+    }
+    await Employee.query().insert(employee)
+    await Project.query().insert(project)
+    await Role.query().insert(role)
+    await Assignment.query().insert(assignment)
+
+    projectIds.push(project.id)
+
+    const response = await global.app.inject({
+      url: `${URL}?include=roles.assignments.employees`,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/vnd.api+json'
+      }
+    })
+
+    const result = JSON.parse(response.body)
+    const testData = result.data.find(record => record.id === project.id)
+
+    expect(testData.id).toBe(project.id)
+
+    expect(testData.attributes).toEqual(expect.objectContaining({ name: project.name, start_date: project.start_date }))
+
+    const includedIds = result.included.map(({ id }) => id)
+    expect(includedIds).toContain('f579ed35-f963-4d21-a460-af64269e901f')
+    expect(includedIds).toContain('f6a0c021-81dd-4ad6-a62c-cd6bca7a739f')
+    expect(includedIds).toContain('f35f80b9-2440-4eee-b8ea-d97630f492df')
   })
 })
 

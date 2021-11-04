@@ -1,6 +1,7 @@
 const { Serializer } = require('../json-api-serializer')
 
 const RolesModel = require('../models/role')
+const { getPage } = require('../utils')
 
 const routes = {
   create: {
@@ -20,8 +21,9 @@ const routes = {
   list: {
     method: 'GET',
     url: '/roles',
-    handler: async function (_, reply) {
-      const roles = await RolesModel.query()
+    handler: async function (request, reply) {
+      const { limit, offset } = getPage(request.query)
+      const roles = await RolesModel.query().limit(limit).offset(offset)
       const data = Serializer.serialize('roles', roles.map(role => role.toJSON()))
       reply.send(data)
     }

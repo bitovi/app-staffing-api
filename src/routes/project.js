@@ -22,8 +22,9 @@ const routes = {
   list: {
     method: 'GET',
     url: '/projects',
-    handler: async function (_, reply) {
-      const projects = await ProjectModel.query()
+    handler: async function (request, reply) {
+      const includeStr = getIncludeStr(request.query)
+      const projects = await ProjectModel.query().withGraphFetched(includeStr)
       const data = Serializer.serialize('projects', projects.map(project => project.toJSON()))
       reply.send(data)
     }
@@ -48,7 +49,7 @@ const routes = {
     url: '/projects/:id',
     handler: async function (request, reply) {
       try {
-        const project = await ProjectModel.query().upsertGraph(request.body, { insertMissing: true })
+        const project = await ProjectModel.query().upsertGraphAndFetch(request.body, { insertMissing: true })
         const data = Serializer.serialize('projects', project.toJSON())
         reply.send(data)
       } catch (e) {

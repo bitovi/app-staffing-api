@@ -40,7 +40,7 @@ const routes = {
         const data = Serializer.serialize('projects', project.toJSON())
         reply.send(data)
       } catch (e) {
-        reply.status(404).send()
+        reply.status(500).send()
       }
     }
   },
@@ -49,12 +49,11 @@ const routes = {
     url: '/projects/:id',
     handler: async function (request, reply) {
       try {
-        const project = await ProjectModel.query().upsertGraphAndFetch(request.body, { insertMissing: true, update: false })
-        const data = Serializer.serialize('projects', project.toJSON())
-        reply.send(data)
+        await ProjectModel.query().upsertGraph(request.body, { insertMissing: true, update: false })
+        reply.send()
       } catch (e) {
         console.log(e)
-        reply.status(404).send()
+        reply.status(500).send()
       }
     }
   },

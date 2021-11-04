@@ -264,9 +264,8 @@ describe('PATCH', () => {
 
     expect(response.statusCode).toBe(200)
 
-    const result = JSON.parse(response.body)
-
-    expect(result.data.attributes).toEqual(expect.objectContaining(body.data.attributes))
+    const updatedRow = await Project.query().findById(project.id)
+    expect(updatedRow).toEqual(expect.objectContaining(body.data.attributes))
   })
 
   test('should unset field', async () => {
@@ -301,9 +300,9 @@ describe('PATCH', () => {
 
     expect(response.statusCode).toBe(200)
 
-    const result = JSON.parse(response.body)
+    const updatedRow = await Project.query().findById(project.id)
 
-    expect(result.data.attributes).toEqual(expect.objectContaining(body.data.attributes))
+    expect(updatedRow).toEqual(expect.objectContaining(body.data.attributes))
   })
 
   test('should reset relationships', async () => {
@@ -389,10 +388,11 @@ describe('PATCH', () => {
 
     expect(response.statusCode).toBe(200)
 
-    const result = JSON.parse(response.body)
+    const updatedRow = await Project.query().findById(project.id)
+    const linkedRole = await Role.query().findById('2579ed35-f963-4d21-a460-af64269e901b')
 
-    expect(result.data.attributes).toEqual(expect.objectContaining(body.data.attributes))
-    expect(result.data.relationships.roles.data[0].id).toEqual('2579ed35-f963-4d21-a460-af64269e901b')
+    expect(updatedRow).toEqual(expect.objectContaining(body.data.attributes))
+    expect(linkedRole.project_id).toEqual(project.id)
   })
 })
 

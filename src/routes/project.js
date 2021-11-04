@@ -37,10 +37,15 @@ const routes = {
       try {
         const includeStr = getIncludeStr(request.query)
         const project = await ProjectModel.query().findById(id).withGraphFetched(includeStr)
+
+        if (!project) {
+          return reply.status(404).send()
+        }
+
         const data = Serializer.serialize('projects', project.toJSON())
-        reply.send(data)
+        return reply.send(data)
       } catch (e) {
-        reply.status(500).send()
+        return reply.status(500).send()
       }
     }
   },

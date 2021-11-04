@@ -186,6 +186,19 @@ describe('GET one', () => {
     expect(result.data.attributes).toEqual(expect.objectContaining({ name: project.name, start_date: project.start_date }))
   })
 
+  test('should return 404 for project not found', async () => {
+    const response = await global.app.inject({
+      url: `${URL}/512a5b8f-84b8-49c1-9df8-8636721e87bf`,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/vnd.api+json'
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.body).toBe('')
+  })
+
   test('should return a project with relations', async () => {
     const project = {
       id: '3de0fe0c-9d74-4f6e-b0d0-5ab435f5f471',

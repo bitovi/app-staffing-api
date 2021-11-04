@@ -1,6 +1,6 @@
-const { Serializer } = require('../json-api-serializer')
-
 const RolesModel = require('../models/role')
+const { Serializer } = require('../json-api-serializer')
+const { getIncludeStr } = require('../utils')
 
 const routes = {
   create: {
@@ -20,8 +20,9 @@ const routes = {
   list: {
     method: 'GET',
     url: '/roles',
-    handler: async function (_, reply) {
-      const roles = await RolesModel.query()
+    handler: async function (request, reply) {
+      const includeStr = getIncludeStr(request.query)
+      const roles = await RolesModel.query().withGraphFetched(includeStr)
       const data = Serializer.serialize('roles', roles.map(role => role.toJSON()))
       reply.send(data)
     }
@@ -31,8 +32,10 @@ const routes = {
     url: '/roles/:id',
     handler: async function (request, reply) {
       const id = request.params.id
+      const includeStr = getIncludeStr(request.query)
+
       try {
-        const role = await RolesModel.query().findById(id)
+        const role = await RolesModel.query().findById(id).withGraphFetched(includeStr)
         const data = Serializer.serialize('roles', role.toJSON())
         reply.send(data)
       } catch (e) {
@@ -44,10 +47,12 @@ const routes = {
     method: 'PATCH',
     url: '/roles/:id',
     handler: async function (request, reply) {
-      const id = request.params.id
-      const { body } = request
       try {
-        const role = await RolesModel.query().patchAndFetchById(id, body)
+        const intermediate = { ...request.body, ...(request.body.skills && { skills: request.body.skills.map(id => ({ id })) }) }
+        const role = await RolesModel.query().upsertGraph(intermediate, {
+          update: false, insertMissing: true, relate: true
+        })
+
         const data = Serializer.serialize('roles', role.toJSON())
         reply.send(data)
       } catch (e) {

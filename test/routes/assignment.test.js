@@ -16,26 +16,26 @@ let project
 let employee
 let role
 
-beforeAll(async () => {
-  project = await Project.query().insert({
-    name: faker.company.companyName(),
-    start_date: new Date()
-  })
-  const roleData = fakeRole(1, { project_id: project.id })
-  role = await Role.query().insert(roleData)
-  employee = await Employee.query().insert({ name: 'Scuba Steve' })
-})
-afterAll(async () => {
-  await Role.query().whereIn('id', [role.id]).delete()
-  await Project.query().whereIn('id', [project.id]).delete()
-  await Employee.query().whereIn('id', [employee.id]).delete()
-  await Assignment.query().delete()
-})
-afterEach(async () => {
-  await Assignment.query().whereIn('id', idsToDelete).delete()
-})
-
 describe('Assignment Component Tests', () => {
+  beforeAll(async () => {
+    project = await Project.query().insert({
+      name: faker.company.companyName(),
+      start_date: new Date()
+    })
+    const roleData = fakeRole(1, { project_id: project.id })
+    role = await Role.query().insert(roleData)
+    employee = await Employee.query().insert({ name: 'Scuba Steve' })
+  })
+  afterAll(async () => {
+    await Role.query().whereIn('id', [role.id]).delete()
+    await Project.query().whereIn('id', [project.id]).delete()
+    await Employee.query().whereIn('id', [employee.id]).delete()
+    await Assignment.query().delete()
+  })
+  afterEach(async () => {
+    await Assignment.query().whereIn('id', idsToDelete).delete()
+  })
+
   describe('POST', () => {
     it('should create assignment', async () => {
       const employee_id = await getEmployeeId()

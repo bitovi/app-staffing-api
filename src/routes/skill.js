@@ -1,13 +1,39 @@
 const SkillModel = require('../models/skill')
 const { Serializer } = require('../json-api-serializer')
+const { getPageParams } = require('../utils')
 
 const routes = {
   list: {
     method: 'GET',
     url: '/skills',
     handler: async (request, reply) => {
-      const skills = await SkillModel.query()
-      const serialized = Serializer.serialize('skills', skills)
+      const { sort, ...rawQuery } = request.query
+      const query = getPageParams(rawQuery)
+      const skillsQuery = SkillModel.query()
+      if (sort) {
+        sort.split(',').forEach(param => {
+          if (param.startsWith('-')) {
+            param = param.slice(1)
+            skillsQuery.orderBy(param, 'desc')
+            return
+          }
+          skillsQuery.orderBy(param, 'asc')
+        })
+      }
+
+      if (query?.page?.number && query?.page?.size) {
+        skillsQuery
+          .page(query.page.number, query.page.size)
+      }
+
+      if (query.filter) {
+        Object.keys(query.filter).forEach(key => {
+          skillsQuery.where(key, 'like', `%${query.filter[key]}%`)
+        })
+      }
+
+      const skills = await skillsQuery
+      const serialized = Serializer.serialize('skills', skills.results ? skills.results : skills, { count: skills.total })
       reply.send(serialized)
     }
   },

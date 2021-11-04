@@ -1,5 +1,14 @@
+const _set = require('lodash/set')
 const getIncludeStr = (q) => {
   return '[' + (q?.include || '') + ']'
+}
+
+const getPageParams = (query) => {
+  const output = {}
+  for (const param in query) {
+    _set(output, param, query[param])
+  }
+  return output
 }
 
 function createUUID () {
@@ -14,5 +23,6 @@ function createUUID () {
 
 module.exports = {
   getIncludeStr,
-  createUUID
+  createUUID,
+  getPageParams
 }

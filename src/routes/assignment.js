@@ -7,7 +7,8 @@ module.exports = {
     url: '/assignments',
     method: 'GET',
     async handler (request, reply) {
-      const data = await Assignment.query()
+      const includeStr = getIncludeStr(request.query)
+      const data = await Assignment.query().withGraphFetched(includeStr)
       const result = Serializer.serialize('assignments', data, {
         count: data.length
       })
@@ -41,13 +42,12 @@ module.exports = {
     url: '/assignments/:id',
     method: 'PATCH',
     async handler (request, reply) {
-      // if (request.body.data.type !== 'assignments') return reply.code(400).send('data.type is required')
-
       const data = await Assignment.query().patchAndFetchById(
         request.params.id,
         request.body
       )
       const result = Serializer.serialize('assignments', data)
+      reply.code(data ? 200 : 404)
       reply.send(result)
     }
   },
@@ -55,9 +55,9 @@ module.exports = {
     url: '/assignments/:id',
     method: 'DELETE',
     async handler (request, reply) {
-      await Assignment.query().deleteById(request.params.id)
+      const wasRecordRemoved = await Assignment.query().deleteById(request.params.id)
       const result = Serializer.serialize('assignments', {})
-      reply.code(204)
+      reply.code(wasRecordRemoved ? 204 : 404)
       reply.send(result)
     }
   }

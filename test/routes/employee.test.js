@@ -1,5 +1,6 @@
 const Employee = require('../../src/models/employee')
 const BASE_URL = '/employees'
+const { createUUID } = require('../../src/utils')
 
 let employeeIdsToCleanup = []
 
@@ -143,13 +144,3 @@ test('should return 404 for getting non existing employees', async () => {
 })
 
 // TODO: delete non-existant entity should throw a 404 not found
-
-function createUUID () {
-  let dt = new Date().getTime()
-  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = (dt + Math.random() * 16) % 16 | 0
-    dt = Math.floor(dt / 16)
-    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16)
-  })
-  return uuid
-}

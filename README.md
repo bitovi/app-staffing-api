@@ -13,3 +13,7 @@ docker compose up --build
 ```sh
 docker compose exec api bash
 ```
+
+## Testing
+
+The migrations need to run before you'll be able to debug the tests. Run `npm test` and all of your dreams will come true.

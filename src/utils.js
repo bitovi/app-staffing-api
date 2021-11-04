@@ -2,6 +2,14 @@ const getIncludeStr = (q) => {
   return '[' + (q?.include || '') + ']'
 }
 
+const getPage = (query, config) => {
+  const DEFAULT_PAGE_SIZE = 100
+  const DEFAULT_PAGE_OFFSET = 0
+  const limit = ~~(query?.limit || config?.limit || DEFAULT_PAGE_SIZE)
+  const offset = ~~(query?.offset || config?.offset || DEFAULT_PAGE_OFFSET)
+  return { limit, offset }
+}
+
 function createUUID () {
   let dt = new Date().getTime()
   const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -14,5 +22,6 @@ function createUUID () {
 
 module.exports = {
   getIncludeStr,
+  getPage,
   createUUID
 }

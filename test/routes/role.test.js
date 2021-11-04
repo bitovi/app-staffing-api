@@ -89,6 +89,21 @@ describe('Role Component Tests', () => {
       expect(result.data.length.toString()).toEqual(roleCount[0].count)
     })
 
+    it('list should paginate records', async () => {
+      await createRoleHelper()
+      const response = await global.app.inject({
+        url: URL,
+        method: 'GET',
+        query: { limit: 1, offset: 0 },
+      })
+
+      expect(response.statusCode).toEqual(200)
+
+      const result = JSON.parse(response.body)
+
+      expect(result.data.length).toEqual(1)
+    })
+
     it('get should find record', async () => {
       await createRoleHelper()
       const testRole = (await Role.query())[0]

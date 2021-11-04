@@ -231,11 +231,9 @@ describe('Role Component Tests', () => {
         }
       })
 
-      expect(response.statusCode).toEqual(200)
-
-      const result = JSON.parse(response.body)
-
-      expect(result.data.attributes.start_confidence).toEqual(newStartConf)
+      expect(response.statusCode).toEqual(204)
+      const result = await Role.query().findById(testRole.id)
+      expect(result.start_confidence).toEqual(newStartConf)
     })
 
     it('should update fields with related', async () => {
@@ -273,11 +271,9 @@ describe('Role Component Tests', () => {
         }
       })
 
-      expect(response.statusCode).toEqual(200)
-
-      const result = JSON.parse(response.body)
-
-      expect(result.data.relationships).toHaveProperty('skills')
+      expect(response.statusCode).toEqual(204)
+      const result = await Role.query().findById(createdRole.id).withGraphFetched('skills')
+      expect(result).toHaveProperty('skills')
     })
 
     it('should return 404 when record not found', async () => {

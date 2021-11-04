@@ -182,6 +182,7 @@ describe('Assignment Component Tests', () => {
       const data = {
         data: {
           type: 'assignments',
+          id: testRecord.id,
           attributes: { start_date }
         }
       }
@@ -196,24 +197,23 @@ describe('Assignment Component Tests', () => {
         }
       })
 
-      expect(response.statusCode).toEqual(200)
-
-      const result = JSON.parse(response.body)
-
-      expect(result.data.attributes.start_date).toEqual(start_date)
+      expect(response.statusCode).toEqual(204)
+      const result = await Assignment.query().findById(testRecord.id)
+      expect(result.start_date.toISOString()).toEqual(start_date)
     })
 
     it('should return 404 when record not found', async () => {
       const start_date = '2000-06-30T09:39:13.985Z'
+      const fakeId = '21993255-c4cd-4e02-bc29-51ea62c62cfc'
       const role = {
         data: {
           type: 'roles',
+          id: fakeId,
           attributes: {
             start_date
           }
         }
       }
-      const fakeId = '21993255-c4cd-4e02-bc29-51ea62c62cfc'
 
       const response = await global.app.inject({
         url: `${URL}/${fakeId}`,

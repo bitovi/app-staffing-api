@@ -42,13 +42,14 @@ module.exports = {
     url: '/assignments/:id',
     method: 'PATCH',
     async handler (request, reply) {
-      const data = await Assignment.query().patchAndFetchById(
-        request.params.id,
-        request.body
-      )
-      const result = Serializer.serialize('assignments', data)
-      reply.code(data ? 200 : 404)
-      reply.send(result)
+      const data = await Assignment.query().upsertGraphAndFetch(request.body,
+        {
+          update: false,
+          relate: true,
+          unrelate: true
+        })
+      reply.code(data ? 204 : 404)
+      reply.send()
     }
   },
   delete: {

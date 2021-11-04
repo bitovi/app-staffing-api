@@ -48,13 +48,14 @@ const routes = {
     url: '/roles/:id',
     handler: async function (request, reply) {
       try {
-        const intermediate = { ...request.body, ...(request.body.skills && { skills: request.body.skills.map(id => ({ id })) }) }
-        const role = await RolesModel.query().upsertGraph(intermediate, {
-          update: false, insertMissing: true, relate: true
-        })
-
-        const data = Serializer.serialize('roles', role.toJSON())
-        reply.send(data)
+        const data = await RolesModel.query().upsertGraphAndFetch(request.body,
+          {
+            update: false,
+            relate: true,
+            unrelate: true
+          })
+        reply.code(data ? 204 : 404)
+        reply.send()
       } catch (e) {
         reply.status(404).send()
       }

@@ -51,8 +51,14 @@ const routes = {
     method: 'PATCH',
     url: '/projects/:id',
     handler: async function (request, reply) {
-      await ProjectModel.query().upsertGraph(request.body, { insertMissing: true, update: false })
-      return reply.send()
+      const data = await ProjectModel.query().upsertGraphAndFetch(request.body,
+        {
+          update: false,
+          relate: true,
+          unrelate: true
+        })
+      reply.code(data ? 204 : 404)
+      reply.send()
     }
   },
   delete: {

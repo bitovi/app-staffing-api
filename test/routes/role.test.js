@@ -237,6 +237,52 @@ describe('Role Component Tests', () => {
       expect(result.data.attributes.start_confidence).toEqual(newStartConf)
     })
 
+
+    //jk
+    it('should update fields with related', async () => {
+      const createdRole = await createRoleHelper()
+      const createdSkill = await createSkillHelper()
+
+      const oData = {
+        data: {
+          type: 'roles',
+          id: createdRole.id,
+          attributes: {
+            start_confidence: 1,
+            end_confidence: 2
+          },
+          relationships: {
+            skills: {
+              data: [
+                {
+                  type: 'skills',
+                  id: createdSkill.id
+                }
+              ]
+            }
+          }
+        }
+      }
+
+      const response = await global.app.inject({
+        url: `${URL}/${oData.data.id}`,
+        body: JSON.stringify(oData),
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/vnd.api+json',
+          Accept: 'application/vnd.api+json'
+        }
+      })
+
+      expect(response.statusCode).toEqual(200)
+
+      const result = JSON.parse(response.body)
+
+      expect(result.data.relationships).toHaveProperty('skills')
+      //@TODO check for skill id
+    })
+
+    //jkend
     it('should return 404 when record not found', async () => {
       const role = {
         data: {
@@ -306,6 +352,15 @@ const createRoleHelper = async () => {
   roleIdsToDelete.push(createdRole.id)
 
   return createdRole
+}
+
+const createSkillHelper = async () => {
+  const createdSkill = await Skill.query().insert({
+    name: 'my-test-skill.js'
+  })
+  skillIdsToDelete.push(createdSkill.id)
+
+  return createdSkill
 }
 
 const createRoleWithRelationsHelper = async () => {

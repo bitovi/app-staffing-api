@@ -184,7 +184,6 @@ describe('Role Component Tests', () => {
       expect(response.statusCode).toEqual(404)
     })
 
-    // @TODO: This test doesnt work yet
     it('get should find record with relationship with sub relationship', async () => {
       const testRole = await createRoleWithRelationsHelper()
 
@@ -201,7 +200,9 @@ describe('Role Component Tests', () => {
       expect(result.data.relationships).toBeTruthy()
       expect(result.data.id).toEqual(testRole.id)
       expect(result.data.relationships).toHaveProperty('employees')
-      expect(result.included.filter(el => el.type === 'skills').length).toBe(1)
+      expect(result.included.filter(el => el.type === 'employees').length).toBeTruthy()
+      expect(result.included.filter(el => el.type === 'employees')[0].relationships).toBeTruthy()
+      expect(result.included.filter(el => el.type === 'employees')[0].relationships).toHaveProperty('skills')
     })
   })
 

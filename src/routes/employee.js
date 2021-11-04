@@ -7,7 +7,8 @@ module.exports = {
     url: '/employees',
     method: 'GET',
     async handler (request, reply) {
-      const data = await Employee.query()
+      const includeStr = getIncludeStr(request.query)
+      const data = await Employee.query().withGraphFetched(includeStr)
       const result = Serializer.serialize('employees', data, {
         count: data.length
       })
@@ -19,7 +20,9 @@ module.exports = {
     method: 'GET',
     async handler (request, reply) {
       const includeStr = getIncludeStr(request.query)
-      const data = await Employee.query().findById(request.params.id).withGraphFetched(includeStr)
+      const data = await Employee.query()
+        .findById(request.params.id)
+        .withGraphFetched(includeStr)
       if (!data) {
         return reply.code(404).send()
       }
@@ -31,7 +34,7 @@ module.exports = {
     url: '/employees',
     method: 'POST',
     async handler (request, reply) {
-      const data = await Employee.query().insertAndFetch(request.body)
+      const data = await Employee.query().upsertGraphAndFetch(request.body, { relate: true })
       const result = Serializer.serialize('employees', data)
       reply.code(201).send(result)
     }
@@ -40,14 +43,15 @@ module.exports = {
     url: '/employees/:id',
     method: 'PATCH',
     async handler (request, reply) {
-      // if (request.body.data.type !== 'employees') return reply.code(400).send('data.type is required')
+      await Employee.query().upsertGraph(
+        request.body,
+        {
+          update: false,
+          relate: true,
+          unrelate: true
+        })
 
-      const data = await Employee.query().patchAndFetchById(
-        request.params.id,
-        request.body
-      )
-      const result = Serializer.serialize('employees', data)
-      reply.send(result)
+      reply.status(204).send()
     }
   },
   delete: {

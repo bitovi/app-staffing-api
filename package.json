@@ -13,6 +13,11 @@
     "test": "jest test/",
     "test:watch": "jest --watch test/"
   },
+  "standard": {
+    "env": [
+      "jest"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bitovi/app-staffing-api.git"

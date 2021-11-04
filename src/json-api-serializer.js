@@ -50,10 +50,3 @@ Serializer.register('assignments', {
     roles: { type: 'roles' }
   }
 })
-
-Serializer.register('employee', 'employeeRelation', {
-  id: 'id',
-  skills: {
-
-  }
-})

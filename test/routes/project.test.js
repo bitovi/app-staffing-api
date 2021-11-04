@@ -275,7 +275,7 @@ describe('PATCH', () => {
       }
     })
 
-    expect(response.statusCode).toBe(200)
+    expect(response.statusCode).toBe(204)
 
     const updatedRow = await Project.query().findById(project.id)
     expect(updatedRow).toEqual(expect.objectContaining(body.data.attributes))
@@ -311,10 +311,8 @@ describe('PATCH', () => {
       }
     })
 
-    expect(response.statusCode).toBe(200)
-
+    expect(response.statusCode).toBe(204)
     const updatedRow = await Project.query().findById(project.id)
-
     expect(updatedRow).toEqual(expect.objectContaining(body.data.attributes))
   })
 
@@ -325,6 +323,11 @@ describe('PATCH', () => {
       start_date: new Date().toISOString()
     }
     await Project.query().insert(project)
+
+    await Role.query().insert({
+      id: '2579ed35-f963-4d21-a460-af64269e901b',
+      project_id: project.id
+    })
 
     projectIds.push(project.id)
 
@@ -399,7 +402,7 @@ describe('PATCH', () => {
       }
     })
 
-    expect(response.statusCode).toBe(200)
+    expect(response.statusCode).toBe(204)
 
     const updatedRow = await Project.query().findById(project.id)
     const linkedRole = await Role.query().findById('2579ed35-f963-4d21-a460-af64269e901b')

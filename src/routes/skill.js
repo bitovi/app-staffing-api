@@ -33,10 +33,15 @@ const routes = {
     method: 'PATCH',
     url: '/skills/:id',
     handler: async (request, reply) => {
-      const skill = await SkillModel
-        .query().patchAndFetchById(request.params.id, request.body)
-      const serialized = Serializer.serialize('skills', skill)
-      reply.send(serialized)
+      const data = await SkillModel
+        .query().upsertGraphAndFetch(request.body,
+          {
+            update: false,
+            relate: true,
+            unrelate: true
+          })
+      reply.code(data ? 204 : 404)
+      reply.send()
     },
     schema: SkillModel.jsonSchemaPatch
   },

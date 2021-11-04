@@ -79,16 +79,17 @@ describe('skills', () => {
       payload: JSON.stringify({
         data: {
           type: 'skills',
+          id: skill.id,
           attributes: {
             name: 'React'
           }
         }
       })
     })
-    const json = JSON.parse(resp.body)
-    expect(json.data).toBeTruthy()
-    expect(json.data.id).toEqual(skill.id)
-    expect(json.data.attributes.name).toEqual('React')
+    expect(resp.statusCode).toEqual(204)
+    const json = await SkillModel.query().findById(skill.id)
+    expect(json.id).toEqual(skill.id)
+    expect(json.name).toEqual('React')
   })
 
   test('DELETE /skills/:id', async () => {

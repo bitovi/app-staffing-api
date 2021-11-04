@@ -43,7 +43,7 @@ module.exports = {
     url: '/employees/:id',
     method: 'PATCH',
     async handler (request, reply) {
-      await Employee.query().upsertGraph(
+      const data = await Employee.query().upsertGraphAndFetch(
         request.body,
         {
           update: false,
@@ -51,7 +51,8 @@ module.exports = {
           unrelate: true
         })
 
-      reply.status(204).send()
+      reply.code(data ? 204 : 404)
+      reply.send()
     }
   },
   delete: {

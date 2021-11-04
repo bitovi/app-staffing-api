@@ -1,6 +1,6 @@
 const { Serializer } = require('../json-api-serializer')
 const ProjectModel = require('../models/project')
-const { getIncludeStr, runQueryOn } = require('../utils')
+const { getIncludeStr } = require('../utils')
 
 const routes = {
   create: {
@@ -11,6 +11,7 @@ const routes = {
     },
     handler: async function (request, reply) {
       const { body, url } = request
+
       if (body.id) {
         return reply.send().status(403)
       }
@@ -25,7 +26,8 @@ const routes = {
     method: 'GET',
     url: '/projects',
     handler: async function (request, reply) {
-      const projects = await runQueryOn(ProjectModel, request.query);
+      const includeStr = getIncludeStr(request.query)
+      const projects = await ProjectModel.query().withGraphFetched(includeStr)
       const data = Serializer.serialize('projects', projects.map(project => project.toJSON()))
       return reply.send(data)
     }

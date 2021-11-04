@@ -105,7 +105,88 @@ describe('Role Component Tests', () => {
 
       expect(result.data.length.toString()).toEqual(roleCount[0].count)
     })
+    
+    it('paginates by limit', async () => {
+      await createRoleHelper()
+      const response = await global.app.inject({
+        url: `${URL}?page[limit]=1&page[offset]=0`,
+        method: 'GET',
+      })
+      expect(response.statusCode).toEqual(200)
+      const result = JSON.parse(response.body)
+      expect(result.data.length).toEqual(1)
+    })
 
+    it('paginates by offset', async () => {
+      await createRoleHelper()
+      const response = await global.app.inject({
+        url: `${URL}?page[limit]=100&page[offset]=1000000`,
+        method: 'GET',
+      })
+      expect(response.statusCode).toEqual(200)
+      const result = JSON.parse(response.body)
+      expect(result.data.length).toEqual(0)
+    })
+
+    it('orderBy start_date', async () => {
+      const r1 = await createRoleHelper()
+      const r2 = await createRoleHelper()
+      const response = await global.app.inject({
+        url: URL,
+        method: 'GET',
+        query: { orderBy: 'start_date' },
+      })
+      expect(response.statusCode).toEqual(200)
+      const result = JSON.parse(response.body)
+      const date1 = Date.parse(result?.data[1].attributes?.start_date)
+      const date2 = Date.parse(result?.data[0].attributes?.start_date)
+      expect(date1).toBeGreaterThan(date2)
+    })
+
+    it('orderBy start_date DESC', async () => {
+      await createRoleHelper()
+      await createRoleHelper()
+      const response = await global.app.inject({
+        url: URL,
+        method: 'GET',
+        query: { orderBy: '-start_date' },
+      })
+      expect(response.statusCode).toEqual(200)
+      const result = JSON.parse(response.body)
+
+      const d1 = result?.data[0]?.attributes?.start_date
+      const d2 = result?.data[1]?.attributes?.start_date
+
+      console.log(d1,"|",d2)
+
+      const date1 = Date.parse(d1)
+      const date2 = Date.parse(d2)
+      expect(date1).toBeGreaterThan(date2)
+    })
+
+    it('filters by start_confidence', async () => {
+      await createRoleHelper({start_confidence:1})
+      await createRoleHelper({start_confidence:3})
+      const response = await global.app.inject({
+        url: `${URL}?filter[start_confidence]=3`,
+        method: 'GET',
+      })
+      expect(response.statusCode).toEqual(200)
+      const result = JSON.parse(response.body)
+      expect(result.data.length).toBeGreaterThan(0)
+      for (d in result.data) {
+        expect(result.data[d].attributes.start_confidence).toEqual(3)
+      }
+    })
+
+    it('explode and 500 if duplicate filter keys', async () => {
+      const response = await global.app.inject({
+        url: `${URL}?filter[start_confidence]=1&filter[start_confidence]=2`,
+        method: 'GET',
+      })
+      expect(response.statusCode).toEqual(500)
+    })
+    
     it('get should find record', async () => {
       await createRoleHelper()
       const testRole = (await Role.query())[0]

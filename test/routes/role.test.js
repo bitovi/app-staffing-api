@@ -375,7 +375,7 @@ const createRoleWithRelationsHelper = async () => {
     name: 'my-test-skill.js'
   })
 
-  const employeeSkill = await knex('employee__skill').insert({
+  await knex('employee__skill').insert({
     employee_id: createdEmployee.id,
     skill_id: createdSkill.id
   })
@@ -394,7 +394,7 @@ const createRoleWithRelationsHelper = async () => {
     end_confidence: 5
   })
 
-  const roleSkill = await knex('role__skill').insert({
+  await knex('role__skill').insert({
     role_id: createdRole.id,
     skill_id: createdSkill.id
   })

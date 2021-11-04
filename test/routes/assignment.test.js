@@ -7,9 +7,7 @@ const Assignment = require('../../src/models/assignment')
 const faker = require('faker')
 const { fakeRole } = require('../../db/seeds/dev-seed')
 
-const config = require('../../src/config')
-
-const URL = `http://localhost:${config.get('APP_PORT')}/assignments`
+const URL = 'assignments'
 
 const idsToDelete = []
 let project

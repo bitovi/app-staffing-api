@@ -12,7 +12,18 @@ function createUUID () {
   return uuid
 }
 
+const getSortOrder = (orderBy) => {
+  let sortOrder = "asc"
+  let sortField = orderBy
+  if( orderBy && orderBy[0] === "-" ) {
+    sortField = orderBy.substring(1);
+    sortOrder = "desc"
+  }
+  return { sortField, sortOrder };
+}
+
 module.exports = {
   getIncludeStr,
+  getSortOrder,
   createUUID
 }

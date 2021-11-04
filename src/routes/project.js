@@ -13,7 +13,7 @@ const routes = {
       const { body, url } = request
 
       if (body.id) {
-        reply.send().status(403)
+        return reply.send().status(403)
       }
 
       const newProject = await ProjectModel.query().insert(body)

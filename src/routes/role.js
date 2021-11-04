@@ -11,8 +11,6 @@ const routes = {
     },
     handler: async function (request, reply) {
       const { body, url } = request
-      // @TODO This function needs to support relationship creates
-      // https://vincit.github.io/objection.js/api/query-builder/mutate-methods.html#updateAndFetch
       const newRole = await RolesModel.query().insert(body)
       const data = Serializer.serialize('roles', newRole)
       const location = `${url}/${newRole.id}`
@@ -49,16 +47,12 @@ const routes = {
     method: 'PATCH',
     url: '/roles/:id',
     handler: async function (request, reply) {
-      const id = request.params.id
-      // @TODO This function needs to support relationship inserts
-      // https://vincit.github.io/objection.js/api/query-builder/mutate-methods.html#updateandfetchbyid
-      // const includeStr = getIncludeStr(request.query)
-      const { body } = request
       try {
-        // const role = await RolesModel.query().patchAndFetchById(id, body)
-        const role = await RolesModel.query().upsertGraph(body, {
-          update: false, insertMissing: true
+        const intermediate = { ...request.body, ...(request.body.skills && { skills: request.body.skills.map(id => ({ id })) }) }
+        const role = await RolesModel.query().upsertGraph(intermediate, {
+          update: false, insertMissing: true, relate: true
         })
+
         const data = Serializer.serialize('roles', role.toJSON())
         reply.send(data)
       } catch (e) {

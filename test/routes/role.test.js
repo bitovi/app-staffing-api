@@ -214,6 +214,7 @@ describe('Role Component Tests', () => {
       const role = {
         data: {
           type: 'roles',
+          id: testRole.id,
           attributes: {
             start_confidence: newStartConf
           }
@@ -237,8 +238,6 @@ describe('Role Component Tests', () => {
       expect(result.data.attributes.start_confidence).toEqual(newStartConf)
     })
 
-
-    //jk
     it('should update fields with related', async () => {
       const createdRole = await createRoleHelper()
       const createdSkill = await createSkillHelper()
@@ -279,10 +278,8 @@ describe('Role Component Tests', () => {
       const result = JSON.parse(response.body)
 
       expect(result.data.relationships).toHaveProperty('skills')
-      //@TODO check for skill id
     })
 
-    //jkend
     it('should return 404 when record not found', async () => {
       const role = {
         data: {
@@ -408,11 +405,6 @@ const createRoleWithRelationsHelper = async () => {
     start_date: '2022-03-01',
     end_date: '2022-03-01'
   })
-
-  console.log('employeeSkill', employeeSkill)
-  console.log('roleSkill', roleSkill)
-  console.log('createdAssignment', createdAssignment)
-  console.log('createdProject', createdProject)
 
   roleIdsToDelete.push(createdRole.id)
   employeeIdsToDelete.push(createdEmployee.id)

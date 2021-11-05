@@ -1,5 +1,6 @@
 const SkillModel = require('../models/skill')
 const { Serializer } = require('../json-api-serializer')
+const { getListHandler } = require('../utils/jsonapi-objection-handler')
 
 const routes = {
   list: {
@@ -14,20 +15,12 @@ const routes = {
   get: {
     method: 'GET',
     url: '/skills/:id',
-    handler: async (request, reply) => {
-      const skill = await SkillModel
-        .query().findById(request.params.id)
-      const serialized = Serializer.serialize('skills', skill)
-      reply.send(serialized)
-    }
+    handler: getListHandler(SkillModel)
   },
   delete: {
     method: 'DELETE',
     url: '/skills/:id',
-    handler: async (request, reply) => {
-      await SkillModel.query().deleteById(request.params.id)
-      reply.code(204).send()
-    }
+    handler: getListHandler(SkillModel)
   },
   update: {
     method: 'PATCH',

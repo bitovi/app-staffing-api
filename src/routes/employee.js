@@ -1,34 +1,17 @@
 const Employee = require('../models/employee')
 const { Serializer } = require('../json-api-serializer')
-const { getIncludeStr } = require('../utils')
+const { getListHandler } = require('../utils/jsonapi-objection-handler')
 
 module.exports = {
   list: {
     url: '/employees',
     method: 'GET',
-    async handler (request, reply) {
-      const includeStr = getIncludeStr(request.query)
-      const data = await Employee.query().withGraphFetched(includeStr)
-      const result = Serializer.serialize('employees', data, {
-        count: data.length
-      })
-      reply.send(result)
-    }
+    handler: getListHandler(Employee)
   },
   get: {
     url: '/employees/:id',
     method: 'GET',
-    async handler (request, reply) {
-      const includeStr = getIncludeStr(request.query)
-      const data = await Employee.query()
-        .findById(request.params.id)
-        .withGraphFetched(includeStr)
-      if (!data) {
-        return reply.code(404).send()
-      }
-      const result = Serializer.serialize('employees', data)
-      reply.send(result)
-    }
+    handler: getListHandler(Employee)
   },
   post: {
     url: '/employees',

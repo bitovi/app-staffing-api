@@ -1,6 +1,6 @@
 const RolesModel = require('../models/role')
 const { Serializer } = require('../json-api-serializer')
-const { getIncludeStr } = require('../utils')
+const { getListHandler } = require('../utils/jsonapi-objection-handler')
 
 const routes = {
   create: {
@@ -20,28 +20,12 @@ const routes = {
   list: {
     method: 'GET',
     url: '/roles',
-    handler: async function (request, reply) {
-      const includeStr = getIncludeStr(request.query)
-      const roles = await RolesModel.query().withGraphFetched(includeStr)
-      const data = Serializer.serialize('roles', roles.map(role => role.toJSON()))
-      reply.send(data)
-    }
+    handler: getListHandler(RolesModel)
   },
   get: {
     method: 'GET',
     url: '/roles/:id',
-    handler: async function (request, reply) {
-      const id = request.params.id
-      const includeStr = getIncludeStr(request.query)
-
-      try {
-        const role = await RolesModel.query().findById(id).withGraphFetched(includeStr)
-        const data = Serializer.serialize('roles', role.toJSON())
-        reply.send(data)
-      } catch (e) {
-        reply.status(404).send()
-      }
-    }
+    handler: getListHandler(RolesModel)
   },
   update: {
     method: 'PATCH',

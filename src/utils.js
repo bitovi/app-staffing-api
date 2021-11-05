@@ -46,7 +46,7 @@ const parseJsonApiParams = (query) => {
     const pageMatch = pageRegEx.exec(param)
     if (pageMatch) {
       if (pageMatch.length === 2) {
-        queryDatabase.page[pageMatch[1]] = query[param]
+        queryDatabase.page[pageMatch[1]] = parseInt(query[param], 10)
         return
       }
     }

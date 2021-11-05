@@ -9,6 +9,7 @@
     "lint:fix": "eslint . --fix",
     "seed": "knex seed:run --knexfile src/knexfile.js",
     "start": "node src/app.js",
+    "serve": "node build/app.js",
     "pretest": "npm run migrate",
     "test": "jest test/",
     "test:watch": "jest --watch test/",

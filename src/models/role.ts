@@ -1,6 +1,13 @@
-const { Model } = require('objection')
+import { Model } from 'objection'
 
 class Role extends Model {
+  id: string;
+  start_date: string;
+  start_confidence: number;
+  end_date: string;
+  end_confidence: number;
+  project_id: string;
+
   static get tableName () {
     return 'role'
   }
@@ -75,4 +82,4 @@ class Role extends Model {
   }
 }
 
-module.exports = Role
+export default Role

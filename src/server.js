@@ -43,7 +43,7 @@ const build = () => {
     reply.send({ hello: 'world' })
   })
 
-  registerService(require('./routes/role.js'))
+  registerService(require('./routes/role.js').default)
   registerService(require('./routes/skill.js'))
   registerService(require('./routes/project.js'))
   registerService(require('./routes/employee.js'))

@@ -1,6 +1,8 @@
 const { Serializer } = require('../json-api-serializer')
 const { getIncludeStr, parseJsonApiParams } = require('../utils')
 
+const normalizeColumn = (tableName, column) => column.includes('.') ? column : `${tableName}.${column}`
+
 const getListHandler = (Model) => {
   return async (request, reply) => {
     const includeStr = getIncludeStr(request.query)
@@ -12,16 +14,15 @@ const getListHandler = (Model) => {
       queryBuilder.findById(request.params.id)
     }
     debugger
-    queryBuilder.withGraphFetched(includeStr)
+    queryBuilder.withGraphJoined(includeStr)
     queryBuilder.skipUndefined()
+
     if (parsedParams.filter.length) {
-      // if (includeStr.length) {
-      //   parsedParams.filter.forEach((filter) => {
-      //     queryBuilder.andWhere(filter.key, 'like', `%${filter.value}%`)
-      //   })
-      // }
       parsedParams.filter.forEach((filter) => {
-        queryBuilder.andWhere(filter.key, 'iLike', `%${filter.value}%`)
+        const isInt = !isNaN(parseInt(filter.value))
+        const isDate = !isNaN(Date.parse(filter.value))
+        const isEqual = isInt || isDate
+        queryBuilder.where(normalizeColumn(Model.tableName, filter.key), isEqual ? '=' : 'ilike', `%${filter.value}%`)
       })
     }
 
@@ -41,10 +42,16 @@ const getListHandler = (Model) => {
     // execute the builder after finish chaining
     queryBuilder.debug()
     const data = await queryBuilder.execute()
+
+    if (!data) {
+      return reply.code(404).send()
+    }
+
     const result = Serializer.serialize(`${Model.tableName}s`, data, {
-      count: data.length
+      count: data?.total || 0
     })
     reply.send(result)
   }
 }
+
 module.exports = { getListHandler }

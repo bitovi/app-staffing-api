@@ -1,5 +1,5 @@
 
-const { JsonApiQueryParser } = require('../../src/utils')
+const { parseJsonApiParams } = require('../../src/utils')
 
 describe('json api query parser', () => {
   // TODO: implement fields parsing (url query param)
@@ -32,6 +32,6 @@ describe('json api query parser', () => {
   ]
 
   test.concurrent.each(testcases)('.parsequery($title)', ({ querystring, expected }) => {
-    expect(JsonApiQueryParser(querystring)).toMatchObject(JSON.parse(expected))
+    expect(parseJsonApiParams(querystring)).toMatchObject(JSON.parse(expected))
   })
 })

@@ -1,33 +1,17 @@
 const Assignment = require('../models/assignment')
 const { Serializer } = require('../json-api-serializer')
-const { getIncludeStr } = require('../utils')
+const { getListHandler } = require('../utils/jsonapi-objection-handler')
 
 module.exports = {
   list: {
     url: '/assignments',
     method: 'GET',
-    async handler (request, reply) {
-      const includeStr = getIncludeStr(request.query)
-      const data = await Assignment.query().withGraphFetched(includeStr)
-      const result = Serializer.serialize('assignments', data, {
-        count: data.length
-      })
-      reply.send(result)
-    }
+    handler: getListHandler(Assignment)
   },
   get: {
     url: '/assignments/:id',
     method: 'GET',
-    async handler (request, reply) {
-      const includeStr = getIncludeStr(request.query)
-      const data = await Assignment.query().findById(request.params.id).withGraphFetched(includeStr)
-      if (!data) {
-        return reply.code(404).send()
-      }
-
-      const result = Serializer.serialize('assignments', data)
-      reply.send(result)
-    }
+    handler: getListHandler(Assignment)
   },
   post: {
     url: '/assignments',

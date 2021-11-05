@@ -57,7 +57,7 @@ Serverside Code Example:
 const { OAuth2Client } = require("google-auth-library");
 fastify.register(require("fastify-auth"));
 
-const GoogleAuthClientId = 'CLIENT_ID'
+const GoogleAuthClientId = "CLIENT_ID";
 
 fastify.decorate("asyncValidateGoogleAuth", async function (request, reply) {
   const { authorization } = request.headers;
@@ -92,4 +92,71 @@ fastify.after(() => {
     fastify.auth([fastify.asyncValidateGoogleAuth])
   );
 });
+```
+
+Clientside React Hook for Google Auth:
+
+```js
+import { useEffect, useState } from "react";
+
+const useGoogleAuth = (gapi) => {
+  if (!gapi) {
+    gapi = window.gapi;
+  }
+
+  const [GoogleAuth, setGoogleAuth] = useState(null);
+  const [GoogleUser, setGoogleUser] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const googleSigninElements = document.getElementsByName(
+      "google-signin-client_id"
+    );
+    if (googleSigninElements.length !== 1) {
+      throw new Error("Invalid Client Id Setup");
+    }
+
+    const client_id = googleSigninElements[0].content;
+
+    gapi.load("auth2", () => {
+      gapi.auth2
+        .init({ client_id: client_id })
+        .then((ga) => {
+          setGoogleAuth(ga);
+        })
+        .catch((err) => {
+          setError(err);
+        });
+    });
+  });
+
+  function signOut() {
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(() => {
+      setGoogleUser(null);
+    });
+  }
+
+  function signIn() {
+    GoogleAuth.signIn({ prompt: "none" })
+      .then((GoogleUser) => {
+        setGoogleUser(GoogleUser);
+      })
+      .catch((err) => {
+        setError(err);
+      });
+  }
+
+  const authResponse = GoogleUser ? GoogleUser.getAuthResponse() : GoogleUser;
+
+  return {
+    signIn,
+    signOut,
+    authResponse,
+    token: authResponse?.id_token,
+    error,
+  };
+};
+
+export default useGoogleAuth;
 ```

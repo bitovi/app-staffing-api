@@ -5,6 +5,8 @@ const { OAuth2Client } = require('google-auth-library')
 const { Serializer } = require('./json-api-serializer')
 const knexfile = require('./knexfile')
 
+const GoogleAuthClientId = '587564559875-48vd2efg2vd4ligphjkuvhcs4fsf0ek9.apps.googleusercontent.com'
+
 const build = () => {
   const knex = Knex(knexfile)
   Model.knex(knex)
@@ -31,12 +33,12 @@ const build = () => {
     }
 
     const tokenId = authorization.replace('Bearer ', '')
-    const client = new OAuth2Client('587564559875-lrm494adb9kq14ptu7mevspc6f08mom6.apps.googleusercontent.com')
+    const client = new OAuth2Client(GoogleAuthClientId)
 
     try {
       const ticket = await client.verifyIdToken({
         idToken: tokenId,
-        audience: '587564559875-lrm494adb9kq14ptu7mevspc6f08mom6.apps.googleusercontent.com'
+        audience: GoogleAuthClientId
       })
       const payload = ticket.getPayload()
       request.state.user = payload

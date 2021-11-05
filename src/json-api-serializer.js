@@ -3,6 +3,22 @@ const Serializer = new JSONAPISerializer()
 
 exports.Serializer = Serializer
 
+const topLevelLinksfn = ({ page, pageSize, count }) => {
+  page = parseInt(page)
+  const lastPage = (Math.round(count / pageSize) - 1)
+  const hasPages = page < lastPage
+  const isLastPage = page === lastPage
+  const isFirstPage = page === 0
+  const hasNextPage = count > pageSize && !isLastPage
+
+  return {
+    first: !isFirstPage ? `/employees?page[number]=0&page[size]=${pageSize}` : null,
+    last: hasNextPage && !isFirstPage ? `/employees?page[number]=${lastPage}&page[size]=${pageSize}` : null,
+    next: hasPages && hasNextPage ? `/employees?page[number]=${page + 1}&page[size]=${pageSize}` : null,
+    prev: !isFirstPage ? `/employees?page[number]=${page - 1}&page[size]=${pageSize}` : null
+  }
+}
+
 const deserialize = (data) => {
   if (data) {
     const { id } = data
@@ -16,7 +32,8 @@ Serializer.register('employees', {
   relationships: {
     roles: { type: 'roles', deserialize },
     skills: { type: 'skills', deserialize }
-  }
+  },
+  topLevelLinks: topLevelLinksfn
 })
 
 Serializer.register('roles', {
@@ -26,22 +43,25 @@ Serializer.register('roles', {
     projects: { type: 'projects', deserialize },
     skills: { type: 'skills', deserialize },
     employees: { type: 'employees', deserialize }
-  }
+  },
+  topLevelLinks: topLevelLinksfn
 })
 
-Serializer.register('skills', {
+Serializer.register('employees', {
   id: 'id',
   relationships: {
-    employees: { type: 'employees', deserialize },
-    roles: { type: 'roles', deserialize }
-  }
+    roles: { type: 'roles', deserialize },
+    skills: { type: 'skills', deserialize }
+  },
+  topLevelLinks: topLevelLinksfn
 })
 
 Serializer.register('projects', {
   id: 'id',
   relationships: {
     roles: { type: 'roles', deserialize }
-  }
+  },
+  topLevelLinks: topLevelLinksfn
 })
 
 Serializer.register('assignments', {
@@ -49,5 +69,6 @@ Serializer.register('assignments', {
   relationships: {
     employees: { type: 'employees', deserialize },
     roles: { type: 'roles', deserialize }
-  }
+  },
+  topLevelLinks: topLevelLinksfn
 })

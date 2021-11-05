@@ -22,7 +22,9 @@ const parseJsonApiParams = (query) => {
   const queryDatabase = {
     filter: [],
     page: {},
-    sort: []
+    sort: [],
+    include: [],
+    fields: []
   }
   params.forEach((param) => {
     const filterMatch = filterRegEx.exec(param)

@@ -1,4 +1,5 @@
 const { Serializer } = require('../json-api-serializer')
+const { query } = require('../models/project')
 const { getIncludeStr, parseJsonApiParams } = require('../utils')
 
 const normalizeColumn = (tableName, column) => column.includes('.') ? column : `${tableName}.${column}`
@@ -25,12 +26,10 @@ const getListHandler = (Model) => {
         queryBuilder.where(normalizeColumn(Model.tableName, filter.key), isEqual ? '=' : 'ilike', `%${filter.value}%`)
       })
     }
+    const { size = 100, number = 0 } = parsedParams?.page || {}
 
     if (parsedParams.page?.number > -1) {
-      const { size, number } = parsedParams.page
-      const offset = (size * number) - size
-      queryBuilder.offset(offset)
-      queryBuilder.limit(parsedParams.page.size)
+      queryBuilder.page(number, size)
     }
 
     if (parsedParams.sort.length) {
@@ -48,7 +47,9 @@ const getListHandler = (Model) => {
     }
 
     const result = Serializer.serialize(`${Model.tableName}s`, data, {
-      count: data?.total || 0
+      count: data?.total || 0,
+      pageSize: size,
+      page: number
     })
     reply.send(result)
   }

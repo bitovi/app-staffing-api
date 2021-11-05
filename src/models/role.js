@@ -9,21 +9,6 @@ class Role extends Model {
     return 'id'
   }
 
-  static get jsonSchema () {
-    return {
-      type: 'object',
-      required: ['project_id'],
-      properties: {
-        id: { type: 'string', format: 'uuid' },
-        start_date: { type: 'string' },
-        start_confidence: { type: 'integer' },
-        end_date: { type: 'string' },
-        end_confidence: { type: 'integer' },
-        project_id: { type: 'string' }
-      }
-    }
-  }
-
   static get relationMappings () {
     const Assignment = require('./assignment')
     const Project = require('./project')

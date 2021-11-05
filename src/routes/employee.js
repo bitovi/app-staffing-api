@@ -1,4 +1,6 @@
 const Employee = require('../models/employee')
+const schema = require('../schemas/employee')
+const queryStringSchema = require('../schemas/query-string')
 const { Serializer } = require('../json-api-serializer')
 const { getIncludeStr } = require('../utils')
 
@@ -13,6 +15,17 @@ module.exports = {
         count: data.length
       })
       reply.send(result)
+    },
+    schema: {
+      description: 'retrieve a list of employees',
+      tags: ['employee'],
+      summary: 'summary',
+      querystring: {
+        type: 'object',
+        properties: {
+          ...queryStringSchema.common
+        }
+      }
     }
   },
   get: {

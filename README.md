@@ -17,3 +17,7 @@ docker compose exec api bash
 ## Testing
 
 The migrations need to run before you'll be able to debug the tests. Run `npm test` and all of your dreams will come true.
+
+## Open the docs
+
+Once you have the app running, as noted above, you can read the documentation at `/docs`.

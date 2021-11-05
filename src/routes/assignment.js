@@ -1,4 +1,6 @@
 const Assignment = require('../models/assignment')
+const schema = require('../schemas/assignment')
+const queryStringSchema = require('../schemas/query-string')
 const { Serializer } = require('../json-api-serializer')
 const { getIncludeStr } = require('../utils')
 
@@ -13,6 +15,17 @@ module.exports = {
         count: data.length
       })
       reply.send(result)
+    },
+    schema: {
+      description: 'retrieve a list of assignments',
+      tags: ['assignment'],
+      summary: 'In addition to the filters',
+      querystring: {
+        type: 'object',
+        properties: {
+          ...queryStringSchema.common
+        }
+      }
     }
   },
   get: {
@@ -27,6 +40,32 @@ module.exports = {
 
       const result = Serializer.serialize('assignments', data)
       reply.send(result)
+    },
+    schema: {
+      description: 'app-staffing-api is so kuhl',
+      tags: ['assignment'],
+      summary: 'qwerty',
+      params: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'user id'
+          }
+        }
+      },
+      body: {
+        type: 'object',
+        properties: {
+          hello: { type: 'string' },
+          obj: {
+            type: 'object',
+            properties: {
+              some: { type: 'string' }
+            }
+          }
+        }
+      }
     }
   },
   post: {

@@ -54,7 +54,7 @@ const parseJsonApiParams = (query) => {
     const sortMatch = sortRegEx.exec(param)
     if (sortMatch) {
       const values = query[param]
-      values.forEach((value) => {
+      values.split(',').forEach((value) => {
         if (value.startsWith('-')) {
           queryDatabase.sort.push({
             name: value.substring(1),

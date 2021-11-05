@@ -4,6 +4,7 @@ const createError = require('http-errors')
 const { OAuth2Client } = require('google-auth-library')
 const { Serializer } = require('./json-api-serializer')
 const knexfile = require('./knexfile')
+const { default: fastify } = require('fastify')
 
 const GoogleAuthClientId = '587564559875-48vd2efg2vd4ligphjkuvhcs4fsf0ek9.apps.googleusercontent.com'
 
@@ -15,38 +16,48 @@ const build = () => {
     logger: true
   })
 
+  fastify.decorate('enableGoogleAuth', function () {
+    fastify.decorate('asyncValidateGoogleAuth', async function (request, reply) {
+      const { authorization } = request.headers
+
+      if (!authorization) {
+        throw createError(401)
+      }
+
+      if (!request.state) {
+        request.state = {}
+      }
+
+      const tokenId = authorization.replace('Bearer ', '')
+      const client = new OAuth2Client(GoogleAuthClientId)
+
+      try {
+        const ticket = await client.verifyIdToken({
+          idToken: tokenId,
+          audience: GoogleAuthClientId
+        })
+        const payload = ticket.getPayload()
+        request.state.user = payload
+      } catch (err) {
+        console.error(err)
+        throw createError(401)
+      }
+    })
+
+    fastify.after(() => {
+      fastify.addHook('preHandler', fastify.auth([
+        fastify.asyncValidateGoogleAuth
+      ]))
+    })
+
+    return fastify
+  })
+
   fastify.register(require('fastify-cors'), {
     origin: true
   })
 
   fastify.register(require('fastify-auth'))
-
-  fastify.decorate('asyncValidateGoogleAuth', async function (request, reply) {
-    const { authorization } = request.headers
-
-    if (!authorization) {
-      throw createError(401)
-    }
-
-    if (!request.state) {
-      request.state = {}
-    }
-
-    const tokenId = authorization.replace('Bearer ', '')
-    const client = new OAuth2Client(GoogleAuthClientId)
-
-    try {
-      const ticket = await client.verifyIdToken({
-        idToken: tokenId,
-        audience: GoogleAuthClientId
-      })
-      const payload = ticket.getPayload()
-      request.state.user = payload
-    } catch (err) {
-      console.error(err)
-      throw createError(401)
-    }
-  })
 
   // Custom Content-Type parser for JSON-API spec
   fastify.addContentTypeParser('application/vnd.api+json', { parseAs: 'string' }, (request, payload, done) => {
@@ -73,12 +84,6 @@ const build = () => {
   fastify.addHook('onClose', async (server, done) => {
     await knex.destroy()
     done()
-  })
-
-  fastify.after(() => {
-    fastify.addHook('preHandler', fastify.auth([
-      fastify.asyncValidateGoogleAuth
-    ]))
   })
 
   const registerService = (def) => Object.values(def).forEach(route => fastify.route(route))

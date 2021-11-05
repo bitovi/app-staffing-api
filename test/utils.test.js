@@ -1,57 +1,13 @@
 
 const { parseJsonApiParams } = require('../src/utils')
 
-// TODO integrate into other tests
-describe('utils', () => {
-  it('should validate url params for filters', async () => {
-    const params = {
-      'filter[name]': ['Jo', 'kev'],
-      'filter[other]': ['new'],
-      'page[number]': 1,
-      'page[size]': 5,
-      sort: 'start_date,-name'
-    }
-
-    const result = parseJsonApiParams(params)
-    expect(result).toEqual({
-      filter: [{
-        key: 'name',
-        value: 'Jo'
-      },
-      {
-        key: 'name',
-        value: 'kev'
-      },
-      {
-        key: 'other',
-        value: 'new'
-      }],
-      page: {
-        number: 1,
-        size: 5
-      },
-      sort: [{
-        direction: 'ASC',
-        name: 'start_date'
-      },
-      {
-        direction: 'DESC',
-        name: 'name'
-      }]
-    })
-  })
-})
-
 describe('parseJsonApiParams', () => {
-  // TODO: implement `fields` parsing
-  // TODO: implement `include` parsing
-
   const defaultExpected = {
     filter: [],
     page: {},
     sort: [],
     include: [],
-    fields: []
+    fields: {}
   }
 
   const testCases = [
@@ -61,6 +17,19 @@ describe('parseJsonApiParams', () => {
       expected: defaultExpected
     },
     {
+      title: 'parse query multiple `filter` params',
+      requestQuery: {
+        'filter[name]': ['Jo', 'kev']
+      },
+      expected: {
+        ...defaultExpected,
+        filter: [
+          { key: 'name', value: 'Jo' },
+          { key: 'name', value: 'kev' }
+        ]
+      }
+    },
+    {
       title: 'parse query with multiple `fields` params, each with their own values',
       requestQuery: {
         'fields[assignments]': 'start_date,end_date',
@@ -68,10 +37,10 @@ describe('parseJsonApiParams', () => {
       },
       expected: {
         ...defaultExpected,
-        fields: [
-          { type: 'assignments', fields: ['start_date', 'end_date'] },
-          { type: 'skills', fields: ['name'] }
-        ]
+        fields: {
+          assignments: ['start_date', 'end_date'],
+          skills: ['name']
+        }
       }
     },
     {

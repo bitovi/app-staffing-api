@@ -1,6 +1,6 @@
 const { Serializer } = require('../json-api-serializer')
 const ProjectModel = require('../models/project')
-const { getIncludeStr } = require('../utils')
+const { getListHandler } = require('../utils/jsonapi-objection-handler')
 
 const routes = {
   create: {
@@ -25,27 +25,12 @@ const routes = {
   list: {
     method: 'GET',
     url: '/projects',
-    handler: async function (request, reply) {
-      const includeStr = getIncludeStr(request.query)
-      const projects = await ProjectModel.query().withGraphFetched(includeStr)
-      const data = Serializer.serialize('projects', projects.map(project => project.toJSON()))
-      return reply.send(data)
-    }
+    handler: getListHandler(ProjectModel)
   },
   get: {
     method: 'GET',
     url: '/projects/:id',
-    handler: async function (request, reply) {
-      const includeStr = getIncludeStr(request.query)
-      const project = await ProjectModel.query().findById(request.params.id).withGraphFetched(includeStr)
-
-      if (!project) {
-        return reply.status(404).send()
-      }
-
-      const data = Serializer.serialize('projects', project.toJSON())
-      return reply.send(data)
-    }
+    handler: getListHandler(ProjectModel)
   },
   update: {
     method: 'PATCH',

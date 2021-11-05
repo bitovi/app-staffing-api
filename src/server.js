@@ -4,7 +4,6 @@ const createError = require('http-errors')
 const { OAuth2Client } = require('google-auth-library')
 const { Serializer } = require('./json-api-serializer')
 const knexfile = require('./knexfile')
-const { default: fastify } = require('fastify')
 
 const GoogleAuthClientId = '587564559875-48vd2efg2vd4ligphjkuvhcs4fsf0ek9.apps.googleusercontent.com'
 

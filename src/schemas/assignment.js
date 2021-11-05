@@ -1,28 +1,130 @@
+const { makeQueryStringFilters } = require('../utils')
+const queryStringSchema = require('./query-string')
+const { makeIdParams } = require('./params')
 
 const properties = {
-  id: { type: 'string' },
-  employee_id: { type: 'string' },
-  role_id: { type: 'string' },
-  start_date: { type: 'date' },
-  end_date: { type: 'date' }
+  employee_id: {
+    type: 'string',
+    format: 'uuid',
+    description: 'the id of the assigned employee'
+  },
+  role_id: {
+    type: 'string',
+    format: 'uuid',
+    description: 'the id of the associated role'
+  },
+  start_date: {
+    type: 'string',
+    format: 'date',
+    description: 'the date the employee will begin this assignment'
+  },
+  end_date: {
+    type: 'string',
+    format: 'date',
+    description: 'the expected date the employee will end this assignment'
+  }
+}
+const propertiesWithId = {
+  id: { type: 'string', format: 'uuid' }
 }
 
+const name = 'assignment'
+const tags = [name]
+
+const list = {
+  description: `retrieve a list of ${name}s`,
+  summary: `retrieve a list of ${name}s`,
+  tags,
+  querystring: {
+    type: 'object',
+    properties: {
+      ...queryStringSchema.common,
+      ...makeQueryStringFilters(properties)
+    }
+  },
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      properties: {}
+    }
+  }
+}
+const get = {
+  description: `retrieve an ${name} by id`,
+  summary: `retrieve an ${name} by id`,
+  tags,
+  params: makeIdParams(name),
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      properties: {}
+    },
+    404: {
+      description: 'Not Found',
+      type: 'object',
+      properties: {}
+    }
+  }
+}
 const create = {
-  $id: 'createAssignment',
+  description: `create an ${name}`,
+  summary: `create an ${name}`,
+  tags,
   type: 'object',
   required: ['employee_id', 'role_id', 'start_date'],
-  properties,
-  additionalProperties: false
+  body: { properties },
+  additionalProperties: false,
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      properties: {}
+    }
+  }
 }
-const update = {
-  $id: 'updateAssignment',
+const patch = {
+  description: `patch an ${name}`,
+  summary: `patch an ${name}`,
+  tags,
   type: 'object',
-  properties,
-  additionalProperties: false
+  body: { properties },
+  additionalProperties: false,
+  params: makeIdParams(name),
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      properties: {}
+    },
+    404: {
+      description: 'Not Found',
+      type: 'object',
+      properties: {}
+    }
+  }
+}
+const remove = {
+  description: `delete an ${name}`,
+  summary: `delete an ${name}`,
+  tags,
+  params: makeIdParams(name),
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      properties: {}
+    }
+  }
 }
 
 module.exports = {
   properties,
+  propertiesWithId,
+  list,
+  get,
   create,
-  update
+  patch,
+  remove
 }

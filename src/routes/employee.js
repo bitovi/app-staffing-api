@@ -1,6 +1,5 @@
 const Employee = require('../models/employee')
 const schema = require('../schemas/employee')
-const queryStringSchema = require('../schemas/query-string')
 const { Serializer } = require('../json-api-serializer')
 const { getIncludeStr } = require('../utils')
 
@@ -16,17 +15,7 @@ module.exports = {
       })
       reply.send(result)
     },
-    schema: {
-      description: 'retrieve a list of employees',
-      tags: ['employee'],
-      summary: 'summary',
-      querystring: {
-        type: 'object',
-        properties: {
-          ...queryStringSchema.common
-        }
-      }
-    }
+    schema: schema.list
   },
   get: {
     url: '/employees/:id',
@@ -41,7 +30,8 @@ module.exports = {
       }
       const result = Serializer.serialize('employees', data)
       reply.send(result)
-    }
+    },
+    schema: schema.get
   },
   post: {
     url: '/employees',
@@ -50,7 +40,8 @@ module.exports = {
       const data = await Employee.query().upsertGraphAndFetch(request.body, { relate: true })
       const result = Serializer.serialize('employees', data)
       reply.code(201).send(result)
-    }
+    },
+    schema: schema.create
   },
   patch: {
     url: '/employees/:id',
@@ -66,7 +57,8 @@ module.exports = {
 
       reply.code(data ? 204 : 404)
       reply.send()
-    }
+    },
+    schema: schema.patch
   },
   delete: {
     url: '/employees/:id',
@@ -76,6 +68,7 @@ module.exports = {
       const result = Serializer.serialize('employees', {})
       reply.code(204)
       reply.send(result)
-    }
+    },
+    schema: schema.remove
   }
 }

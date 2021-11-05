@@ -1,6 +1,5 @@
 const Assignment = require('../models/assignment')
 const schema = require('../schemas/assignment')
-const queryStringSchema = require('../schemas/query-string')
 const { Serializer } = require('../json-api-serializer')
 const { getIncludeStr } = require('../utils')
 
@@ -16,17 +15,7 @@ module.exports = {
       })
       reply.send(result)
     },
-    schema: {
-      description: 'retrieve a list of assignments',
-      tags: ['assignment'],
-      summary: 'In addition to the filters',
-      querystring: {
-        type: 'object',
-        properties: {
-          ...queryStringSchema.common
-        }
-      }
-    }
+    schema: schema.list
   },
   get: {
     url: '/assignments/:id',
@@ -41,32 +30,7 @@ module.exports = {
       const result = Serializer.serialize('assignments', data)
       reply.send(result)
     },
-    schema: {
-      description: 'app-staffing-api is so kuhl',
-      tags: ['assignment'],
-      summary: 'qwerty',
-      params: {
-        type: 'object',
-        properties: {
-          id: {
-            type: 'string',
-            description: 'user id'
-          }
-        }
-      },
-      body: {
-        type: 'object',
-        properties: {
-          hello: { type: 'string' },
-          obj: {
-            type: 'object',
-            properties: {
-              some: { type: 'string' }
-            }
-          }
-        }
-      }
-    }
+    schema: schema.get
   },
   post: {
     url: '/assignments',
@@ -75,7 +39,8 @@ module.exports = {
       const data = await Assignment.query().insertAndFetch(request.body)
       const result = Serializer.serialize('assignments', data)
       reply.code(201).send(result)
-    }
+    },
+    schema: schema.create
   },
   patch: {
     url: '/assignments/:id',
@@ -89,7 +54,8 @@ module.exports = {
         })
       reply.code(data ? 204 : 404)
       reply.send()
-    }
+    },
+    schema: schema.patch
   },
   delete: {
     url: '/assignments/:id',
@@ -99,6 +65,7 @@ module.exports = {
       const result = Serializer.serialize('assignments', {})
       reply.code(wasRecordRemoved ? 204 : 404)
       reply.send(result)
-    }
+    },
+    schema: schema.remove
   }
 }

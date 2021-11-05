@@ -16,6 +16,8 @@ const parseJsonApiParams = (query) => {
   const filterRegEx = /^filter\[(.*?)\]$/
   const pageRegEx = /^page\[(.*?)\]$/
   const sortRegEx = /^sort$/
+  const includeRegEx = /^include$/
+  const fieldsRegEx = /^fields\[(.*?)\]$/
 
   const params = Object.keys(query)
 
@@ -24,7 +26,7 @@ const parseJsonApiParams = (query) => {
     page: {},
     sort: [],
     include: [],
-    fields: []
+    fields: {}
   }
   params.forEach((param) => {
     const filterMatch = filterRegEx.exec(param)
@@ -43,6 +45,13 @@ const parseJsonApiParams = (query) => {
         })
         return
       }
+    }
+
+    const fieldsMatch = fieldsRegEx.exec(param)
+    if (fieldsMatch) {
+      const type = fieldsMatch[1]
+      const values = query[param]
+      queryDatabase.fields[type] = [...values.split(',')]
     }
 
     const pageMatch = pageRegEx.exec(param)
@@ -69,6 +78,12 @@ const parseJsonApiParams = (query) => {
           })
         }
       })
+    }
+
+    const includeMatch = includeRegEx.exec(param)
+    if (includeMatch) {
+      const values = query[param]
+      queryDatabase.include.push(...values.split(','))
     }
   })
 

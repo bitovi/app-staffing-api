@@ -36,9 +36,12 @@ const getListHandler = (Model) => {
 
     if (parsedParams.filter.length) {
       parsedParams.filter.forEach((filter) => {
-        const isInt = !isNaN(parseInt(filter.value))
+        const isInt = !isNaN(parseInt(filter.value, 10))
         const isDate = !isNaN(Date.parse(filter.value))
         const isEqual = isInt || isDate
+        if (isInt) {
+          filter.value = parseInt(filter.value, 10)
+        }
         queryBuilder.where(normalizeColumn(Model.tableName, filter.key), isEqual ? '=' : 'ilike', `%${filter.value}%`)
       })
     }
@@ -61,7 +64,7 @@ const getListHandler = (Model) => {
       })
     }
     // execute the builder after finish chaining
-    // queryBuilder.debug()
+    queryBuilder.debug()
     const data = await queryBuilder.execute()
 
     if (!data) {

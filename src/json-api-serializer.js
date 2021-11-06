@@ -47,11 +47,11 @@ Serializer.register('roles', {
   topLevelLinks: topLevelLinksfn
 })
 
-Serializer.register('employees', {
+Serializer.register('skills', {
   id: 'id',
   relationships: {
     roles: { type: 'roles', deserialize },
-    skills: { type: 'skills', deserialize }
+    employees: { type: 'employees', deserialize }
   },
   topLevelLinks: topLevelLinksfn
 })

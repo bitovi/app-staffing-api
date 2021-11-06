@@ -1,6 +1,6 @@
 const Assignment = require('../models/assignment')
 const { Serializer } = require('../json-api-serializer')
-const { getListHandler } = require('../utils/jsonapi-objection-handler')
+const { getListHandler, getDeleteHandler } = require('../utils/jsonapi-objection-handler')
 
 module.exports = {
   list: {
@@ -39,11 +39,6 @@ module.exports = {
   delete: {
     url: '/assignments/:id',
     method: 'DELETE',
-    async handler (request, reply) {
-      const wasRecordRemoved = await Assignment.query().deleteById(request.params.id)
-      const result = Serializer.serialize('assignments', {})
-      reply.code(wasRecordRemoved ? 204 : 404)
-      reply.send(result)
-    }
+    handler: getDeleteHandler(Assignment)
   }
 }

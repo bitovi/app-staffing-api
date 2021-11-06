@@ -1,6 +1,6 @@
 const Employee = require('../models/employee')
 const { Serializer } = require('../json-api-serializer')
-const { getListHandler } = require('../utils/jsonapi-objection-handler')
+const { getListHandler, getDeleteHandler } = require('../utils/jsonapi-objection-handler')
 
 module.exports = {
   list: {
@@ -41,11 +41,6 @@ module.exports = {
   delete: {
     url: '/employees/:id',
     method: 'DELETE',
-    async handler (request, reply) {
-      await Employee.query().deleteById(request.params.id)
-      const result = Serializer.serialize('employees', {})
-      reply.code(204)
-      reply.send(result)
-    }
+    handler: getDeleteHandler(Employee)
   }
 }

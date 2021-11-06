@@ -1,6 +1,6 @@
 const RolesModel = require('../models/role')
 const { Serializer } = require('../json-api-serializer')
-const { getListHandler } = require('../utils/jsonapi-objection-handler')
+const { getListHandler, getDeleteHandler } = require('../utils/jsonapi-objection-handler')
 
 const routes = {
   create: {
@@ -48,12 +48,7 @@ const routes = {
   delete: {
     method: 'DELETE',
     url: '/roles/:id',
-    handler: async function (request, reply) {
-      const id = request.params.id
-      const numberDeleted = await RolesModel.query().deleteById(id)
-      const status = numberDeleted > 0 ? 204 : 404
-      reply.status(status).send()
-    }
+    handler: getDeleteHandler(RolesModel)
   }
 }
 

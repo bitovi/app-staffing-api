@@ -1,6 +1,6 @@
 const { Serializer } = require('../json-api-serializer')
 const ProjectModel = require('../models/project')
-const { getListHandler } = require('../utils/jsonapi-objection-handler')
+const { getListHandler, getDeleteHandler } = require('../utils/jsonapi-objection-handler')
 
 const routes = {
   create: {
@@ -49,11 +49,7 @@ const routes = {
   delete: {
     method: 'DELETE',
     url: '/projects/:id',
-    handler: async function (request, reply) {
-      const numberDeleted = await ProjectModel.query().deleteById(request.params.id)
-      const status = numberDeleted > 0 ? 204 : 404
-      return reply.status(status).send()
-    }
+    handler: getDeleteHandler(ProjectModel)
   }
 }
 

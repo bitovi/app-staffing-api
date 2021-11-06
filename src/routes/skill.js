@@ -1,6 +1,6 @@
 const SkillModel = require('../models/skill')
 const { Serializer } = require('../json-api-serializer')
-const { getListHandler } = require('../utils/jsonapi-objection-handler')
+const { getListHandler, getDeleteHandler } = require('../utils/jsonapi-objection-handler')
 
 const routes = {
   list: {
@@ -20,7 +20,7 @@ const routes = {
   delete: {
     method: 'DELETE',
     url: '/skills/:id',
-    handler: getListHandler(SkillModel)
+    handler: getDeleteHandler(SkillModel)
   },
   update: {
     method: 'PATCH',

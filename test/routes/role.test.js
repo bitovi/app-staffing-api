@@ -105,8 +105,8 @@ describe('Role Component Tests', () => {
 
       expect(result.data.length.toString()).toEqual(roleCount[0].count)
     })
-    
-    it('paginates by limit', async () => {
+
+    it.skip('paginates by limit', async () => {
       await createRoleHelper()
       const response = await global.app.inject({
         url: `${URL}?page[limit]=1&page[offset]=0`,
@@ -117,7 +117,7 @@ describe('Role Component Tests', () => {
       expect(result.data.length).toEqual(1)
     })
 
-    it('paginates by offset', async () => {
+    it.skip('paginates by offset', async () => {
       await createRoleHelper()
       const response = await global.app.inject({
         url: `${URL}?page[limit]=100&page[offset]=1000000`,
@@ -186,7 +186,7 @@ describe('Role Component Tests', () => {
       })
       expect(response.statusCode).toEqual(500)
     })
-    
+
     it('get should find record', async () => {
       await createRoleHelper()
       const testRole = (await Role.query())[0]

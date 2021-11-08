@@ -6,7 +6,6 @@ const normalizeColumn = (tableName, column) => column.includes('.') ? column : `
 
 const getListHandler = (Model) => {
   return async (request, reply) => {
-    debugger
     const includeStr = getIncludeStr(request.query)
     const parsedParams = parseJsonApiParams(request.query)
 
@@ -35,6 +34,17 @@ const getListHandler = (Model) => {
     queryBuilder.skipUndefined()
 
     if (parsedParams.filter.length) {
+      // check for duplicate filter keys, return 500
+      const filterkeys = parsedParams.filter.map(el => el.key)
+
+      if (filterkeys.length > (new Set(filterkeys)).size) {
+        reply.status(500)
+          .send({
+            status: 500,
+            title: 'Cannot have the same filter more than once.'
+          })
+      }
+
       parsedParams.filter.forEach((filter) => {
         const isInt = !isNaN(parseInt(filter.value, 10))
         const isDate = !isNaN(Date.parse(filter.value))

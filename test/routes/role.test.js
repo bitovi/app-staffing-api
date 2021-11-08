@@ -129,14 +129,14 @@ describe('Role Component Tests', () => {
     })
 
     it('orderBy start_date', async () => {
-      const r1 = await createRoleHelper('2020-11-03')
-      const r2 = await createRoleHelper('2021-11-03')
+      await createRoleHelper('2020-11-03')
+      await createRoleHelper('2021-11-03')
       const response = await global.app.inject({
         url: URL,
         method: 'GET',
         query: { orderBy: 'start_date' }
       })
-      debugger
+
       expect(response.statusCode).toEqual(200)
       const result = JSON.parse(response.body)
       const date1 = Date.parse(result?.data[1].attributes?.start_date)
@@ -145,8 +145,8 @@ describe('Role Component Tests', () => {
     })
 
     it('orderBy start_date DESC', async () => {
-      await createRoleHelper()
-      await createRoleHelper()
+      await createRoleHelper('2020-01-01')
+      await createRoleHelper('2022-01-02')
       const response = await global.app.inject({
         url: URL,
         method: 'GET',
@@ -157,8 +157,6 @@ describe('Role Component Tests', () => {
 
       const d1 = result?.data[0]?.attributes?.start_date
       const d2 = result?.data[1]?.attributes?.start_date
-
-      console.log(d1, '|', d2)
 
       const date1 = Date.parse(d1)
       const date2 = Date.parse(d2)
@@ -414,7 +412,7 @@ describe('Role Component Tests', () => {
 /**
  * Helper to create a test role and push it to the cleanup array.
  */
-const createRoleHelper = async (start_date = '2021-11-02', end_date = '2021-11-03' ) => {
+const createRoleHelper = async (start_date = '2021-11-02', end_date = '2021-11-03') => {
   const testRole = {
     project_id: '21993255-c4cd-4e02-bc29-51ea62c62cfc',
     start_date: start_date,

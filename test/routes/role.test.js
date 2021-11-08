@@ -110,7 +110,7 @@ describe('Role Component Tests', () => {
       await createRoleHelper()
       const response = await global.app.inject({
         url: `${URL}?page[limit]=1&page[offset]=0`,
-        method: 'GET',
+        method: 'GET'
       })
       expect(response.statusCode).toEqual(200)
       const result = JSON.parse(response.body)
@@ -121,7 +121,7 @@ describe('Role Component Tests', () => {
       await createRoleHelper()
       const response = await global.app.inject({
         url: `${URL}?page[limit]=100&page[offset]=1000000`,
-        method: 'GET',
+        method: 'GET'
       })
       expect(response.statusCode).toEqual(200)
       const result = JSON.parse(response.body)
@@ -129,13 +129,14 @@ describe('Role Component Tests', () => {
     })
 
     it('orderBy start_date', async () => {
-      const r1 = await createRoleHelper()
-      const r2 = await createRoleHelper()
+      const r1 = await createRoleHelper('2020-11-03')
+      const r2 = await createRoleHelper('2021-11-03')
       const response = await global.app.inject({
         url: URL,
         method: 'GET',
-        query: { orderBy: 'start_date' },
+        query: { orderBy: 'start_date' }
       })
+      debugger
       expect(response.statusCode).toEqual(200)
       const result = JSON.parse(response.body)
       const date1 = Date.parse(result?.data[1].attributes?.start_date)
@@ -149,7 +150,7 @@ describe('Role Component Tests', () => {
       const response = await global.app.inject({
         url: URL,
         method: 'GET',
-        query: { orderBy: '-start_date' },
+        query: { orderBy: '-start_date' }
       })
       expect(response.statusCode).toEqual(200)
       const result = JSON.parse(response.body)
@@ -157,7 +158,7 @@ describe('Role Component Tests', () => {
       const d1 = result?.data[0]?.attributes?.start_date
       const d2 = result?.data[1]?.attributes?.start_date
 
-      console.log(d1,"|",d2)
+      console.log(d1, '|', d2)
 
       const date1 = Date.parse(d1)
       const date2 = Date.parse(d2)
@@ -165,16 +166,16 @@ describe('Role Component Tests', () => {
     })
 
     it('filters by start_confidence', async () => {
-      await createRoleHelper({start_confidence:1})
-      await createRoleHelper({start_confidence:3})
+      await createRoleHelper({ start_confidence: 1 })
+      await createRoleHelper({ start_confidence: 3 })
       const response = await global.app.inject({
         url: `${URL}?filter[start_confidence]=3`,
-        method: 'GET',
+        method: 'GET'
       })
       expect(response.statusCode).toEqual(200)
       const result = JSON.parse(response.body)
       expect(result.data.length).toBeGreaterThan(0)
-      for (d in result.data) {
+      for (const d in result.data) {
         expect(result.data[d].attributes.start_confidence).toEqual(3)
       }
     })
@@ -182,7 +183,7 @@ describe('Role Component Tests', () => {
     it('explode and 500 if duplicate filter keys', async () => {
       const response = await global.app.inject({
         url: `${URL}?filter[start_confidence]=1&filter[start_confidence]=2`,
-        method: 'GET',
+        method: 'GET'
       })
       expect(response.statusCode).toEqual(500)
     })
@@ -413,12 +414,12 @@ describe('Role Component Tests', () => {
 /**
  * Helper to create a test role and push it to the cleanup array.
  */
-const createRoleHelper = async () => {
+const createRoleHelper = async (start_date = '2021-11-02', end_date = '2021-11-03' ) => {
   const testRole = {
     project_id: '21993255-c4cd-4e02-bc29-51ea62c62cfc',
-    start_date: '2021-11-02',
+    start_date: start_date,
     start_confidence: 1,
-    end_date: '2021-11-03',
+    end_date: end_date,
     end_confidence: 5
   }
 

@@ -4,6 +4,7 @@ const Project = require('../../src/models/project')
 const Employee = require('../../src/models/employee')
 const Skill = require('../../src/models/skill')
 const Assignment = require('../../src/models/assignment')
+// const { getArgs } = require('../../src/config')
 
 const URL = `http://localhost:${config.get('APP_PORT')}/roles`
 
@@ -129,12 +130,12 @@ describe('Role Component Tests', () => {
     })
 
     it('orderBy start_date', async () => {
-      await createRoleHelper('2020-11-03')
-      await createRoleHelper('2021-11-03')
+      await createRoleHelper({ start_date: '2020-11-03' })
+      await createRoleHelper({ start_date: '2021-11-03' })
       const response = await global.app.inject({
         url: URL,
         method: 'GET',
-        query: { orderBy: 'start_date' }
+        query: { sort: 'start_date' }
       })
 
       expect(response.statusCode).toEqual(200)
@@ -145,12 +146,12 @@ describe('Role Component Tests', () => {
     })
 
     it('orderBy start_date DESC', async () => {
-      await createRoleHelper('2020-01-01')
-      await createRoleHelper('2022-01-02')
+      await createRoleHelper({ start_date: '2020-10-01' })
+      await createRoleHelper({ start_date: '2022-10-02' })
       const response = await global.app.inject({
         url: URL,
         method: 'GET',
-        query: { orderBy: '-start_date' }
+        query: { sort: '-start_date' }
       })
       expect(response.statusCode).toEqual(200)
       const result = JSON.parse(response.body)
@@ -160,7 +161,7 @@ describe('Role Component Tests', () => {
 
       const date1 = Date.parse(d1)
       const date2 = Date.parse(d2)
-      expect(date1).toBeGreaterThan(date2)
+      expect(date1).toBeGreaterThanOrEqual(date2)
     })
 
     it('filters by start_confidence', async () => {
@@ -412,15 +413,22 @@ describe('Role Component Tests', () => {
 /**
  * Helper to create a test role and push it to the cleanup array.
  */
-const createRoleHelper = async (start_date = '2021-11-02', end_date = '2021-11-03') => {
+const createRoleHelper = async (
+  {
+    project_id = '21993255-c4cd-4e02-bc29-51ea62c62cfc',
+    start_date = '2020-01-01',
+    start_confidence = 1,
+    end_date = '2021-01-01',
+    end_confidence = 5
+  } = {}
+) => {
   const testRole = {
-    project_id: '21993255-c4cd-4e02-bc29-51ea62c62cfc',
-    start_date: start_date,
-    start_confidence: 1,
-    end_date: end_date,
-    end_confidence: 5
+    project_id,
+    start_date,
+    start_confidence,
+    end_date,
+    end_confidence
   }
-
   const createdRole = await Role.query().insert(testRole)
   roleIdsToDelete.push(createdRole.id)
 

@@ -39,10 +39,14 @@ const getListHandler = (Model) => {
         const isInt = !isNaN(parseInt(filter.value, 10))
         const isDate = !isNaN(Date.parse(filter.value))
         const isEqual = isInt || isDate
-        if (isInt) {
-          filter.value = parseInt(filter.value, 10)
+        let comparator = 'ilike'
+        let sqlValue = `%${filter.value}%`
+
+        if (isEqual) {
+          comparator = '='
+          sqlValue = filter.value
         }
-        queryBuilder.where(normalizeColumn(Model.tableName, filter.key), isEqual ? '=' : 'ilike', `%${filter.value}%`)
+        queryBuilder.where(normalizeColumn(Model.tableName, filter.key), comparator, sqlValue)
       })
     }
     let { size = 100, number = 0 } = parsedParams?.page || {}

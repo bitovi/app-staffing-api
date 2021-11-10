@@ -10,6 +10,7 @@ const getListHandler = (Model) => {
   return async (request, reply) => {
     const includeStr = getIncludeStr(request.query)
     const parsedParams = parseJsonApiParams(request.query)
+    const tableName = Model.tableName
 
     const modelRelations = Object.keys(Model.getRelations())
     databaseName = databaseName || Model.knex().client.config.connection.database
@@ -30,13 +31,13 @@ const getListHandler = (Model) => {
     if (request.params.id) {
       queryBuilder.findById(request.params.id)
     }
-
-    // if (Object.keys(parsedParams.fields).length) {
-    //   for (const [key, val] of Object.entries(parsedParams.fields)) {
-    //     const items = val.map(el => normalizeColumn(key.slice(0, -1), el))
-    //     queryBuilder.select(...items)
-    //   }
-    // }
+    // @TODO verify column names
+    if (Object.keys(parsedParams.fields).length) {
+      for (const [key, val] of Object.entries(parsedParams.fields)) {
+        const items = val.map(el => normalizeColumn(key.slice(0, -1), el))
+        queryBuilder.column(...items)
+      }
+    }
 
     queryBuilder.withGraphJoined(includeStr)
     queryBuilder.skipUndefined()
@@ -72,15 +73,16 @@ const getListHandler = (Model) => {
           comparator = '='
           sqlValue = filter.value
         }
-        queryBuilder.where(normalizeColumn(Model.tableName, filter.key), comparator, sqlValue)
+        queryBuilder.where(normalizeColumn(tableName, filter.key), comparator, sqlValue)
       })
     }
-    let { size = 100, number = 0 } = parsedParams?.page || {}
-    if (size < 1) {
-      size = 1
-    }
-    if (number < 0) {
-      number = 0
+    const { size = 100, number = 0 } = parsedParams?.page || {}
+    if ((size < 1) || (number < 0)) {
+      return reply.status(400)
+        .send({
+          status: 400,
+          title: 'Invalid page[size] or page[number]'
+        })
     }
     // @TODO return error for pad page values
 
@@ -92,7 +94,7 @@ const getListHandler = (Model) => {
       parsedParams.sort.forEach((fieldDirection) => {
         const { name, direction } = fieldDirection
         if (columnNames.includes(name)) {
-          queryBuilder.orderBy(name, direction)
+          queryBuilder.orderBy(normalizeColumn(tableName, name), direction)
         } else {
           reply.status(400)
             .send({
@@ -110,7 +112,7 @@ const getListHandler = (Model) => {
       return reply.code(404).send()
     }
 
-    const result = Serializer.serialize(`${Model.tableName}s`, data, {
+    const result = Serializer.serialize(`${tableName}s`, data, {
       count: data?.total || 0,
       pageSize: size,
       page: number

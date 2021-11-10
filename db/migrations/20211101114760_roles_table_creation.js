@@ -7,7 +7,7 @@ exports.up = async (knex) => {
     table.integer('start_confidence')
     table.timestamp('end_date')
     table.integer('end_confidence')
-    table.uuid('project_id').notNullable()
+    table.uuid('project_id').references('project.id').notNullable()
   })
 }
 

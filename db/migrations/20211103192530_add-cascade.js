@@ -1,4 +1,16 @@
 exports.up = async (knex) => {
+  await knex.schema.alterTable('role', (table) => {
+    table.dropForeign('project_id')
+  })
+  await knex.schema.alterTable('role', (table) => {
+    table.uuid('project_id')
+      .references('project.id')
+      .notNullable()
+      .onUpdate('CASCADE')
+      .onDelete('CASCADE')
+      .index()
+      .alter()
+  })
   await knex.schema.alterTable('employee__skill', (table) => {
     table.dropPrimary()
     table.dropForeign('employee_id')

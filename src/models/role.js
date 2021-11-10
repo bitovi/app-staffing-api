@@ -63,12 +63,12 @@ class Role extends Model {
         relation: Model.ManyToManyRelation,
         modelClass: Skill,
         join: {
-          from: 'skill.id',
+          from: 'role.id',
           through: {
             from: 'role__skill.role_id',
             to: 'role__skill.skill_id'
           },
-          to: 'role.id'
+          to: 'skill.id'
         }
       }
     }

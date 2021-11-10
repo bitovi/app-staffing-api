@@ -4,7 +4,6 @@ const Project = require('../../src/models/project')
 const Employee = require('../../src/models/employee')
 const Skill = require('../../src/models/skill')
 const Assignment = require('../../src/models/assignment')
-const crypto = require('crypto')
 // const { getArgs } = require('../../src/config')
 
 const URL = `http://localhost:${config.get('APP_PORT')}/roles`
@@ -32,11 +31,16 @@ afterEach(async () => {
 describe('Role Component Tests', () => {
   describe('POST', () => {
     it('should create role', async () => {
+      const createdProject = await Project.query().insert({
+        name: 'Test Project',
+        start_date: new Date().toDateString(),
+        end_date: new Date().toDateString()
+      })
       const testBody = {
         data: {
           type: 'roles',
           attributes: {
-            project_id: '21993255-c4cd-4e02-bc29-51ea62c62cfc',
+            project_id: createdProject.id,
             start_date: '2021-11-02',
             start_confidence: 1,
             end_date: '2021-11-03',
@@ -44,6 +48,7 @@ describe('Role Component Tests', () => {
           }
         }
       }
+      projectIdsToDelete.push(createdProject.id)
 
       const response = await global.app.inject({
         url: URL,
@@ -424,7 +429,6 @@ describe('Role Component Tests', () => {
  */
 const createRoleHelper = async (
   {
-    project_id = crypto.randomUUID(),
     start_date = (new Date()).toISOString(),
     start_confidence = 1,
     end_date = '2021-01-01',
@@ -432,7 +436,6 @@ const createRoleHelper = async (
   } = {}
 ) => {
   const testRole = {
-    project_id,
     start_date,
     start_confidence,
     end_date,
@@ -441,8 +444,15 @@ const createRoleHelper = async (
   if (!testRole.start_date) {
     testRole.start_date = (new Date()).toISOString()
   }
+  const createdProject = await Project.query().insert({
+    name: 'Test Project',
+    start_date: new Date().toDateString(),
+    end_date: new Date().toDateString()
+  })
+  testRole.project_id = createdProject.id
   const createdRole = await Role.query().insert(testRole)
   roleIdsToDelete.push(createdRole.id)
+  projectIdsToDelete.push(createdProject.id)
 
   return createdRole
 }

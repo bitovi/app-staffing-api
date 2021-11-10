@@ -13,12 +13,8 @@ module.exports = class Skill extends Model {
       required: ['name'],
 
       properties: {
-        id: {
-          type: 'string'
-        },
-        name: {
-          type: 'string'
-        }
+        id: { type: 'string' },
+        name: { type: 'string' }
       },
       additionalProperties: false
     }
@@ -27,7 +23,7 @@ module.exports = class Skill extends Model {
   // ??? Maybe
   static get jsonSchemaPatch () {
     const patchSchema = { ...this.jsonSchema }
-    patchSchema.required = []
+    patchSchema.required = ['id']
     return patchSchema
   }
 

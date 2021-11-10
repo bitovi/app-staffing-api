@@ -72,7 +72,6 @@ describe('Employee Component Tests', () => {
       payload: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/vnd.api+json' }
     })
-
     const body = JSON.parse(response.body)
 
     employeeIdsToCleanup.push(body.data.id)

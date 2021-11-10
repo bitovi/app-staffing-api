@@ -4,12 +4,20 @@ const { getIncludeStr, parseJsonApiParams } = require('../utils')
 
 const normalizeColumn = (tableName, column) => column.includes('.') ? column : `${tableName}.${column}`
 
+let databaseName
+
 const getListHandler = (Model) => {
   return async (request, reply) => {
     const includeStr = getIncludeStr(request.query)
     const parsedParams = parseJsonApiParams(request.query)
 
-    const modelRelations = Object.keys(Model.relationMappings)
+    const modelRelations = Object.keys(Model.getRelations())
+    databaseName = databaseName || Model.knex().client.config.connection.database
+    const columnNames = Object.keys(Model.jsonSchema.properties)
+    // DEBUG columnInfo
+
+    // const knex = Model.knex()
+    // const allnames = await knex.raw(`SELECT * from information_schema.columns where table_catalog = '${databaseName}'`)
 
     // Check if there is any include that is not in Model relations, return 404
     // Checking first level only for now
@@ -38,15 +46,23 @@ const getListHandler = (Model) => {
       const filterkeys = parsedParams.filter.map(el => el.key)
 
       if (filterkeys.length > (new Set(filterkeys)).size) {
-        reply.status(500)
+        return reply.status(400)
           .send({
-            status: 500,
+            status: 400,
             title: 'Cannot have the same filter more than once.'
           })
       }
 
       parsedParams.filter.forEach((filter) => {
-        const isInt = !isNaN(parseInt(filter.value, 10))
+        if (!columnNames.includes(filter.key)) {
+          return reply.status(400)
+            .send({
+              status: 400,
+              title: `Cannot filter on non existing column name: ${filter.key}`
+            })
+        }
+
+        const isInt = Number.isInteger(Number(filter.value))
         const isDate = !isNaN(Date.parse(filter.value))
         const isEqual = isInt || isDate
         let comparator = 'ilike'
@@ -66,6 +82,7 @@ const getListHandler = (Model) => {
     if (number < 0) {
       number = 0
     }
+    // @TODO return error for pad page values
 
     if (parsedParams.page?.number > -1) {
       queryBuilder.page(number, size)
@@ -74,7 +91,15 @@ const getListHandler = (Model) => {
     if (parsedParams.sort.length) {
       parsedParams.sort.forEach((fieldDirection) => {
         const { name, direction } = fieldDirection
-        queryBuilder.orderBy(name, direction)
+        if (columnNames.includes(name)) {
+          queryBuilder.orderBy(name, direction)
+        } else {
+          reply.status(400)
+            .send({
+              status: 400,
+              title: `Cannot sort by invalid column name: ${name}`
+            })
+        }
       })
     }
     // execute the builder after finish chaining
@@ -103,4 +128,36 @@ const getDeleteHandler = (Model) => {
   }
 }
 
-module.exports = { getListHandler, getDeleteHandler }
+const getUpdateHandler = (Model) => {
+  return async (request, reply) => {
+    try {
+      const data = await Model.query().upsertGraphAndFetch(request.body,
+        {
+          update: false,
+          relate: true,
+          unrelate: true
+        })
+      reply.code(data ? 204 : 404)
+      reply.send()
+    } catch (e) {
+      reply.status(404).send()
+    }
+  }
+}
+
+const getPostHandler = (Model) => {
+  return async (request, reply) => {
+    const { body, url } = request
+
+    if (body.id) {
+      return reply.send().status(403)
+    }
+
+    const newModel = await Model.query().insertGraph(body, { relate: true })
+    const data = Serializer.serialize(Model.name.toLowerCase() + 's', newModel)
+    const location = `${url}/${newModel.id}`
+    return reply.status(201).header('Location', location).send(data)
+  }
+}
+
+module.exports = { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler }

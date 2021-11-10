@@ -1,40 +1,29 @@
 const Assignment = require('../models/assignment')
-const { Serializer } = require('../json-api-serializer')
-const { getListHandler, getDeleteHandler } = require('../utils/jsonapi-objection-handler')
+const { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
 
-module.exports = {
+const routes = {
   list: {
     url: '/assignments',
     method: 'GET',
     handler: getListHandler(Assignment)
   },
+
   get: {
     url: '/assignments/:id',
     method: 'GET',
     handler: getListHandler(Assignment)
   },
+
   post: {
     url: '/assignments',
     method: 'POST',
-    async handler (request, reply) {
-      const data = await Assignment.query().insertAndFetch(request.body)
-      const result = Serializer.serialize('assignments', data)
-      reply.code(201).send(result)
-    }
+    handler: getPostHandler(Assignment)
   },
+
   patch: {
     url: '/assignments/:id',
     method: 'PATCH',
-    async handler (request, reply) {
-      const data = await Assignment.query().upsertGraphAndFetch(request.body,
-        {
-          update: false,
-          relate: true,
-          unrelate: true
-        })
-      reply.code(data ? 204 : 404)
-      reply.send()
-    }
+    handler: getUpdateHandler(Assignment)
   },
   delete: {
     url: '/assignments/:id',
@@ -42,3 +31,5 @@ module.exports = {
     handler: getDeleteHandler(Assignment)
   }
 }
+
+module.exports = routes

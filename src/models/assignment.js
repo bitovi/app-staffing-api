@@ -20,8 +20,8 @@ module.exports = class Assignment extends Model {
         role_id: {
           type: 'string'
         },
-        start_date: { type: 'string' },
-        end_date: { type: 'string' }
+        start_date: { type: 'date' },
+        end_date: { type: 'date' }
       },
       additionalProperties: false
     }

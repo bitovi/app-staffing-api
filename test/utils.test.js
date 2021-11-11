@@ -24,8 +24,8 @@ describe('parseJsonApiParams', () => {
       expected: {
         ...defaultExpected,
         filter: [
-          { key: 'name', value: 'Jo' },
-          { key: 'name', value: 'kev' }
+          { key: 'name', value: 'Jo', type: 'lk' },
+          { key: 'name', value: 'kev', type: 'lk' }
         ]
       }
     },
@@ -61,6 +61,7 @@ describe('parseJsonApiParams', () => {
         'page[number]': '3',
         'page[size]': '1',
         'filter[name]': 'Carl',
+        'filter[start_date][$gt]': '2020-01-01',
         sort: 'name,-title'
       },
       expected: {
@@ -71,7 +72,8 @@ describe('parseJsonApiParams', () => {
           size: 1
         },
         filter: [
-          { key: 'name', value: 'Carl' }
+          { key: 'name', value: 'Carl', type: 'lk' },
+          { key: 'start_date', value: '2020-01-01', type: 'gt' }
         ],
         sort: [
           { direction: 'ASC', name: 'name' },

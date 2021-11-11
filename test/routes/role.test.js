@@ -98,7 +98,9 @@ describe('Role Component Tests', () => {
 
   describe('GET', () => {
     it('list should get all records', async () => {
+      debugger
       await createRoleHelper()
+      
       const response = await global.app.inject({
         url: URL,
         method: 'GET'

@@ -13,6 +13,7 @@ let employeeIdsToDelete = []
 let skillIdsToDelete = []
 let projectIdsToDelete = []
 let assignmentIdsToDelete = []
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 afterEach(async () => {
   await Employee.query().whereIn('id', employeeIdsToDelete).delete()
@@ -98,9 +99,8 @@ describe('Role Component Tests', () => {
 
   describe('GET', () => {
     it('list should get all records', async () => {
-      debugger
       await createRoleHelper()
-      
+      delay(100)
       const response = await global.app.inject({
         url: URL,
         method: 'GET'

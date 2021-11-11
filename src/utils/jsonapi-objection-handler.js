@@ -44,7 +44,7 @@ const getListHandler = (Model) => {
 
     if (parsedParams.filter.length) {
       // check for duplicate filter keys, return 500
-      const filterkeys = parsedParams.filter.map(el => el.key)
+      const filterkeys = parsedParams.filter.map(el => el.key + '_-_' + el.type)
 
       if (filterkeys.length > (new Set(filterkeys)).size) {
         return reply.status(400)
@@ -140,7 +140,8 @@ const getListHandler = (Model) => {
     const result = Serializer.serialize(`${tableName}s`, data, {
       count: data?.total || 0,
       pageSize: size,
-      page: number
+      page: number,
+      url: request.url
     })
     reply.send(result)
   }

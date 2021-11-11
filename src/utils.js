@@ -14,7 +14,7 @@ function createUUID () {
 
 const parseJsonApiParams = (query) => {
   // /^filter\[(.*?)\]$/
-  const filterRegEx = /^filter\[([a-zA-Z0-9\-\_.]*?)\](\[\$([lgeqtn]{2})\])?$/
+  const filterRegEx = /^filter\[([a-zA-Z0-9\-_.]*?)\](\[\$([lgeqtn]{2})\])?$/
   const pageRegEx = /^page\[(.*?)\]$/
   const sortRegEx = /^sort$/
   const includeRegEx = /^include$/

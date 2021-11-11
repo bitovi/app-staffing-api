@@ -67,13 +67,38 @@ const getListHandler = (Model) => {
         const isDate = !isNaN(Date.parse(filter.value))
         const isEqual = isInt || isDate
         let comparator = 'ilike'
-        let sqlValue = `%${filter.value}%`
+        let sqlValue = filter.value
 
-        if (isEqual) {
+        switch (filter.type) {
+          case 'lt':
+            comparator = '<'
+            break
+          case 'gt':
+            comparator = '>'
+            break
+          case 'le':
+            comparator = '<='
+            break
+          case 'ge':
+            comparator = '>='
+            break
+          case 'eq':
+            comparator = '='
+            break
+          default:
+            sqlValue = `%${filter.value}%`
+            break
+        }
+
+        if (isEqual && filter.type === 'lk') {
           comparator = '='
           sqlValue = filter.value
         }
-        queryBuilder.where(normalizeColumn(tableName, filter.key), comparator, sqlValue)
+        if (!queryBuilder.hasWheres()) {
+          queryBuilder.where(normalizeColumn(tableName, filter.key), comparator, sqlValue)
+        } else {
+          queryBuilder.andWhere(normalizeColumn(tableName, filter.key), comparator, sqlValue)
+        }
       })
     }
     const { size = 100, number = 0 } = parsedParams?.page || {}

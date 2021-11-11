@@ -13,7 +13,8 @@ function createUUID () {
 }
 
 const parseJsonApiParams = (query) => {
-  const filterRegEx = /^filter\[(.*?)\]$/
+  // /^filter\[(.*?)\]$/
+  const filterRegEx = /^filter\[([a-zA-Z0-9\-\_.]*?)\](\[\$([lgetn]{2})\])?$/
   const pageRegEx = /^page\[(.*?)\]$/
   const sortRegEx = /^sort$/
   const includeRegEx = /^include$/
@@ -32,7 +33,7 @@ const parseJsonApiParams = (query) => {
     const filterMatch = filterRegEx.exec(param)
     if (filterMatch) {
       let workingValue = query[param]
-      if (filterMatch.length === 2) {
+      if (filterMatch.length === 4) {
         if (!Array.isArray(workingValue)) {
           workingValue = [workingValue]
         }
@@ -40,6 +41,7 @@ const parseJsonApiParams = (query) => {
         workingValue.forEach((entry) => {
           queryDatabase.filter.push({
             key: filterMatch[1],
+            type: filterMatch[3] || 'lk',
             value: entry
           })
         })

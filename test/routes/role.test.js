@@ -185,15 +185,13 @@ describe('Role Component Tests', () => {
       const result = JSON.parse(response.body)
 
       expect(result.data.length).toBeGreaterThan(1)
-      // @TODO fix bug in creating roles with null date
-      const d1 = result?.data[0]?.attributes?.start_date || (new Date('2050-01-01')).toISOString()
-      const d2 = result?.data[1]?.attributes?.start_date
 
-      console.log('d1', d1, 'd2', d2)
+      const index1 = result.data.findIndex(el => el.id === role1.id)
+      const index2 = result.data.findIndex(el => el.id === role2.id)
 
-      const date1 = Date.parse(d1)
-      const date2 = Date.parse(d2)
-      expect(date1).toBeGreaterThanOrEqual(date2)
+      expect(index1).toBeGreaterThan(-1)
+      expect(index2).toBeGreaterThan(-1)
+      expect(index1).toBeGreaterThan(index2)
     })
 
     it('filters by start_confidence', async () => {

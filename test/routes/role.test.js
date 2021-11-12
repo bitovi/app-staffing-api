@@ -13,14 +13,20 @@ let employeeIdsToDelete = []
 let skillIdsToDelete = []
 let projectIdsToDelete = []
 let assignmentIdsToDelete = []
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+let testsRunning = 0
+// const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+beforeEach(() => {
+  testsRunning++
+})
 
 afterEach(async () => {
-  await Employee.query().whereIn('id', employeeIdsToDelete).delete()
+  testsRunning--
+  if (testsRunning > 0) return null
   await Assignment.query().whereIn('id', assignmentIdsToDelete).delete()
-  await Skill.query().whereIn('id', skillIdsToDelete).delete()
   await Role.query().whereIn('id', roleIdsToDelete).delete()
   await Project.query().whereIn('id', projectIdsToDelete).delete()
+  await Employee.query().whereIn('id', employeeIdsToDelete).delete()
+  await Skill.query().whereIn('id', skillIdsToDelete).delete()
 
   employeeIdsToDelete = []
   assignmentIdsToDelete = []
@@ -32,6 +38,7 @@ afterEach(async () => {
 describe('Role Component Tests', () => {
   describe('POST', () => {
     it('should create role', async () => {
+      testsRunning++
       const createdProject = await Project.query().insert({
         name: 'Test Project',
         start_date: new Date().toDateString(),
@@ -68,6 +75,7 @@ describe('Role Component Tests', () => {
       roleIdsToDelete.push(result.data.id)
 
       expect(result.data.attributes).toEqual(testBody.data.attributes)
+      testsRunning--
     })
 
     it('should return 500 when no project_id is present on body', async () => {
@@ -98,9 +106,13 @@ describe('Role Component Tests', () => {
   })
 
   describe('GET', () => {
-    it('list should get all records', async () => {
-      await createRoleHelper()
-      delay(100)
+    it('list should get at least all created records', async () => {
+      const createdIds = []
+      for (let i = 0; i < 5; i++) {
+        const role = await createRoleHelper()
+        createdIds.push(role.id)
+      }
+
       const response = await global.app.inject({
         url: URL,
         method: 'GET'
@@ -110,9 +122,9 @@ describe('Role Component Tests', () => {
 
       const result = JSON.parse(response.body)
 
-      const roleCount = await Role.query().count()
+      const roleCount = result.data.filter(obj => createdIds.includes(obj.id)).length
 
-      expect(result.data.length.toString()).toEqual(roleCount[0].count)
+      expect(createdIds.length).toEqual(roleCount)
     })
 
     it.skip('paginates by limit', async () => {
@@ -138,8 +150,8 @@ describe('Role Component Tests', () => {
     })
 
     it('orderBy start_date', async () => {
-      await createRoleHelper({ start_date: '2020-11-03' })
-      await createRoleHelper({ start_date: '2021-11-03' })
+      const role1 = await createRoleHelper({ start_date: '2022-11-03' })
+      const role2 = await createRoleHelper({ start_date: '2021-11-03' })
       const response = await global.app.inject({
         url: URL,
         method: 'GET',
@@ -147,10 +159,14 @@ describe('Role Component Tests', () => {
       })
 
       expect(response.statusCode).toEqual(200)
+
       const result = JSON.parse(response.body)
-      const date1 = Date.parse(result?.data[1].attributes?.start_date)
-      const date2 = Date.parse(result?.data[0].attributes?.start_date)
-      expect(date1).toBeGreaterThan(date2)
+
+      const index1 = result.data.findIndex(el => el.id === role1.id)
+      const index2 = result.data.findIndex(el => el.id === role2.id)
+      expect(index1).toBeGreaterThan(-1)
+      expect(index2).toBeGreaterThan(-1)
+      expect(index1).toBeGreaterThan(index2)
     })
 
     it('orderBy start_date DESC', async () => {
@@ -222,6 +238,8 @@ describe('Role Component Tests', () => {
     it('get should find record with relationship data', async () => {
       await createRoleHelper()
       const testRole = (await Role.query())[0]
+
+      expect(testRole?.id?.length).toBeGreaterThan(1)
 
       const response = await global.app.inject({
         url: `${URL}/${testRole.id}?include=skills`,

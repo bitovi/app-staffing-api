@@ -1,4 +1,5 @@
 const { Model } = require('objection')
+const Project = require('./project')
 
 module.exports = class Assignment extends Model {
   static get tableName () {
@@ -20,8 +21,8 @@ module.exports = class Assignment extends Model {
         role_id: {
           type: 'string'
         },
-        start_date: { type: 'string' },
-        end_date: { type: 'string' }
+        start_date: { type: 'date' },
+        end_date: { type: 'date' }
       },
       additionalProperties: false
     }
@@ -46,6 +47,18 @@ module.exports = class Assignment extends Model {
         join: {
           from: 'assignment.employee_id',
           to: 'employee.id'
+        }
+      },
+      projects: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Project,
+        join: {
+          from: 'assignment.role_id',
+          through: {
+            from: 'role.id',
+            to: 'role.project_id'
+          },
+          to: 'project.id'
         }
       }
     }

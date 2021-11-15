@@ -1,5 +1,4 @@
 const SkillModel = require('../../src/models/skill')
-
 const URL = '/skills'
 
 describe('skills', () => {
@@ -24,6 +23,218 @@ describe('skills', () => {
     expect(instance).toBeTruthy()
     expect(instance.id).toEqual(skill.id)
     expect(instance.attributes.name).toEqual(skill.name)
+  })
+
+  test('GET /skills sorted asc', async () => {
+    const [react, node, angular] = await SkillModel.query().insert([
+      {
+        name: 'React'
+      },
+      {
+        name: 'Node'
+      },
+      {
+        name: 'Angular'
+      }
+    ])
+
+    skillsToCleanup.push(react.id, node.id, angular.id)
+
+    const resp = await global.app.inject({
+      url: URL,
+      method: 'GET',
+      query: {
+        sort: 'name'
+      }
+    })
+    const json = JSON.parse(resp.body)
+
+    const angularIndex = json.data.findIndex(({ id }) => id === angular.id)
+    const nodeIndex = json.data.findIndex(({ id }) => id === node.id)
+    const reactIndex = json.data.findIndex(({ id }) => id === react.id)
+
+    expect(reactIndex).toBeGreaterThan(nodeIndex)
+    expect(nodeIndex).toBeGreaterThan(angularIndex)
+  })
+
+  test('GET /skills sorted desc', async () => {
+    const [react, node, angular] = await SkillModel.query().insert([
+      {
+        name: 'React'
+      },
+      {
+        name: 'Node'
+      },
+      {
+        name: 'Angular'
+      }
+    ])
+
+    skillsToCleanup.push(react.id, node.id, angular.id)
+
+    const resp = await global.app.inject({
+      url: URL,
+      method: 'GET',
+      query: {
+        sort: '-name'
+      }
+    })
+    const json = JSON.parse(resp.body)
+
+    const angularIndex = json.data.findIndex(({ id }) => id === angular.id)
+    const nodeIndex = json.data.findIndex(({ id }) => id === node.id)
+    const reactIndex = json.data.findIndex(({ id }) => id === react.id)
+
+    expect(reactIndex).toBeLessThan(nodeIndex)
+    expect(nodeIndex).toBeLessThan(angularIndex)
+  })
+
+  test('GET /skills sorted on invalid key', async () => {
+    const resp = await global.app.inject({
+      url: URL,
+      method: 'GET',
+      query: {
+        sort: 'fooBar'
+      }
+    })
+
+    expect(resp.statusCode).toBe(400)
+  })
+
+  test('GET /skills paginated', async () => {
+    const [react, node, angular] = await SkillModel.query().insert([
+      {
+        name: 'React'
+      },
+      {
+        name: 'Node'
+      },
+      {
+        name: 'Angular'
+      }
+    ])
+
+    skillsToCleanup.push(react.id, node.id, angular.id)
+
+    const resp = await global.app.inject({
+      url: URL,
+      method: 'GET',
+      query: {
+        'page[number]': '0',
+        'page[size]': '2'
+      }
+    })
+    const json = JSON.parse(resp.body)
+    // @TODO check results, this might be wrong
+    expect(json.data.attributes.results.length).toBe(2)
+  })
+  // not needed, paging is cleaned? is that ok?
+  test.skip('GET /skills paginated invalid page key', async () => {
+    const [react, node, angular] = await SkillModel.query().insert([
+      {
+        name: 'React'
+      },
+      {
+        name: 'Node'
+      },
+      {
+        name: 'Angular'
+      }
+    ])
+
+    skillsToCleanup.push(react.id, node.id, angular.id)
+
+    const resp = await global.app.inject({
+      url: URL,
+      method: 'GET',
+      query: {
+        'page[fooBar]': '0'
+      }
+    })
+
+    expect(resp.statusCode).toBe(400)
+  })
+
+  test('GET /skills filter', async () => {
+    const createdSkill = await SkillModel.query().insert({
+      name: '' + Math.random()
+    })
+
+    skillsToCleanup.push(createdSkill.id)
+
+    const resp = await global.app.inject({
+      url: `${URL}?filter[name]=${createdSkill.name}`,
+      method: 'GET'
+    })
+
+    const json = JSON.parse(resp.body)
+
+    expect(resp.statusCode).toBe(200)
+    expect(json.data[0].attributes.name).toBe(createdSkill.name)
+  })
+
+  test('GET /skills filter invalid field', async () => {
+    const createdSkill = await SkillModel.query().insert({
+      name: '' + Math.random()
+    })
+
+    skillsToCleanup.push(createdSkill.id)
+
+    const resp = await global.app.inject({
+      url: `${URL}?filter[BlaNotexisting]=${createdSkill.name}`,
+      method: 'GET'
+    })
+
+    expect(resp.statusCode).toBe(400)
+  })
+
+  test('GET /skills filter like', async () => {
+    const createdSkill = await SkillModel.query().insert({
+      name: (Math.random().toString(36) + '00000000000000000').slice(2, 12 + 2)
+    })
+
+    skillsToCleanup.push(createdSkill.id)
+
+    const resp = await global.app.inject({
+      url: `${URL}?filter[name]=${createdSkill.name.slice(0, -2)}`,
+      method: 'GET'
+      // query: { 'filter[name]': createdSkill.name.slice(0, -2) }
+    })
+
+    const json = JSON.parse(resp.body)
+
+    expect(resp.statusCode).toBe(200)
+    expect(json.data[0].attributes.name).toBe(createdSkill.name)
+  })
+
+  test('GET /skills filter and sort', async () => {
+    const [react, reactNative] = await SkillModel.query().insert([
+      {
+        name: 'React'
+      },
+      {
+        name: 'React Native'
+      }
+    ])
+
+    skillsToCleanup.push(react.id, reactNative.id)
+
+    const resp = await global.app.inject({
+      url: URL,
+      method: 'GET',
+      query: {
+        'filter[name]': 'React',
+        sort: 'name'
+      }
+    })
+
+    const json = JSON.parse(resp.body)
+
+    const reactIndex = json.data.findIndex(({ id }) => id === react.id)
+    const reactNativeIndex = json.data.findIndex(({ id }) => id === reactNative.id)
+
+    expect(resp.statusCode).toBe(200)
+    expect(reactIndex).toBeLessThan(reactNativeIndex)
   })
 
   test('GET /skills/:id', async () => {

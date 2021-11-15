@@ -15,9 +15,9 @@ class Role extends Model {
       required: ['project_id'],
       properties: {
         id: { type: 'string', format: 'uuid' },
-        start_date: { type: 'string' },
+        start_date: { type: 'date' },
         start_confidence: { type: 'integer' },
-        end_date: { type: 'string' },
+        end_date: { type: 'date' },
         end_confidence: { type: 'integer' },
         project_id: { type: 'string' }
       }
@@ -63,12 +63,12 @@ class Role extends Model {
         relation: Model.ManyToManyRelation,
         modelClass: Skill,
         join: {
-          from: 'skill.id',
+          from: 'role.id',
           through: {
             from: 'role__skill.role_id',
             to: 'role__skill.skill_id'
           },
-          to: 'role.id'
+          to: 'skill.id'
         }
       }
     }

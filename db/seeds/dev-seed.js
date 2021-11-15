@@ -4,6 +4,7 @@ const Project = require('../../src/models/project')
 const faker = require('faker')
 
 const fakesCache = new Map()
+
 function generateAndCacheFake (keyPrefix, key, generator) {
   const prefixedKey = `${keyPrefix}.${key}`
   let value
@@ -68,6 +69,8 @@ const seed = async (knex) => {
   await knex('employee').del()
   await knex('skill').del()
 
+  // Generate skills
+
   // insert seed data
   await Project.query().insertGraph([
     {
@@ -122,7 +125,6 @@ const seed = async (knex) => {
             '#id': fakeSkill(2),
             name: fakeSkill(2)
           }, {
-            '#id': fakeSkill(3),
             name: fakeSkill(3)
           }],
 
@@ -146,7 +148,10 @@ const seed = async (knex) => {
       ]
     }
     // more projects
-  ], { allowRefs: true })
+  ], {
+    allowRefs: true,
+    relate: true
+  })
 }
 
 module.exports = {

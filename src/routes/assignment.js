@@ -1,34 +1,40 @@
 const Assignment = require('../models/assignment')
 const { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
+const schema = require('../schemas/assignment')
 
 const routes = {
   list: {
     url: '/assignments',
     method: 'GET',
-    handler: getListHandler(Assignment)
+    handler: getListHandler(Assignment),
+    schema: schema.list
   },
 
   get: {
     url: '/assignments/:id',
     method: 'GET',
-    handler: getListHandler(Assignment)
+    handler: getListHandler(Assignment),
+    schema: schema.get
   },
 
   post: {
     url: '/assignments',
     method: 'POST',
-    handler: getPostHandler(Assignment)
+    handler: getPostHandler(Assignment),
+    schema: schema.create
   },
 
   patch: {
     url: '/assignments/:id',
     method: 'PATCH',
-    handler: getUpdateHandler(Assignment)
+    handler: getUpdateHandler(Assignment),
+    schema: schema.patch
   },
   delete: {
     url: '/assignments/:id',
     method: 'DELETE',
-    handler: getDeleteHandler(Assignment)
+    handler: getDeleteHandler(Assignment),
+    schema: schema.remove
   }
 }
 

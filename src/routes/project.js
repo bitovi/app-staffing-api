@@ -1,32 +1,34 @@
 const ProjectModel = require('../models/project')
 const { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
+const schema = require('../schemas/project')
 
 const routes = {
   create: {
     method: 'POST',
     url: '/projects',
-    schema: {
-      body: ProjectModel.getSchema
-    },
-    handler: getPostHandler(ProjectModel)
+    handler: getPostHandler(ProjectModel),
+    schema: schema.create
   },
 
   list: {
     method: 'GET',
     url: '/projects',
-    handler: getListHandler(ProjectModel)
+    handler: getListHandler(ProjectModel),
+    schema: schema.list
   },
 
   get: {
     method: 'GET',
     url: '/projects/:id',
-    handler: getListHandler(ProjectModel)
+    handler: getListHandler(ProjectModel),
+    schema: schema.get
   },
 
   update: {
     method: 'PATCH',
     url: '/projects/:id',
-    handler: getUpdateHandler(ProjectModel)
+    handler: getUpdateHandler(ProjectModel),
+    schema: schema.patch
   },
 
   delete: {

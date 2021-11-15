@@ -6,28 +6,6 @@ module.exports = class Assignment extends Model {
     return 'assignment'
   }
 
-  static get jsonSchema () {
-    return {
-      type: 'object',
-      required: ['employee_id', 'role_id', 'start_date'],
-
-      properties: {
-        id: {
-          type: 'string'
-        },
-        employee_id: {
-          type: 'string'
-        },
-        role_id: {
-          type: 'string'
-        },
-        start_date: { type: 'date' },
-        end_date: { type: 'date' }
-      },
-      additionalProperties: false
-    }
-  }
-
   static get relationMappings () {
     const Role = require('./role')
     const Employee = require('./employee')

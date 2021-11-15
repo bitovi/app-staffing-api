@@ -72,7 +72,7 @@ const seed = async (knex) => {
   // Generate skills
 
   // insert seed data
-  const grapth = await Project.query().insertGraph([
+  await Project.query().insertGraph([
     {
       name: fakeProject(1),
       start_date: new Date(),

@@ -44,6 +44,16 @@ const create = {
   tags,
   type: 'object',
   required: ['name', 'start_date'],
+  body: {
+    type: 'object',
+    required: ['name', 'start_date']
+  },
+  errorMessage: {
+    required: {
+      name: 'name is required',
+      age: 'start_date is required'
+    }
+  },
   properties,
   additionalProperties: false
 }

@@ -57,6 +57,10 @@ const create = {
   tags,
   type: 'object',
   required: ['project_id'],
+  body: {
+    type: 'object',
+    required: ['project_id']
+  },
   properties,
   additionalProperties: false
 }

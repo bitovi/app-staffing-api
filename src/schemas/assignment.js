@@ -15,13 +15,13 @@ const properties = {
   },
   start_date: {
     type: 'string',
-    format: 'date',
-    description: 'the date the employee will begin this assignment'
+    // format: 'date-time',
+    description: 'the date-time the employee will begin this assignment'
   },
   end_date: {
     type: 'string',
-    format: 'date',
-    description: 'the expected date the employee will end this assignment'
+    // format: 'date-time',
+    description: 'the expected date-time the employee will end this assignment'
   }
 }
 const propertiesWithId = {

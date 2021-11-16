@@ -27,6 +27,9 @@ const build = () => {
   })
   // Custom Error handler for JSON-API spec
   fastify.setErrorHandler(function (error, request, reply) {
+    if (error?.validation) {
+      error.statusCode = 400
+    }
     const status = error.status || error.statusCode || 500
     this.log.error(error)
     reply.status(status).send({

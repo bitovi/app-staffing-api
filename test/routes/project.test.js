@@ -58,7 +58,7 @@ describe('POST', () => {
       data: {
         type: 'projects',
         attributes: {
-          start_date: new Date().toISOString()
+          start_date: '2020-01-15'
         }
       }
     }
@@ -75,7 +75,7 @@ describe('POST', () => {
 
     const result = JSON.parse(response.body)
 
-    expect(result).toEqual({ title: 'name: is a required property', status: 400 })
+    expect(result).toEqual({ title: "body should have required property '.name'", status: 400 })
   })
 })
 

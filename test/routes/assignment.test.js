@@ -40,14 +40,15 @@ describe('Assignment Component Tests', () => {
       const role_id = await getRoleId()
 
       // const employees = await Employee.query()
+      // validattion expects date of format "YYYY-MM-DD"
       const testBody = {
         data: {
           type: 'assignments',
           attributes: {
             employee_id,
             role_id,
-            start_date: '2021-06-30T09:39:13.985Z',
-            end_date: '2022-06-30T09:39:13.985Z'
+            start_date: '2021-06-30',
+            end_date: '2022-06-30'
           }
         }
       }
@@ -71,7 +72,7 @@ describe('Assignment Component Tests', () => {
       expect(result.data.attributes).toEqual(testBody.data.attributes)
     })
 
-    it('should return 500 when no project_id is present on body', async () => {
+    it('should return 500 when no role_id is present on body', async () => {
       const testBody = {
         data: {
           type: 'roles',
@@ -94,7 +95,7 @@ describe('Assignment Component Tests', () => {
         }
       })
 
-      expect(response.statusCode).toEqual(400)
+      expect(response.statusCode).toEqual(500)
     })
   })
 
@@ -178,7 +179,7 @@ describe('Assignment Component Tests', () => {
     it('should update fields', async () => {
       const testRecord = await createAssignment()
 
-      const start_date = '2000-06-30T09:39:13.985Z'
+      const start_date = '2000-06-30T00:00:00.000Z'
       const data = {
         data: {
           type: 'assignments',

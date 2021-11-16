@@ -1,7 +1,7 @@
 const common = {
   'page[number]': {
     type: 'string',
-    description: 'page number'
+    description: 'page number. First page starts at 0'
   },
   'page[size]': {
     type: 'string',

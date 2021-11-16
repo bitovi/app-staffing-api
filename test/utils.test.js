@@ -1,5 +1,6 @@
 
 const { parseJsonApiParams } = require('../src/utils')
+jest.useFakeTimers()
 
 describe('parseJsonApiParams', () => {
   const defaultExpected = {

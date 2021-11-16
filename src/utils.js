@@ -91,9 +91,26 @@ const parseJsonApiParams = (query) => {
 
   return queryDatabase
 }
+/**
+ * Create queryString filters for validating and documenting the model entities
+ * @param {*} properties
+ * @returns JSON Schema Object
+ */
+function makeQueryStringFilters (properties) {
+  const filters = Object.entries(properties).reduce((filters, [key, def]) => {
+    if (key === 'id') return filters
+
+    const name = `filter[${key}]`
+    filters[name] = def
+
+    return filters
+  }, {})
+  return filters
+}
 
 module.exports = {
   getIncludeStr,
   createUUID,
-  parseJsonApiParams
+  parseJsonApiParams,
+  makeQueryStringFilters
 }

@@ -2,6 +2,7 @@ const { Model } = require('objection')
 const Knex = require('knex')
 const { Serializer } = require('./json-api-serializer')
 const knexfile = require('./knexfile')
+const setupFastifySwagger = require('./fastify-swagger')
 
 const build = () => {
   const knex = Knex(knexfile)
@@ -10,6 +11,8 @@ const build = () => {
   const fastify = require('fastify')({
     logger: true
   })
+
+  setupFastifySwagger(fastify)
 
   // Custom Content-Type parser for JSON-API spec
   fastify.addContentTypeParser('application/vnd.api+json', { parseAs: 'string' }, (request, payload, done) => {
@@ -24,6 +27,9 @@ const build = () => {
   })
   // Custom Error handler for JSON-API spec
   fastify.setErrorHandler(function (error, request, reply) {
+    if (error?.validation) {
+      error.statusCode = 400
+    }
     const status = error.status || error.statusCode || 500
     this.log.error(error)
     reply.status(status).send({

@@ -1,33 +1,38 @@
 const SkillModel = require('../models/skill')
 const { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
+const schema = require('../schemas/skill')
 
 const routes = {
   list: {
     method: 'GET',
     url: '/skills',
-    handler: getListHandler(SkillModel)
+    handler: getListHandler(SkillModel),
+    schema: schema.list
   },
   get: {
     method: 'GET',
     url: '/skills/:id',
-    handler: getListHandler(SkillModel)
+    handler: getListHandler(SkillModel),
+    schema: schema.get
   },
   delete: {
     method: 'DELETE',
     url: '/skills/:id',
-    handler: getDeleteHandler(SkillModel)
+    handler: getDeleteHandler(SkillModel),
+    schema: schema
   },
-  update: {
+  patch: {
     method: 'PATCH',
     url: '/skills/:id',
-    handler: getUpdateHandler(SkillModel)
+    handler: getUpdateHandler(SkillModel),
+    schema: schema.patch
     // schema: SkillModel.jsonSchemaPatch
   },
   create: {
     method: 'POST',
     url: '/skills',
     handler: getPostHandler(SkillModel),
-    schema: SkillModel.jsonSchema
+    schema: schema.create
   }
 
 }

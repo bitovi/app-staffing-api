@@ -1,6 +1,7 @@
 const { Serializer } = require('../json-api-serializer')
 // const { query } = require('../models/project')
 const { getIncludeStr, parseJsonApiParams } = require('../utils')
+const modelHasColumn = require('../schemas/all-properties')
 
 const normalizeColumn = (tableName, column) => column.includes('.') ? column : `${tableName}.${column}`
 
@@ -14,7 +15,7 @@ const getListHandler = (Model) => {
 
     const modelRelations = Object.keys(Model.getRelations())
     databaseName = databaseName || Model.knex().client.config.connection.database
-    const columnNames = Object.keys(Model.jsonSchema.properties)
+    // const columnNames = Object.keys(request.context.schema.querystring.properties)
     // DEBUG columnInfo
 
     // const knex = Model.knex()
@@ -40,6 +41,14 @@ const getListHandler = (Model) => {
     if (Object.keys(parsedParams.fields).length) {
       for (const [key, val] of Object.entries(parsedParams.fields)) {
         const items = val.map(el => normalizeColumn(key.slice(0, -1), el))
+        if (!modelHasColumn(items)) {
+          return reply
+            .code(404)
+            .send({
+              status: 400,
+              title: 'Cannot select non-existing fields'
+            })
+        }
         queryBuilder.column(...items)
       }
     }
@@ -60,7 +69,8 @@ const getListHandler = (Model) => {
       }
 
       parsedParams.filter.forEach((filter) => {
-        if (!columnNames.includes(filter.key)) {
+        const normalizedName = normalizeColumn(tableName, filter.key)
+        if (!modelHasColumn(normalizedName)) {
           return reply.status(400)
             .send({
               status: 400,
@@ -100,9 +110,9 @@ const getListHandler = (Model) => {
           sqlValue = filter.value
         }
         if (!queryBuilder.hasWheres()) {
-          queryBuilder.where(normalizeColumn(tableName, filter.key), comparator, sqlValue)
+          queryBuilder.where(normalizedName, comparator, sqlValue)
         } else {
-          queryBuilder.andWhere(normalizeColumn(tableName, filter.key), comparator, sqlValue)
+          queryBuilder.andWhere(normalizedName, comparator, sqlValue)
         }
       })
     }
@@ -123,8 +133,10 @@ const getListHandler = (Model) => {
     if (parsedParams.sort.length) {
       parsedParams.sort.forEach((fieldDirection) => {
         const { name, direction } = fieldDirection
-        if (columnNames.includes(name)) {
-          queryBuilder.orderBy(normalizeColumn(tableName, name), direction)
+        const normalizedName = normalizeColumn(tableName, name)
+
+        if (modelHasColumn(normalizedName)) {
+          queryBuilder.orderBy(normalizedName, direction)
         } else {
           reply.status(400)
             .send({
@@ -135,7 +147,7 @@ const getListHandler = (Model) => {
       })
     }
     // execute the builder after finish chaining
-    queryBuilder.debug()
+    // queryBuilder.debug()
     const data = await queryBuilder.execute()
 
     if (!data) {

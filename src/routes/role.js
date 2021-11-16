@@ -1,29 +1,31 @@
 const RolesModel = require('../models/role')
 const { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
+const schema = require('../schemas/role')
 
 const routes = {
   create: {
     method: 'POST',
     url: '/roles',
-    schema: {
-      body: RolesModel.getSchema
-    },
+    schema: schema.create,
     handler: getPostHandler(RolesModel)
   },
   list: {
     method: 'GET',
     url: '/roles',
-    handler: getListHandler(RolesModel)
+    handler: getListHandler(RolesModel),
+    schema: schema.list
   },
   get: {
     method: 'GET',
     url: '/roles/:id',
-    handler: getListHandler(RolesModel)
+    handler: getListHandler(RolesModel),
+    schema: schema.get
   },
-  update: {
+  patch: {
     method: 'PATCH',
     url: '/roles/:id',
-    handler: getUpdateHandler(RolesModel)
+    handler: getUpdateHandler(RolesModel),
+    schema: schema.patch
   },
   delete: {
     method: 'DELETE',

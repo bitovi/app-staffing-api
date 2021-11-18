@@ -23,8 +23,8 @@ const tags = [name]
 
 const list = {
   description: `retrieve a list of ${name}s`,
+  summary: `retrieve a list of ${name}s`,
   tags,
-  summary: '',
   querystring: {
     type: 'object',
     properties: {
@@ -35,12 +35,13 @@ const list = {
 }
 const get = {
   description: `retrieve an ${name} by id`,
+  summary: `retrieve an ${name} by id`,
   tags,
-  summary: '',
   params: makeIdParams(name)
 }
 const create = {
   description: `create an ${name}`,
+  summary: `create an ${name}`,
   tags,
   type: 'object',
   required: ['name'],
@@ -53,6 +54,7 @@ const create = {
 }
 const patch = {
   description: `patch an ${name}`,
+  summary: `patch an ${name}`,
   tags,
   type: 'object',
   properties,

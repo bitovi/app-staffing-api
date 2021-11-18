@@ -30,7 +30,8 @@ const routes = {
   delete: {
     method: 'DELETE',
     url: '/roles/:id',
-    handler: getDeleteHandler(RolesModel)
+    handler: getDeleteHandler(RolesModel),
+    schema: schema.remove
   }
 }
 

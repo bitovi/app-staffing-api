@@ -44,11 +44,6 @@ const build = () => {
 
   const registerService = (def) => Object.values(def).forEach(route => fastify.route(route))
 
-  // Declare a route
-  fastify.get('/', (request, reply) => {
-    reply.send({ hello: 'world' })
-  })
-
   registerService(require('./routes/role.js'))
   registerService(require('./routes/skill.js'))
   registerService(require('./routes/project.js'))

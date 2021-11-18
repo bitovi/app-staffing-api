@@ -19,14 +19,13 @@ const routes = {
     method: 'DELETE',
     url: '/skills/:id',
     handler: getDeleteHandler(SkillModel),
-    schema: schema
+    schema: schema.remove
   },
   patch: {
     method: 'PATCH',
     url: '/skills/:id',
     handler: getUpdateHandler(SkillModel),
     schema: schema.patch
-    // schema: SkillModel.jsonSchemaPatch
   },
   create: {
     method: 'POST',

@@ -34,7 +34,8 @@ const routes = {
   delete: {
     url: '/employees/:id',
     method: 'DELETE',
-    handler: getDeleteHandler(Employee)
+    handler: getDeleteHandler(Employee),
+    schema: schema.remove
   }
 }
 

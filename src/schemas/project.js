@@ -23,8 +23,8 @@ const tags = [name]
 
 const list = {
   description: `retrieve a list of ${name}s`,
+  summary: `retrieve a list of ${name}s`,
   tags,
-  summary: '',
   querystring: {
     type: 'object',
     properties: {
@@ -35,12 +35,13 @@ const list = {
 }
 const get = {
   description: `retrieve a ${name} by id`,
+  summary: `retrieve a ${name} by id`,
   tags,
-  summary: '',
   params: makeIdParams(name)
 }
 const create = {
   description: `create a ${name}`,
+  summary: `create a ${name}`,
   tags,
   type: 'object',
   required: ['name', 'start_date'],
@@ -59,10 +60,24 @@ const create = {
 }
 const patch = {
   description: `patch a ${name}`,
+  summary: `patch a ${name}`,
   tags,
   type: 'object',
   properties,
   additionalProperties: false
+}
+const remove = {
+  description: `delete a ${name}`,
+  summary: `delete an ${name}`,
+  tags,
+  params: makeIdParams(name),
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      properties: {}
+    }
+  }
 }
 
 module.exports = {
@@ -70,5 +85,6 @@ module.exports = {
   list,
   get,
   create,
-  patch
+  patch,
+  remove
 }

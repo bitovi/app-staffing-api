@@ -17,12 +17,8 @@ let assignmentIdsToDelete = []
 
 describe('Role Component Tests', () => {
   afterAll(async () => {
-    console.time('AssignmentDelete')
     await Assignment.query().whereIn('id', assignmentIdsToDelete).delete()
-    console.timeEnd('AssignmentDelete')
-    console.time('RoleDelete')
     await Role.query().whereIn('id', roleIdsToDelete).delete()
-    console.timeEnd('RoleDelete')
     await Project.query().whereIn('id', projectIdsToDelete).delete()
     await Employee.query().whereIn('id', employeeIdsToDelete).delete()
     await Skill.query().whereIn('id', skillIdsToDelete).delete()

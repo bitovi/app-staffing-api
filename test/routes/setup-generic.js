@@ -16,7 +16,7 @@ module.exports = {
           type: 'string'
         }
       },
-      primarykeys: ['id'],
+      primaryKeys: ['id'],
       required: ['name'],
       relations: ['roles', 'employees']
     },
@@ -37,7 +37,7 @@ module.exports = {
           type: 'string'
         }
       },
-      primarykeys: ['id'],
+      primaryKeys: ['id'],
       required: ['name'],
       relations: ['skills', 'roles', 'assignments']
     },
@@ -58,7 +58,7 @@ module.exports = {
           type: 'string'
         }
       },
-      primarykeys: ['id'],
+      primaryKeys: ['id'],
       required: ['name', 'start_date'],
       relations: ['roles', 'assignments']
     },
@@ -93,7 +93,7 @@ module.exports = {
           format: 'uuid'
         }
       },
-      primarykeys: ['id'],
+      primaryKeys: ['id'],
       required: ['project_id'],
       foreignKeys: {
         projects: {
@@ -128,7 +128,7 @@ module.exports = {
           type: 'string'
         }
       },
-      primarykeys: ['id'],
+      primaryKeys: ['id'],
       required: ['employee_id', 'role_id', 'start_date'],
       foreignKeys: {
         employees: {

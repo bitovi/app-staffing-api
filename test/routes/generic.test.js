@@ -176,9 +176,11 @@ function testGets (mylist) {
       const objname = myroute.routeName
 
       beforeAll(async () => {
-        // create 2 of objname
+        // create 4 of objname, why not a loop you might ask.
         createdObjects[0] = await createDbObject(objname, createdIDs)
         createdObjects[1] = await createDbObject(objname, createdIDs)
+        createdObjects[2] = await createDbObject(objname, createdIDs)
+        createdObjects[3] = await createDbObject(objname, createdIDs)
       })
 
       test(`GET: should get listing for GET /${objname}`, async () => {
@@ -225,6 +227,46 @@ function testGets (mylist) {
           headers: { 'Content-Type': 'application/vnd.api+json' }
         })
         expect(resp.statusCode).toBe(404)
+      })
+
+      // test Pagination
+      test(`GET /${objname} paginated`, async () => {
+        const response = await global.app.inject({
+          url: `${objname}`,
+          method: 'GET',
+          query: {
+            'page[number]': '0',
+            'page[size]': '2'
+          }
+        })
+        const results = JSON.parse(response.body)
+        expect(results.data.attributes.results.length).toBe(2)
+      })
+
+      // test Invalid Pagination
+      test(`GET /${objname} with invalid page[number]`, async () => {
+        const response = await global.app.inject({
+          url: `${objname}`,
+          method: 'GET',
+          query: {
+            'page[number]': '-1',
+            'page[size]': '2'
+          }
+        })
+        expect(response.statusCode).toBe(400)
+      })
+
+      // test Invalid Page size
+      test(`GET /${objname} with invalid page[size]`, async () => {
+        const response = await global.app.inject({
+          url: `${objname}`,
+          method: 'GET',
+          query: {
+            'page[number]': '1',
+            'page[size]': '0'
+          }
+        })
+        expect(response.statusCode).toBe(400)
       })
 
       // testing SORT
@@ -275,6 +317,19 @@ function testGets (mylist) {
         if (createdObjects[1][prop] !== createdObjects[0][prop]) {
           expect(index2 > index1).toBe(createdObjects[1][prop] < createdObjects[0][prop])
         }
+      })
+
+      // testing SORT on invalid key
+      test(`SORT on non-existing: ${objname}?sort=foobooNo`, async () => {
+        const routeName = myroute.routeName
+        const result = await global.app.inject({
+          url: `${routeName}`,
+          method: 'GET',
+          query: {
+            sort: 'foobooNo'
+          }
+        })
+        expect(result.statusCode).toBe(400)
       })
 
       // Testing FILTER

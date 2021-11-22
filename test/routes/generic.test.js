@@ -25,18 +25,19 @@ testPostCreates(schema.routes)
 
 //
 function testPostCreates (mylist) {
-  describe('POST Create Component Tests', () => {
+  describe('POST, PATCH, DELETE Component Tests', () => {
     const createdIDs = {}
 
     afterAll(async () => {
       await deleteCreatedIDs(createdIDs)
     })
-    test.concurrent.each(mylist)('%s: POST should insert and return an id, dependencies are already created', async (myroute) => {
+    test.concurrent.each(mylist)('%s: POST should insert and return an id', async (myroute) => {
       const obj = {}
       const required = myroute.required
       const foreignKeys = myroute?.foreignKeys || {}
       const primaryKeys = myroute?.primaryKeys || ['id']
       const pkey = primaryKeys[0]
+      const routeName = myroute.routeName
 
       if (myroute?.foreignKeys) {
         for (const [key, value] of Object.entries(foreignKeys)) {
@@ -47,13 +48,13 @@ function testPostCreates (mylist) {
         }
       }
       for (const [key, value] of Object.entries(myroute.properties)) {
-        if (required.includes(key) && !obj[key]) {
+        if (required.includes(key) && !obj[key] && key !== pkey) {
           obj[key] = createFakeData(key, value)
         }
       }
       const testBody = {
         data: {
-          type: 'roles',
+          type: routeName,
           attributes: { ...obj }
         }
       }
@@ -73,6 +74,87 @@ function testPostCreates (mylist) {
       const result = JSON.parse(response.body)
 
       expect(result?.data).toHaveProperty(pkey)
+    })
+
+    // PATCH update
+    test.concurrent.each(mylist)('%s: PATCH should update record', async (myroute) => {
+      const required = myroute.required
+      const foreignKeys = myroute?.foreignKeys || {}
+      const primaryKeys = myroute?.primaryKeys || ['id']
+      const pkey = primaryKeys[0]
+      const routeName = myroute.routeName
+
+      const createdObj = await createDbObject(routeName, createdIDs)
+
+      const obj = {}
+      let sampleProperty
+      if (myroute?.foreignKeys) {
+        for (const [key, value] of Object.entries(foreignKeys)) {
+          const createdObj = await createDbObject(key, createdIDs)
+          // console.log('POST createdObj', createdObj)
+          const keyFrom = createdObj[value.from]
+          obj[value.into] = keyFrom
+        }
+      }
+      for (const [key, value] of Object.entries(myroute.properties)) {
+        if (required.includes(key) && !obj[key] && key !== pkey) {
+          obj[key] = createFakeData(key, value)
+          if (!sampleProperty) {
+            sampleProperty = key
+          }
+        }
+      }
+
+      const testBody = {
+        data: {
+          type: routeName,
+          attributes: { ...obj }
+        }
+      }
+      testBody.data[pkey] = createdObj[pkey]
+
+      const response = await global.app.inject({
+        url: `${routeName}/${createdObj[pkey]}`,
+        body: JSON.stringify(testBody),
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/vnd.api+json',
+          Accept: 'application/vnd.api+json'
+        }
+      })
+      expect(response.statusCode).toEqual(204)
+      const result = await myroute.model.query().findById(createdObj[pkey])
+      expect(result[sampleProperty]).toEqual(obj[sampleProperty])
+    })
+
+    // DELETE
+    test.concurrent.each(mylist)('%s: DELETE record', async (myroute) => {
+      const primaryKeys = myroute?.primaryKeys || ['id']
+      const pkey = primaryKeys[0]
+      const routeName = myroute.routeName
+
+      const createdObj = await createDbObject(routeName, createdIDs)
+
+      const response = await global.app.inject({
+        url: `${routeName}/${createdObj[pkey]}`,
+        method: 'DELETE'
+      })
+      expect(response.statusCode).toEqual(204)
+
+      const deletedObj = await myroute.model.query().findById(createdObj[pkey])
+
+      expect(deletedObj).toBeUndefined()
+    })
+
+    // DELETE non existing record
+    test.concurrent.each(mylist)('%s: DELETE record', async (myroute) => {
+      const routeName = myroute.routeName
+
+      const response = await global.app.inject({
+        url: `${routeName}/7761b531-50b7-457e-803e-dd8897f86dd2`,
+        method: 'DELETE'
+      })
+      expect(response.statusCode).toEqual(404)
     })
   })
 }
@@ -134,7 +216,7 @@ function testGets (mylist) {
         expect(results[pkey]).toBe(id)
       })
 
-      test(`GET by NONE EXISTING ID: should return 404. GET /${objname}/nonexisting`, async () => {
+      test(`GET by NONE-EXISTING-ID: should return 404. GET /${objname}/nonexisting`, async () => {
         const url = `${objname}/f3eae4c7-1234-409f-9a84-8d66df519876`
 
         const resp = await global.app.inject({

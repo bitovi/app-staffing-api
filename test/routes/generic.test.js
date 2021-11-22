@@ -1,5 +1,6 @@
 const schema = require('./setup-generic')
 const faker = require('faker')
+schema.routes = schema.routes.map(route => Object.assign(route, { toString: function () { return this.routeName } }))
 
 /*
 // Generate subsets from array
@@ -14,11 +15,10 @@ const getAllSubsets = theArray => theArray.reduce(
 // jest.useFakeTimers()
 
 // -----------Start-here-----------------
+// #1
+testGets(schema.routes)
 
-const myRoutes = schema.routes.map(r => { return [r.routeName, r.relations] })
-testGets(myRoutes)
-
-schema.routes = schema.routes.map(route => Object.assign(route, { toString: function () { return this.routeName } }))
+// #2
 testPostCreates(schema.routes)
 
 // ----------End-Here------------------
@@ -147,7 +147,7 @@ function testPostCreates (mylist) {
     })
 
     // DELETE non existing record
-    test.concurrent.each(mylist)('%s: DELETE record', async (myroute) => {
+    test.concurrent.each(mylist)('%s: DELETE non-existing record', async (myroute) => {
       const routeName = myroute.routeName
 
       const response = await global.app.inject({
@@ -168,12 +168,12 @@ function testGets (mylist) {
       await deleteCreatedIDs(createdIDs)
     })
 
-    describe.each(mylist)('%s: GET Listing Component Tests', (objname, relations) => {
-      const route = schema.routes.filter(el => el.routeName === objname)[0]
-      const primaryKeys = route?.primaryKeys || ['id']
+    describe.each(mylist)('%s: GET Listing Component Tests', (myroute) => {
+      const primaryKeys = myroute?.primaryKeys || ['id']
       const pkey = primaryKeys[0]
-      const properties = route.properties
+      const properties = myroute.properties
       const createdObjects = []
+      const objname = myroute.routeName
 
       beforeAll(async () => {
         // create 2 of objname
@@ -303,11 +303,12 @@ function testGets (mylist) {
       // })
     })
 
-    describe.each(mylist)('%s: Testing include relations requests', (objname, relations) => {
-      const route = schema.routes.filter(el => el.routeName === objname)[0]
-      const primaryKeys = route?.primaryKeys || ['id']
+    describe.each(mylist)('%s: Testing include relations requests', (myroute) => {
+      const primaryKeys = myroute?.primaryKeys || ['id']
       const pkey = primaryKeys[0]
       const createdObjects = []
+      const objname = myroute.routeName
+      const relations = myroute.relations
 
       beforeAll(async () => {
         // create 2 of objname

@@ -333,29 +333,23 @@ function testGets (mylist) {
       })
 
       // Testing FILTER
-      // test.each(props)(`FILTER ${objname}?filter[%s]=`, async (prop) => {
-      //   // expect.assertions(2)
-      //   // console.log(objname, relation)
-      //   const filterby = 'a'
-      //   const resp = await global.app.inject({
-      //     url: `${objname}?filter[${prop}=${filterby}`,
-      //     method: 'GET',
-      //     headers: { 'Content-Type': 'application/vnd.api+json' }
-      //   })
-      //   const json = JSON.parse(resp.body)
+      // @TODO: fix after fixing swagger schema
+      test.each(props.filter(el => properties[el]?.format !== 'uuid'))(`FILTER ${objname}?filter[%s]=`, async (prop) => {
+        const isString = properties[prop].type === 'string'
+        const unixTime = Date.parse(createdObjects[0][prop])
 
-      //   const results = json.data
-      //   expect(resp.statusCode).toBe(200)
-      //   // console.log('results', results)
-      //   expect(results.length).toBeGreaterThan(0)
-      //   const index1 = results.findIndex(el => el[pkey] === createdObject1[pkey])
-      //   const index2 = results.findIndex(el => el[pkey] === createdObjects[1][pkey])
-      //   console.log(prop, 'index1', index1, 'index2', index2)
-      //   console.log(prop, 'createdObject1[prop]', createdObject1[prop], 'createdObjects[1][prop]', createdObjects[1][prop])
-      //   if (createdObjects[1][prop] !== createdObject1[prop]) {
-      //     expect(index2 > index1).toBe(createdObjects[1][prop] < createdObject1[prop])
-      //   }
-      // })
+        const filterby = (isString && unixTime) ? (new Date(unixTime)).toISOString().slice(0, 10) || createdObjects[0][prop] : createdObjects[0][prop]
+        const url = `${objname}?filter[${prop}]=${filterby}`
+        const response = await global.app.inject({
+          url: url,
+          method: 'GET',
+          headers: { 'Content-Type': 'application/vnd.api+json' }
+        })
+        const json = JSON.parse(response.body)
+        const results = json.data
+        expect(response.statusCode).toBe(200)
+        expect(Array.isArray(results)).toBe(true)
+      })
     })
 
     describe.each(mylist)('%s: Testing include relations requests', (myroute) => {

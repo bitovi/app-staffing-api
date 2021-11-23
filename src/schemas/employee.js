@@ -3,7 +3,10 @@ const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
 
 const properties = {
-  id: { type: 'string', format: 'uuid' },
+  id: {
+    type: 'string',
+    format: 'uuid'
+  },
   name: {
     type: 'string',
     description: 'The name of the employee'

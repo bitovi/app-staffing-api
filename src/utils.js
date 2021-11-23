@@ -98,7 +98,7 @@ const parseJsonApiParams = (query) => {
  */
 function makeQueryStringFilters (properties) {
   const filters = Object.entries(properties).reduce((filters, [key, def]) => {
-    if (key === 'id') return filters
+    if (def?.format === 'uuid') return filters
 
     const name = `filter[${key}]`
     filters[name] = def

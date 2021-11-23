@@ -2,18 +2,6 @@ const schema = require('./setup-generic')
 const faker = require('faker')
 schema.routes = schema.routes.map(route => Object.assign(route, { toString: function () { return this.routeName } }))
 
-/*
-// Generate subsets from array
-*/
-const getAllSubsets = theArray => theArray.reduce(
-  (subsets, value) => subsets.concat(
-    subsets.map(set => [...set, value])
-  ),
-  [[]]
-)
-
-// jest.useFakeTimers()
-
 // -----------Start-here-----------------
 // #1
 testGets(schema.routes)
@@ -271,7 +259,7 @@ function testGets (mylist) {
 
       // testing SORT
       const props = Object.keys(properties).filter(el => el)
-      test.each(props)(`OrderBy ${objname}?sort=%s`, async (prop) => {
+      test.each(props)(`SORT ${objname}?sort=%s`, async (prop) => {
         // expect.assertions(2)
         // console.log(objname, relation)
         const resp = await global.app.inject({
@@ -295,7 +283,7 @@ function testGets (mylist) {
         }
       })
       // Testing SORT DESC
-      test.each(props)(`OrderBy DESC ${objname}?sort=-%s`, async (prop) => {
+      test.each(props)(`SORT DESC ${objname}?sort=-%s`, async (prop) => {
         // expect.assertions(2)
         // console.log(objname, relation)
         const resp = await global.app.inject({
@@ -496,4 +484,16 @@ function createFakeData (key, value) {
 // generates random integer between 2 numbers including them
 function randomIntFromInterval (min = 0, max = 100) {
   return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
+/*
+// Generate subsets from array
+*/
+function getAllSubsets (theArray) {
+  return theArray.reduce(
+    (subsets, value) => subsets.concat(
+      subsets.map(set => [...set, value])
+    ),
+    [[]]
+  )
 }

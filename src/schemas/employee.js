@@ -40,7 +40,7 @@ const exampleGetResponse = {
 }
 const exampleCreateResponse = {
   jsonapi: { version: '1.0' },
-  links: { self: '', first: '?', prev: '?' },
+  links: { self: '/employees/6c0d8a4c-e8e2-4ce9-96b2-04a81a91c1cd' },
   data: {
     type: 'employees',
     id: '6c0d8a4c-e8e2-4ce9-96b2-04a81a91c1cd',

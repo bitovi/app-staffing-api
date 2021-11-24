@@ -61,7 +61,7 @@ function testPostCreates (mylist) {
         expect(response.statusCode).toEqual(201)
 
         const result = JSON.parse(response.body)
-
+        console.log(result)
         expect(result?.data).toHaveProperty(pkey)
 
         // add to list to be deleted with afterAll

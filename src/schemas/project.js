@@ -21,6 +21,24 @@ const properties = {
   }
 }
 
+const exampleGetResponse = {
+  jsonapi: {
+    version: '1.0'
+  },
+  links: {
+    self: '/projects/0b3aabce-b783-4169-bdeb-b342fc4fc70a'
+  },
+  data: {
+    type: 'projects',
+    id: '0b3aabce-b783-4169-bdeb-b342fc4fc70a',
+    attributes: {
+      name: 'Okuneva Group',
+      start_date: '2021-11-24T18:29:51.833Z',
+      end_date: '2021-11-24T18:29:51.833Z'
+    }
+  }
+}
+
 const name = 'project'
 const tags = [name]
 
@@ -46,7 +64,8 @@ const get = {
     default: {
       description: 'Default response',
       type: 'object',
-      properties: {}
+      properties: {},
+      example: exampleGetResponse
     },
     404: {
       description: 'Not Found',

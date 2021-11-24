@@ -3,7 +3,11 @@ const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
 
 const properties = {
-  id: { type: 'string', format: 'uuid' },
+  id: {
+    type: 'string',
+    format: 'uuid',
+    description: "The role's unique identifier"
+  },
   start_date: {
     type: 'string',
     description: 'The date the role starts'
@@ -30,7 +34,25 @@ const properties = {
     description: 'The id of the project record'
   }
 }
-
+const exampleGetResponse = {
+  jsonapi: {
+    version: '1.0'
+  },
+  links: {
+    self: '/roles/c0d1f6ad-1c39-4ebd-bdb8-38723886def2'
+  },
+  data: {
+    type: 'roles',
+    id: 'c0d1f6ad-1c39-4ebd-bdb8-38723886def2',
+    attributes: {
+      start_date: '2021-11-24T04:22:04.193Z',
+      start_confidence: 1,
+      end_date: '2022-05-31T20:56:23.731Z',
+      end_confidence: 9,
+      project_id: '0b3aabce-b783-4169-bdeb-b342fc4fc70a'
+    }
+  }
+}
 const name = 'role'
 const tags = [name]
 
@@ -56,7 +78,8 @@ const get = {
     default: {
       description: 'Default response',
       type: 'object',
-      properties: {}
+      properties: {},
+      example: exampleGetResponse
     },
     404: {
       description: 'Not Found',
@@ -81,7 +104,7 @@ const patch = {
   summary: `patch a ${name}`,
   tags,
   type: 'object',
-  properties,
+  body: { properties },
   additionalProperties: false
 }
 const remove = {

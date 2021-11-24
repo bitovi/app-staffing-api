@@ -9,7 +9,38 @@ const properties = {
     description: 'The name of the skill'
   }
 }
-
+const exampleGetResponse = {
+  jsonapi: {
+    version: '1.0'
+  },
+  links: {
+    self: '/skills/20b853c7-2747-4c2d-8659-fa0777ab4d64'
+  },
+  data: {
+    type: 'skills',
+    id: '20b853c7-2747-4c2d-8659-fa0777ab4d64',
+    attributes: {
+      name: 'mobile.js'
+    }
+  }
+}
+const exampleCreateResponse = {
+  jsonapi: {
+    version: '1.0'
+  },
+  links: {
+    self: '',
+    first: '?',
+    prev: '?'
+  },
+  data: {
+    type: 'skills',
+    id: 'b691fad7-27ba-4d40-9545-cecca582b9a8',
+    attributes: {
+      name: 'example skill'
+    }
+  }
+}
 const name = 'skill'
 const tags = [name]
 
@@ -35,7 +66,8 @@ const get = {
     default: {
       description: 'Default response',
       type: 'object',
-      properties: {}
+      properties: {},
+      example: exampleGetResponse
     },
     404: {
       description: 'Not Found',
@@ -50,10 +82,26 @@ const create = {
   tags,
   body: {
     type: 'object',
-    required: ['name']
+    required: ['name'],
+    example: {
+      data: {
+        type: 'skills',
+        attributes: {
+          name: 'example skill'
+        }
+      }
+    }
   },
   properties,
-  additionalProperties: false
+  additionalProperties: false,
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      properties: {},
+      example: exampleCreateResponse
+    }
+  }
 }
 const patch = {
   description: `patch a ${name}`,

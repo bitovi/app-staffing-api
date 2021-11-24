@@ -53,6 +53,15 @@ const exampleGetResponse = {
     }
   }
 }
+const exampleCreateResponse = {
+  jsonapi: { version: '1.0' },
+  links: { self: '/roles/1b083dce-51e4-4d3b-9412-f113a259bf50' },
+  data: {
+    type: 'roles',
+    id: '1b083dce-51e4-4d3b-9412-f113a259bf50',
+    attributes: { project_id: '62171769-871a-403c-b5c8-a47b93e5999a' }
+  }
+}
 const name = 'role'
 const tags = [name]
 
@@ -94,10 +103,24 @@ const create = {
   tags,
   body: {
     type: 'object',
-    required: ['project_id']
+    required: ['project_id'],
+    example: {
+      data: {
+        type: 'roles',
+        attributes: { project_id: '62171769-871a-403c-b5c8-a47b93e5999a' }
+      }
+    }
   },
   properties,
-  additionalProperties: false
+  additionalProperties: false,
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      properties: {},
+      example: exampleCreateResponse
+    }
+  }
 }
 const patch = {
   description: `patch a ${name}`,

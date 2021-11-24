@@ -38,7 +38,15 @@ const exampleGetResponse = {
     }
   }
 }
-
+const exampleCreateResponse = {
+  jsonapi: { version: '1.0' },
+  links: { self: '/projects/1ff5d9a0-b814-4790-b3ee-43aaf2d753f3' },
+  data: {
+    type: 'projects',
+    id: '1ff5d9a0-b814-4790-b3ee-43aaf2d753f3',
+    attributes: { name: 'Kathleen Lehner', start_date: '2021-09-21T10:20:51.920Z' }
+  }
+}
 const name = 'project'
 const tags = [name]
 
@@ -80,7 +88,13 @@ const create = {
   tags,
   body: {
     type: 'object',
-    required: ['name', 'start_date']
+    required: ['name', 'start_date'],
+    example: {
+      data: {
+        type: 'projects',
+        attributes: { name: 'Kathleen Lehner', start_date: '2021-09-21T10:20:51.920Z' }
+      }
+    }
   },
   errorMessage: {
     required: {
@@ -89,7 +103,15 @@ const create = {
     }
   },
   properties,
-  additionalProperties: false
+  additionalProperties: false,
+  response: {
+    default: {
+      description: 'Success: Object created and returned',
+      type: 'object',
+      properties: {},
+      example: exampleCreateResponse
+    }
+  }
 }
 const patch = {
   description: `patch a ${name}`,

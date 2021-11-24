@@ -50,6 +50,19 @@ const exampleGetResponse = {
     }
   }
 }
+const exampleCreateResponse = {
+  jsonapi: { version: '1.0' },
+  links: { self: '/assignments/5a421587-f7ee-49dd-9a8d-255c3a3f63b3' },
+  data: {
+    type: 'assignments',
+    id: '5a421587-f7ee-49dd-9a8d-255c3a3f63b3',
+    attributes: {
+      employee_id: '685eeb8d-74b2-4be9-8a62-984374367763',
+      role_id: 'e2ac77b7-2186-410e-9013-20b6778bc0b6',
+      start_date: '2021-07-23T14:36:23.589Z'
+    }
+  }
+}
 const name = 'assignment'
 const tags = [name]
 
@@ -99,14 +112,25 @@ const create = {
   body: {
     properties,
     type: 'object',
-    required: ['employee_id', 'role_id', 'start_date']
+    required: ['employee_id', 'role_id', 'start_date'],
+    example: {
+      data: {
+        type: 'assignments',
+        attributes: {
+          employee_id: '6bae7e59-7317-4b37-b615-77db7d971f1f',
+          role_id: '2855162e-aa10-4c96-bc4b-49d001a82116',
+          start_date: '2021-03-14T06:46:54.745Z'
+        }
+      }
+    }
   },
   additionalProperties: false,
   response: {
     default: {
-      description: 'Default response',
+      description: 'Success: Object created and returned',
       type: 'object',
-      properties: {}
+      properties: {},
+      example: exampleCreateResponse
     }
   }
 }

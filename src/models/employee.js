@@ -9,18 +9,18 @@ module.exports = class Employee extends Model {
     return 'id'
   }
 
-  static get jsonSchema () {
-    return {
-      type: 'object',
-      required: ['name'],
-      properties: {
-        id: { type: 'string', format: 'uuid' },
-        name: { type: 'string' },
-        start_date: { type: 'date' },
-        end_date: { type: 'date' }
-      }
-    }
-  }
+  // static get jsonSchema () {
+  //   return {
+  //     type: 'object',
+  //     required: ['name'],
+  //     properties: {
+  //       id: { type: 'string', format: 'uuid' },
+  //       name: { type: 'string' },
+  //       start_date: { type: 'date' },
+  //       end_date: { type: 'date' }
+  //     }
+  //   }
+  // }
 
   static get relationMappings () {
     const Assignment = require('./assignment')

@@ -3,6 +3,8 @@ const { Model } = require('objection')
 const Project = require('../../src/models/project')
 const faker = require('faker')
 
+const NUMBER_OF_RECORDS_TO_INSERT = 10
+
 const fakesCache = new Map()
 
 function generateAndCacheFake (keyPrefix, key, generator) {
@@ -71,87 +73,50 @@ const seed = async (knex) => {
 
   // Generate skills
 
-  // insert seed data
-  await Project.query().insertGraph([
-    {
-      name: fakeProject(1),
-      start_date: new Date(),
-      end_date: new Date(),
+  for (let i = 0; i < NUMBER_OF_RECORDS_TO_INSERT; i++) {
+    // insert seed data
+    await Project.query().insertGraph([
+      {
+        name: fakeProject(i + 1),
+        start_date: new Date(),
+        end_date: new Date(),
 
-      roles: [
-        {
-          start_date: new Date(faker.date.recent()).toISOString(),
-          start_confidence: faker.datatype.number(10),
-          end_date: new Date(faker.date.future()).toISOString(),
-          end_confidence: faker.datatype.number(10),
-
-          skills: [{
-            '#id': fakeSkill(1),
-            name: fakeSkill(1)
-          }],
-
-          assignments: [{
+        roles: [
+          {
             start_date: new Date(faker.date.recent()).toISOString(),
+            start_confidence: faker.datatype.number(10),
             end_date: new Date(faker.date.future()).toISOString(),
+            end_confidence: faker.datatype.number(10),
 
-            employees: [{
-              name: fakeEmployee(1),
-              start_date: new Date(faker.date.past()).toISOString(),
-              end_date: null,
+            skills: [{
+              '#id': fakeSkill(i + 1),
+              name: fakeSkill(i + 1)
+            }],
 
-              skills: [
-                {
-                  '#ref': fakeSkill(1)
-                }
-              ]
+            assignments: [{
+              start_date: new Date(faker.date.recent()).toISOString(),
+              end_date: new Date(faker.date.future()).toISOString(),
+
+              employees: [{
+                name: fakeEmployee(i),
+                start_date: new Date(faker.date.past()).toISOString(),
+                end_date: null,
+
+                skills: [
+                  {
+                    '#ref': fakeSkill(i + 1)
+                  }
+                ]
+              }]
             }]
-          }]
-        }
-      ]
-    },
-    {
-      name: fakeProject(2),
-      start_date: new Date(),
-      end_date: new Date(),
-
-      roles: [
-        {
-          start_date: new Date(faker.date.recent()).toISOString(),
-          start_confidence: faker.datatype.number(10),
-          end_date: new Date(faker.date.future()).toISOString(),
-          end_confidence: faker.datatype.number(10),
-
-          skills: [{
-            '#id': fakeSkill(2),
-            name: fakeSkill(2)
-          }, {
-            name: fakeSkill(3)
-          }],
-
-          assignments: [{
-            start_date: new Date(faker.date.recent()).toISOString(),
-            end_date: new Date(faker.date.future()).toISOString(),
-
-            employees: [{
-              name: fakeEmployee(2),
-              start_date: new Date(faker.date.past()).toISOString(),
-              end_date: new Date(),
-
-              skills: [
-                {
-                  '#ref': fakeSkill(2)
-                }
-              ]
-            }]
-          }]
-        }
-      ]
-    }
-    // more projects
-  ], {
-    allowRefs: true,
-    relate: true
-  })
+          }
+        ]
+      }
+    ], {
+      allowRefs: true,
+      relate: true
+    })
+  }
 }
 
 module.exports = {

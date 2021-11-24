@@ -77,9 +77,11 @@ const create = {
   description: `create an ${name}`,
   summary: `create an ${name}`,
   tags,
-  type: 'object',
-  required: ['employee_id', 'role_id', 'start_date'],
-  body: { properties },
+  body: {
+    properties,
+    type: 'object',
+    required: ['employee_id', 'role_id', 'start_date']
+  },
   additionalProperties: false,
   response: {
     default: {

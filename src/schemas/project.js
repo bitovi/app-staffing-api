@@ -46,8 +46,6 @@ const create = {
   description: `create a ${name}`,
   summary: `create a ${name}`,
   tags,
-  type: 'object',
-  required: ['name', 'start_date'],
   body: {
     type: 'object',
     required: ['name', 'start_date']

@@ -364,6 +364,19 @@ function testGets (mylist) {
         createdObjects[1] = await createDbObject(objname, createdIDs)
       })
 
+      // test non-existing include
+      test(`get non-existing include GET ${objname}?include=nonexisting`, async () => {
+        const url = `${objname}?include=nonexisting`
+        const resp = await global.app.inject({
+          url: url,
+          method: 'GET',
+          headers: { 'Content-Type': 'application/vnd.api+json' }
+        })
+        expect(resp.statusCode).toBe(400)
+        const json = JSON.parse(resp.body)
+        expect(json.title).toBe('Cannot include non-existing relation')
+      })
+
       test.each(relations)(`get included relation of GET ${objname}?include=%s`, async (relation) => {
       // expect.assertions(2)
       // console.log(objname, relation)

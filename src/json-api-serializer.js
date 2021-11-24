@@ -13,6 +13,7 @@ const buildPagingUrl = (urlParts, params, number) => {
 // @TODO: fix paging for page > lastPage
 const topLevelLinksfn = ({ page, pageSize, count, url }) => {
   url = url || ''
+  if (page === undefined) return { self: url }
   const lastPage = (Math.round(count / pageSize) - 1)
   const hasPages = page < lastPage
   const isLastPage = page === lastPage

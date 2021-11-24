@@ -41,7 +41,19 @@ const get = {
   description: `retrieve an ${name} by id`,
   summary: `retrieve an ${name} by id`,
   tags,
-  params: makeIdParams(name)
+  params: makeIdParams(name),
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      properties: {}
+    },
+    404: {
+      description: 'Not Found',
+      type: 'object',
+      properties: {}
+    }
+  }
 }
 const create = {
   description: `create an ${name}`,

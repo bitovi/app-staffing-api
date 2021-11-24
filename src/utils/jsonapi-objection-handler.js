@@ -25,7 +25,7 @@ const getListHandler = (Model) => {
     // Checking first level only for now
     if (parsedParams?.include && parsedParams.include.filter(el => !modelRelations.includes(el.split('.')[0])).length > 0) {
       return reply
-        .code(404)
+        .code(400)
         .send({
           status: 400,
           title: 'Cannot include non-existing relation'

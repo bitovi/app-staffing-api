@@ -1,4 +1,4 @@
-const { makeQueryStringFilters } = require('../utils')
+const { makeQueryStringFilters, makeQueryStringFields } = require('../utils')
 const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
 
@@ -42,7 +42,8 @@ const list = {
     type: 'object',
     properties: {
       ...queryStringSchema.common,
-      ...makeQueryStringFilters(properties)
+      ...makeQueryStringFilters(properties),
+      ...makeQueryStringFields(name)
     }
   }
 }

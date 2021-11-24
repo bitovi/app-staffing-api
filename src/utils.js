@@ -107,10 +107,25 @@ function makeQueryStringFilters (properties) {
   }, {})
   return filters
 }
+/**
+ * Create queryString SELECT fields for validating and documenting the model entities
+ * @param {*} properties
+ * @returns JSON Schema Object
+ */
+function makeQueryStringFields (name) {
+  const keyName = `fields[${name}s]`
+  const fields = {}
+  fields[keyName] = {
+    type: 'string',
+    description: `comma-separated list of column names to return instead of returning all. Instead of ${name}, a relation name could be used`
+  }
 
+  return fields
+}
 module.exports = {
   getIncludeStr,
   createUUID,
   parseJsonApiParams,
-  makeQueryStringFilters
+  makeQueryStringFilters,
+  makeQueryStringFields
 }

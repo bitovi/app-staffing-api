@@ -165,10 +165,9 @@ function testGets (mylist) {
 
       beforeAll(async () => {
         // create 4 of objname, why not a loop you might ask.
-        createdObjects[0] = await createDbObject(objname, createdIDs)
-        createdObjects[1] = await createDbObject(objname, createdIDs)
-        createdObjects[2] = await createDbObject(objname, createdIDs)
-        createdObjects[3] = await createDbObject(objname, createdIDs)
+        for (let i = 0; i < 8; i++) {
+          createdObjects[i] = await createDbObject(objname, createdIDs)
+        }
       })
 
       test(`GET: should get listing for GET /${objname}`, async () => {
@@ -218,17 +217,29 @@ function testGets (mylist) {
       })
 
       // test Pagination
-      test(`GET /${objname} paginated`, async () => {
+      test(`GET /${objname} paginated with links`, async () => {
         const response = await global.app.inject({
           url: `${objname}`,
           method: 'GET',
           query: {
-            'page[number]': '0',
+            'page[number]': '1',
             'page[size]': '2'
           }
         })
         const results = JSON.parse(response.body)
         expect(results.data.attributes.results.length).toBe(2)
+        const selfLinkParams = (new URL('http://localhost:3000/' + results?.links?.self)).searchParams
+
+        expect(selfLinkParams.get('page[number]')).toBe('1')
+        expect(selfLinkParams.get('page[size]')).toBe('2')
+
+        const nextLinkParams = (new URL('http://localhost:3000/' + results?.links?.next)).searchParams
+        expect(nextLinkParams.get('page[number]')).toBe('2')
+        expect(selfLinkParams.get('page[size]')).toBe('2')
+
+        const prevLinkParams = (new URL('http://localhost:3000/' + results?.links?.prev)).searchParams
+        expect(prevLinkParams.get('page[number]')).toBe('0')
+        expect(prevLinkParams.get('page[size]')).toBe('2')
       })
 
       // test Invalid Pagination

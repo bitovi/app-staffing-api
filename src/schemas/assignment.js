@@ -32,7 +32,24 @@ const properties = {
 const propertiesWithId = {
   id: { type: 'string', format: 'uuid' }
 }
-
+const exampleGetResponse = {
+  jsonapi: {
+    version: '1.0'
+  },
+  links: {
+    self: '/assignments/3c8d4eef-3725-491e-b4ae-f70ea338892c'
+  },
+  data: {
+    type: 'assignments',
+    id: '3c8d4eef-3725-491e-b4ae-f70ea338892c',
+    attributes: {
+      employee_id: '03598cfb-6857-4c3e-99ec-9ee8f9e129d1',
+      role_id: 'c0d1f6ad-1c39-4ebd-bdb8-38723886def2',
+      start_date: '2021-11-23T23:09:35.922Z',
+      end_date: '2022-05-20T22:14:07.069Z'
+    }
+  }
+}
 const name = 'assignment'
 const tags = [name]
 
@@ -65,7 +82,8 @@ const get = {
     default: {
       description: 'Default response',
       type: 'object',
-      properties: {}
+      properties: {},
+      example: exampleGetResponse
     },
     404: {
       description: 'Not Found',

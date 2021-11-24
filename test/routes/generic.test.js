@@ -63,6 +63,7 @@ function testPostCreates (mylist) {
         const result = JSON.parse(response.body)
         console.log(result)
         expect(result?.data).toHaveProperty(pkey)
+        expect(result?.links?.self).toBe(`/${routeName}/${result.data[pkey]}`)
 
         // add to list to be deleted with afterAll
         createdIDs[routeName] = createdIDs[routeName] || []

@@ -204,7 +204,8 @@ const getPostHandler = (Model) => {
     }
 
     const newModel = await Model.query().insertGraph(body, { relate: true })
-    const data = Serializer.serialize(Model.name.toLowerCase() + 's', newModel)
+    const modelName = Model.name.toLowerCase() + 's'
+    const data = Serializer.serialize(modelName, newModel, { url: `${modelName}/${newModel.id}` })
     const location = `${url}/${newModel.id}`
     return reply.status(201).header('Location', location).send(data)
   }

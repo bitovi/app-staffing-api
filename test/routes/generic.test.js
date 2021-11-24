@@ -19,94 +19,38 @@ function testPostCreates (mylist) {
     afterAll(async () => {
       await deleteCreatedIDs(createdIDs)
     })
-    test.concurrent.each(mylist)('%s: POST should insert and return an id', async (myroute) => {
-      const obj = {}
-      const required = myroute.required
-      const foreignKeys = myroute?.foreignKeys || {}
-      const primaryKeys = myroute?.primaryKeys || ['id']
-      const pkey = primaryKeys[0]
-      const routeName = myroute.routeName
+    describe('Test POST for creating new row', () => {
+      test.concurrent.each(mylist)('%s: POST should insert and return an id', async (myroute) => {
+        const obj = {}
+        const required = myroute.required
+        const foreignKeys = myroute?.foreignKeys || {}
+        const primaryKeys = myroute?.primaryKeys || ['id']
+        const pkey = primaryKeys[0]
+        const routeName = myroute.routeName
 
-      if (myroute?.foreignKeys) {
-        for (const [key, value] of Object.entries(foreignKeys)) {
-          const createdObj = await createDbObject(key, createdIDs)
-          // console.log('POST createdObj', createdObj)
-          const keyFrom = createdObj[value.from]
-          obj[value.into] = keyFrom
+        if (myroute?.foreignKeys) {
+          for (const [key, value] of Object.entries(foreignKeys)) {
+            const createdObj = await createDbObject(key, createdIDs)
+            // console.log('POST createdObj', createdObj)
+            const keyFrom = createdObj[value.from]
+            obj[value.into] = keyFrom
+          }
         }
-      }
-      for (const [key, value] of Object.entries(myroute.properties)) {
-        if (required.includes(key) && !obj[key] && key !== pkey) {
-          obj[key] = createFakeData(key, value)
+        for (const [key, value] of Object.entries(myroute.properties)) {
+          if (required.includes(key) && !obj[key] && key !== pkey) {
+            obj[key] = createFakeData(key, value)
+          }
         }
-      }
-      const testBody = {
-        data: {
-          type: routeName,
-          attributes: { ...obj }
+        const testBody = {
+          data: {
+            type: routeName,
+            attributes: { ...obj }
+          }
         }
-      }
-
-      const response = await global.app.inject({
-        url: `${routeName}`,
-        body: JSON.stringify(testBody),
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/vnd.api+json',
-          Accept: 'application/vnd.api+json'
-        }
-      })
-
-      expect(response.statusCode).toEqual(201)
-
-      const result = JSON.parse(response.body)
-
-      expect(result?.data).toHaveProperty(pkey)
-
-      // add to list to be deleted with afterAll
-      createdIDs[routeName] = createdIDs[routeName] || []
-      const idObj = {}
-      idObj[pkey] = result.data[pkey]
-      createdIDs[routeName].push(idObj)
-    })
-
-    // Test CREATE with missing required
-    test.concurrent.each(mylist)('%s: POST with missing required column', async (myroute) => {
-      const obj = {}
-      const required = myroute.required
-      const foreignKeys = myroute?.foreignKeys || {}
-      const primaryKeys = myroute?.primaryKeys || ['id']
-      const pkey = primaryKeys[0]
-      const routeName = myroute.routeName
-
-      if (myroute?.foreignKeys) {
-        for (const [key, value] of Object.entries(foreignKeys)) {
-          const createdObj = await createDbObject(key, createdIDs)
-          // console.log('POST createdObj', createdObj)
-          const keyFrom = createdObj[value.from]
-          obj[value.into] = keyFrom
-        }
-      }
-      for (const [key, value] of Object.entries(myroute.properties)) {
-        if (required.includes(key) && !obj[key] && key !== pkey) {
-          obj[key] = createFakeData(key, value)
-        }
-      }
-      const testBody = {
-        data: {
-          type: routeName,
-          attributes: { ...obj }
-        }
-      }
-      // Remove one required column at a time and test
-      for (let i = 0; i < required.length; i++) {
-        const missingTestBody = { ...testBody }
-
-        delete missingTestBody.data.attributes[required[i]]
 
         const response = await global.app.inject({
           url: `${routeName}`,
-          body: JSON.stringify(missingTestBody),
+          body: JSON.stringify(testBody),
           method: 'POST',
           headers: {
             'Content-Type': 'application/vnd.api+json',
@@ -114,98 +58,160 @@ function testPostCreates (mylist) {
           }
         })
 
-        expect(response.statusCode).toEqual(400)
-        if (response.statusCode === 201) {
-          const result = JSON.parse(response.body)
+        expect(response.statusCode).toEqual(201)
 
-          // add to list to be deleted with afterAll
-          createdIDs[routeName] = createdIDs[routeName] || []
-          const idObj = {}
-          idObj[pkey] = result.data[pkey]
-          createdIDs[routeName].push(idObj)
+        const result = JSON.parse(response.body)
+
+        expect(result?.data).toHaveProperty(pkey)
+
+        // add to list to be deleted with afterAll
+        createdIDs[routeName] = createdIDs[routeName] || []
+        const idObj = {}
+        idObj[pkey] = result.data[pkey]
+        createdIDs[routeName].push(idObj)
+      })
+    })
+    describe('Test POST with missing required column', () => {
+    // Test CREATE with missing required
+      test.concurrent.each(mylist)('%s: POST with missing required column', async (myroute) => {
+        const obj = {}
+        const required = myroute.required
+        const foreignKeys = myroute?.foreignKeys || {}
+        const primaryKeys = myroute?.primaryKeys || ['id']
+        const pkey = primaryKeys[0]
+        const routeName = myroute.routeName
+
+        if (myroute?.foreignKeys) {
+          for (const [key, value] of Object.entries(foreignKeys)) {
+            const createdObj = await createDbObject(key, createdIDs)
+            // console.log('POST createdObj', createdObj)
+            const keyFrom = createdObj[value.from]
+            obj[value.into] = keyFrom
+          }
         }
-      }
+        for (const [key, value] of Object.entries(myroute.properties)) {
+          if (required.includes(key) && !obj[key] && key !== pkey) {
+            obj[key] = createFakeData(key, value)
+          }
+        }
+        const testBody = {
+          data: {
+            type: routeName,
+            attributes: { ...obj }
+          }
+        }
+        // Remove one required column at a time and test
+        for (let i = 0; i < required.length; i++) {
+          const missingTestBody = { ...testBody }
+
+          delete missingTestBody.data.attributes[required[i]]
+
+          const response = await global.app.inject({
+            url: `${routeName}`,
+            body: JSON.stringify(missingTestBody),
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/vnd.api+json',
+              Accept: 'application/vnd.api+json'
+            }
+          })
+
+          expect(response.statusCode).toEqual(400)
+          if (response.statusCode === 201) {
+            const result = JSON.parse(response.body)
+
+            // add to list to be deleted with afterAll
+            createdIDs[routeName] = createdIDs[routeName] || []
+            const idObj = {}
+            idObj[pkey] = result.data[pkey]
+            createdIDs[routeName].push(idObj)
+          }
+        }
+      })
     })
 
     // PATCH update
-    test.concurrent.each(mylist)('%s: PATCH should update record', async (myroute) => {
-      const required = myroute.required
-      const foreignKeys = myroute?.foreignKeys || {}
-      const primaryKeys = myroute?.primaryKeys || ['id']
-      const pkey = primaryKeys[0]
-      const routeName = myroute.routeName
+    describe('Test PATCH for update', () => {
+      test.concurrent.each(mylist)('%s: PATCH should update record', async (myroute) => {
+        const required = myroute.required
+        const foreignKeys = myroute?.foreignKeys || {}
+        const primaryKeys = myroute?.primaryKeys || ['id']
+        const pkey = primaryKeys[0]
+        const routeName = myroute.routeName
 
-      const createdObj = await createDbObject(routeName, createdIDs)
+        const createdObj = await createDbObject(routeName, createdIDs)
 
-      const obj = {}
-      let sampleProperty
-      if (myroute?.foreignKeys) {
-        for (const [key, value] of Object.entries(foreignKeys)) {
-          const createdObj = await createDbObject(key, createdIDs)
-          // console.log('POST createdObj', createdObj)
-          const keyFrom = createdObj[value.from]
-          obj[value.into] = keyFrom
-        }
-      }
-      for (const [key, value] of Object.entries(myroute.properties)) {
-        if (required.includes(key) && !obj[key] && key !== pkey) {
-          obj[key] = createFakeData(key, value)
-          if (!sampleProperty) {
-            sampleProperty = key
+        const obj = {}
+        let sampleProperty
+        if (myroute?.foreignKeys) {
+          for (const [key, value] of Object.entries(foreignKeys)) {
+            const createdObj = await createDbObject(key, createdIDs)
+            // console.log('POST createdObj', createdObj)
+            const keyFrom = createdObj[value.from]
+            obj[value.into] = keyFrom
           }
         }
-      }
-
-      const testBody = {
-        data: {
-          type: routeName,
-          attributes: { ...obj }
+        for (const [key, value] of Object.entries(myroute.properties)) {
+          if (required.includes(key) && !obj[key] && key !== pkey) {
+            obj[key] = createFakeData(key, value)
+            if (!sampleProperty) {
+              sampleProperty = key
+            }
+          }
         }
-      }
-      testBody.data[pkey] = createdObj[pkey]
 
-      const response = await global.app.inject({
-        url: `${routeName}/${createdObj[pkey]}`,
-        body: JSON.stringify(testBody),
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/vnd.api+json',
-          Accept: 'application/vnd.api+json'
+        const testBody = {
+          data: {
+            type: routeName,
+            attributes: { ...obj }
+          }
         }
+        testBody.data[pkey] = createdObj[pkey]
+
+        const response = await global.app.inject({
+          url: `${routeName}/${createdObj[pkey]}`,
+          body: JSON.stringify(testBody),
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/vnd.api+json',
+            Accept: 'application/vnd.api+json'
+          }
+        })
+        expect(response.statusCode).toEqual(204)
+        const result = await myroute.model.query().findById(createdObj[pkey])
+        expect(result[sampleProperty]).toEqual(obj[sampleProperty])
       })
-      expect(response.statusCode).toEqual(204)
-      const result = await myroute.model.query().findById(createdObj[pkey])
-      expect(result[sampleProperty]).toEqual(obj[sampleProperty])
     })
-
     // DELETE
-    test.concurrent.each(mylist)('%s: DELETE record', async (myroute) => {
-      const primaryKeys = myroute?.primaryKeys || ['id']
-      const pkey = primaryKeys[0]
-      const routeName = myroute.routeName
+    describe('Test DELETE', () => {
+      test.concurrent.each(mylist)('%s: DELETE record', async (myroute) => {
+        const primaryKeys = myroute?.primaryKeys || ['id']
+        const pkey = primaryKeys[0]
+        const routeName = myroute.routeName
 
-      const createdObj = await createDbObject(routeName, createdIDs)
+        const createdObj = await createDbObject(routeName, createdIDs)
 
-      const response = await global.app.inject({
-        url: `${routeName}/${createdObj[pkey]}`,
-        method: 'DELETE'
+        const response = await global.app.inject({
+          url: `${routeName}/${createdObj[pkey]}`,
+          method: 'DELETE'
+        })
+        expect(response.statusCode).toEqual(204)
+
+        const deletedObj = await myroute.model.query().findById(createdObj[pkey])
+
+        expect(deletedObj).toBeUndefined()
       })
-      expect(response.statusCode).toEqual(204)
 
-      const deletedObj = await myroute.model.query().findById(createdObj[pkey])
+      // DELETE non existing record
+      test.concurrent.each(mylist)('%s: DELETE non-existing record', async (myroute) => {
+        const routeName = myroute.routeName
 
-      expect(deletedObj).toBeUndefined()
-    })
-
-    // DELETE non existing record
-    test.concurrent.each(mylist)('%s: DELETE non-existing record', async (myroute) => {
-      const routeName = myroute.routeName
-
-      const response = await global.app.inject({
-        url: `${routeName}/7761b531-50b7-457e-803e-dd8897f86dd2`,
-        method: 'DELETE'
+        const response = await global.app.inject({
+          url: `${routeName}/7761b531-50b7-457e-803e-dd8897f86dd2`,
+          method: 'DELETE'
+        })
+        expect(response.statusCode).toEqual(404)
       })
-      expect(response.statusCode).toEqual(404)
     })
   })
 }

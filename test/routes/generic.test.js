@@ -48,7 +48,7 @@ function testPostCreates (mylist) {
       }
 
       const response = await global.app.inject({
-        url: `${myroute}`,
+        url: `${routeName}`,
         body: JSON.stringify(testBody),
         method: 'POST',
         headers: {
@@ -62,6 +62,12 @@ function testPostCreates (mylist) {
       const result = JSON.parse(response.body)
 
       expect(result?.data).toHaveProperty(pkey)
+
+      // add to list to be deleted with afterAll
+      createdIDs[routeName] = createdIDs[routeName] || []
+      const idObj = {}
+      idObj[pkey] = result.data[pkey]
+      createdIDs[routeName].push(idObj)
     })
 
     // PATCH update
@@ -377,7 +383,7 @@ function testGets (mylist) {
         expect(json.title).toBe('Cannot include non-existing relation')
       })
 
-      test.each(relations)(`get included relation of GET ${objname}?include=%s`, async (relation) => {
+      test.each(relations)(`get ONE included relation of GET ${objname}?include=%s`, async (relation) => {
       // expect.assertions(2)
       // console.log(objname, relation)
         const url = `${objname}?include=${relation}`
@@ -397,7 +403,7 @@ function testGets (mylist) {
 
       const multiIncludes = getAllSubsets(relations).filter(el => el.length > 1).map(el => el.join(','))
 
-      test.each(multiIncludes)(`get included relations of GET ${objname}?include=%s`, async (relation) => {
+      test.each(multiIncludes)(`get MULTIPLE included relations of GET ${objname}?include=%s`, async (relation) => {
       // expect.assertions(2)
       // console.log(objname, relation)
         const resp = await global.app.inject({

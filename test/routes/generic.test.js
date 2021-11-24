@@ -61,7 +61,9 @@ function testPostCreates (mylist) {
         expect(response.statusCode).toEqual(201)
 
         const result = JSON.parse(response.body)
-        console.log(result)
+        // use console.log to get sample request and response
+        // console.log('testBody', testBody)
+        // console.log('result', result)
         expect(result?.data).toHaveProperty(pkey)
         expect(result?.links?.self).toBe(`/${routeName}/${result.data[pkey]}`)
 

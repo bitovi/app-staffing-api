@@ -37,24 +37,29 @@ const getListHandler = (Model) => {
     if (request.params.id) {
       queryBuilder.findById(request.params.id)
     }
+
+    queryBuilder.withGraphJoined(includeStr)
+    queryBuilder.skipUndefined()
+
     // @TODO verify column names
     if (Object.keys(parsedParams.fields).length) {
       for (const [key, val] of Object.entries(parsedParams.fields)) {
         const items = val.map(el => normalizeColumn(key.slice(0, -1), el))
         if (!modelHasColumn(items)) {
           return reply
-            .code(404)
+            .code(400)
             .send({
               status: 400,
               title: 'Cannot select non-existing fields'
             })
         }
-        queryBuilder.column(...items)
+        if (key.slice(0, -1) === tableName) {
+          queryBuilder.columns(...items)
+        } else {
+          queryBuilder.modifyGraph(key, builder => builder.columns(...items))
+        }
       }
     }
-
-    queryBuilder.withGraphJoined(includeStr)
-    queryBuilder.skipUndefined()
 
     if (parsedParams.filter.length) {
       // check for duplicate filter keys, return 500

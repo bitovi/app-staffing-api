@@ -114,6 +114,7 @@ const getListHandler = (Model) => {
           comparator = '='
           sqlValue = filter.value
         }
+        // @TODO: compare datetime based on date only accepting YYYY-MM-DD?
         if (!queryBuilder.hasWheres()) {
           queryBuilder.where(normalizedName, comparator, sqlValue)
         } else {

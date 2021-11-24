@@ -1,5 +1,4 @@
 const { Serializer } = require('../json-api-serializer')
-// const { query } = require('../models/project')
 const { getIncludeStr, parseJsonApiParams } = require('../utils')
 const modelHasColumn = require('../schemas/all-properties')
 

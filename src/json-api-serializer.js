@@ -13,6 +13,7 @@ const buildPagingUrl = (urlParts, params, number) => {
 // @TODO: fix paging for page > lastPage
 const topLevelLinksfn = ({ page, pageSize, count, url }) => {
   url = url || ''
+  if (page === undefined) return { self: url }
   const lastPage = (Math.round(count / pageSize) - 1)
   const hasPages = page < lastPage
   const isLastPage = page === lastPage
@@ -22,13 +23,15 @@ const topLevelLinksfn = ({ page, pageSize, count, url }) => {
   const query = urlParts[1] || ''
   const params = new URLSearchParams(query)
 
-  return {
+  const linksObj = {
     self: url,
     first: !isFirstPage ? buildPagingUrl(urlParts, params, 0) : null,
     last: hasNextPage && !isLastPage ? buildPagingUrl(urlParts, params, lastPage) : null,
     next: hasPages && hasNextPage ? buildPagingUrl(urlParts, params, page + 1) : null,
     prev: !isFirstPage ? buildPagingUrl(urlParts, params, page - 1) : null
   }
+  Object.keys(linksObj).forEach((key) => (linksObj[key] == null) && delete linksObj[key])
+  return linksObj
 }
 
 const deserialize = (data) => {

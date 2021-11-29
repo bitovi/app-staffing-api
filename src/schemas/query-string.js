@@ -1,4 +1,8 @@
 const common = {
+  include: {
+    type: 'string',
+    description: 'include comma "," separated relations'
+  },
   'page[number]': {
     type: 'string',
     description: 'page number. First page starts at 0'

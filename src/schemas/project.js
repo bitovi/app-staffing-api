@@ -1,9 +1,12 @@
-const { makeQueryStringFilters } = require('../utils')
+const { makeQueryStringFilters, makeQueryStringFields } = require('../utils')
 const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
 
 const properties = {
-  id: { type: 'string', format: 'uuid' },
+  id: {
+    type: 'string',
+    format: 'uuid'
+  },
   name: {
     type: 'string',
     description: 'The name of the project'
@@ -18,6 +21,32 @@ const properties = {
   }
 }
 
+const exampleGetResponse = {
+  jsonapi: {
+    version: '1.0'
+  },
+  links: {
+    self: '/projects/0b3aabce-b783-4169-bdeb-b342fc4fc70a'
+  },
+  data: {
+    type: 'projects',
+    id: '0b3aabce-b783-4169-bdeb-b342fc4fc70a',
+    attributes: {
+      name: 'Okuneva Group',
+      start_date: '2021-11-24T18:29:51.833Z',
+      end_date: '2021-11-24T18:29:51.833Z'
+    }
+  }
+}
+const exampleCreateResponse = {
+  jsonapi: { version: '1.0' },
+  links: { self: '/projects/1ff5d9a0-b814-4790-b3ee-43aaf2d753f3' },
+  data: {
+    type: 'projects',
+    id: '1ff5d9a0-b814-4790-b3ee-43aaf2d753f3',
+    attributes: { name: 'Kathleen Lehner', start_date: '2021-09-21T10:20:51.920Z' }
+  }
+}
 const name = 'project'
 const tags = [name]
 
@@ -29,7 +58,8 @@ const list = {
     type: 'object',
     properties: {
       ...queryStringSchema.common,
-      ...makeQueryStringFilters(properties)
+      ...makeQueryStringFilters(properties),
+      ...makeQueryStringFields(name)
     }
   }
 }
@@ -37,17 +67,34 @@ const get = {
   description: `retrieve a ${name} by id`,
   summary: `retrieve a ${name} by id`,
   tags,
-  params: makeIdParams(name)
+  params: makeIdParams(name),
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      properties: {},
+      example: exampleGetResponse
+    },
+    404: {
+      description: 'Not Found',
+      type: 'object',
+      properties: {}
+    }
+  }
 }
 const create = {
   description: `create a ${name}`,
   summary: `create a ${name}`,
   tags,
-  type: 'object',
-  required: ['name', 'start_date'],
   body: {
     type: 'object',
-    required: ['name', 'start_date']
+    required: ['name', 'start_date'],
+    example: {
+      data: {
+        type: 'projects',
+        attributes: { name: 'Kathleen Lehner', start_date: '2021-09-21T10:20:51.920Z' }
+      }
+    }
   },
   errorMessage: {
     required: {
@@ -56,7 +103,15 @@ const create = {
     }
   },
   properties,
-  additionalProperties: false
+  additionalProperties: false,
+  response: {
+    default: {
+      description: 'Success: Object created and returned',
+      type: 'object',
+      properties: {},
+      example: exampleCreateResponse
+    }
+  }
 }
 const patch = {
   description: `patch a ${name}`,

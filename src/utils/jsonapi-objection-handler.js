@@ -1,5 +1,4 @@
 const { Serializer } = require('../json-api-serializer')
-// const { query } = require('../models/project')
 const { getIncludeStr, parseJsonApiParams } = require('../utils')
 const modelHasColumn = require('../schemas/all-properties')
 
@@ -25,7 +24,7 @@ const getListHandler = (Model) => {
     // Checking first level only for now
     if (parsedParams?.include && parsedParams.include.filter(el => !modelRelations.includes(el.split('.')[0])).length > 0) {
       return reply
-        .code(404)
+        .code(400)
         .send({
           status: 400,
           title: 'Cannot include non-existing relation'
@@ -37,24 +36,29 @@ const getListHandler = (Model) => {
     if (request.params.id) {
       queryBuilder.findById(request.params.id)
     }
+
+    queryBuilder.withGraphJoined(includeStr)
+    queryBuilder.skipUndefined()
+
     // @TODO verify column names
     if (Object.keys(parsedParams.fields).length) {
       for (const [key, val] of Object.entries(parsedParams.fields)) {
         const items = val.map(el => normalizeColumn(key.slice(0, -1), el))
         if (!modelHasColumn(items)) {
           return reply
-            .code(404)
+            .code(400)
             .send({
               status: 400,
               title: 'Cannot select non-existing fields'
             })
         }
-        queryBuilder.column(...items)
+        if (key.slice(0, -1) === tableName) {
+          queryBuilder.columns(...items)
+        } else {
+          queryBuilder.modifyGraph(key, builder => builder.columns(...items))
+        }
       }
     }
-
-    queryBuilder.withGraphJoined(includeStr)
-    queryBuilder.skipUndefined()
 
     if (parsedParams.filter.length) {
       // check for duplicate filter keys, return 500
@@ -109,6 +113,7 @@ const getListHandler = (Model) => {
           comparator = '='
           sqlValue = filter.value
         }
+        // @TODO: compare datetime based on date only accepting YYYY-MM-DD?
         if (!queryBuilder.hasWheres()) {
           queryBuilder.where(normalizedName, comparator, sqlValue)
         } else {
@@ -199,7 +204,8 @@ const getPostHandler = (Model) => {
     }
 
     const newModel = await Model.query().insertGraph(body, { relate: true })
-    const data = Serializer.serialize(Model.name.toLowerCase() + 's', newModel)
+    const modelName = Model.name.toLowerCase() + 's'
+    const data = Serializer.serialize(modelName, newModel, { url: `/${modelName}/${newModel.id}` })
     const location = `${url}/${newModel.id}`
     return reply.status(201).header('Location', location).send(data)
   }

@@ -1,9 +1,13 @@
-const { makeQueryStringFilters } = require('../utils')
+const { makeQueryStringFilters, makeQueryStringFields } = require('../utils')
 const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
 
 const properties = {
-  id: { type: 'string', format: 'uuid' },
+  id: {
+    type: 'string',
+    format: 'uuid',
+    description: "The employee's unique identifier"
+  },
   name: {
     type: 'string',
     description: 'The name of the employee'
@@ -17,7 +21,32 @@ const properties = {
     description: 'The date the employee will or did end their employment'
   }
 }
-
+const exampleGetResponse = {
+  jsonapi: {
+    version: '1.0'
+  },
+  links: {
+    self: '/employees/03598cfb-6857-4c3e-99ec-9ee8f9e129d1'
+  },
+  data: {
+    type: 'employees',
+    id: '03598cfb-6857-4c3e-99ec-9ee8f9e129d1',
+    attributes: {
+      name: 'Carlee Luettgen',
+      start_date: '2020-12-11T00:35:41.276Z',
+      end_date: null
+    }
+  }
+}
+const exampleCreateResponse = {
+  jsonapi: { version: '1.0' },
+  links: { self: '/employees/6c0d8a4c-e8e2-4ce9-96b2-04a81a91c1cd' },
+  data: {
+    type: 'employees',
+    id: '6c0d8a4c-e8e2-4ce9-96b2-04a81a91c1cd',
+    attributes: { name: 'Donnie Larson' }
+  }
+}
 const name = 'employee'
 const tags = [name]
 
@@ -29,7 +58,8 @@ const list = {
     type: 'object',
     properties: {
       ...queryStringSchema.common,
-      ...makeQueryStringFilters(properties)
+      ...makeQueryStringFilters(properties),
+      ...makeQueryStringFields(name)
     }
   }
 }
@@ -37,20 +67,40 @@ const get = {
   description: `retrieve an ${name} by id`,
   summary: `retrieve an ${name} by id`,
   tags,
-  params: makeIdParams(name)
+  params: makeIdParams(name),
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      properties: {},
+      example: exampleGetResponse
+    },
+    404: {
+      description: 'Not Found',
+      type: 'object',
+      properties: {}
+    }
+  }
 }
 const create = {
   description: `create an ${name}`,
   summary: `create an ${name}`,
   tags,
-  type: 'object',
-  required: ['name'],
   body: {
     type: 'object',
-    required: ['name']
+    required: ['name'],
+    example: { data: { type: 'employees', attributes: { name: 'Donnie Larson' } } }
   },
   properties,
-  additionalProperties: false
+  additionalProperties: false,
+  response: {
+    default: {
+      description: 'Success: Object created and returned',
+      type: 'object',
+      properties: {},
+      example: exampleCreateResponse
+    }
+  }
 }
 const patch = {
   description: `patch an ${name}`,

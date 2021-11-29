@@ -1,4 +1,4 @@
-const { makeQueryStringFilters } = require('../utils')
+const { makeQueryStringFilters, makeQueryStringFields } = require('../utils')
 const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
 
@@ -9,7 +9,38 @@ const properties = {
     description: 'The name of the skill'
   }
 }
-
+const exampleGetResponse = {
+  jsonapi: {
+    version: '1.0'
+  },
+  links: {
+    self: '/skills/20b853c7-2747-4c2d-8659-fa0777ab4d64'
+  },
+  data: {
+    type: 'skills',
+    id: '20b853c7-2747-4c2d-8659-fa0777ab4d64',
+    attributes: {
+      name: 'mobile.js'
+    }
+  }
+}
+const exampleCreateResponse = {
+  jsonapi: {
+    version: '1.0'
+  },
+  links: {
+    self: '',
+    first: '?',
+    prev: '?'
+  },
+  data: {
+    type: 'skills',
+    id: 'b691fad7-27ba-4d40-9545-cecca582b9a8',
+    attributes: {
+      name: 'example skill'
+    }
+  }
+}
 const name = 'skill'
 const tags = [name]
 
@@ -21,7 +52,8 @@ const list = {
     type: 'object',
     properties: {
       ...queryStringSchema.common,
-      ...makeQueryStringFilters(properties)
+      ...makeQueryStringFilters(properties),
+      ...makeQueryStringFields(name)
     }
   }
 }
@@ -29,16 +61,47 @@ const get = {
   description: `retrieve a ${name} by id`,
   summary: `retrieve a ${name} by id`,
   tags,
-  params: makeIdParams(name)
+  params: makeIdParams(name),
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      properties: {},
+      example: exampleGetResponse
+    },
+    404: {
+      description: 'Not Found',
+      type: 'object',
+      properties: {}
+    }
+  }
 }
 const create = {
   description: `create a ${name}`,
   summary: `create a ${name}`,
   tags,
-  type: 'object',
-  required: ['name'],
+  body: {
+    type: 'object',
+    required: ['name'],
+    example: {
+      data: {
+        type: 'skills',
+        attributes: {
+          name: 'example skill'
+        }
+      }
+    }
+  },
   properties,
-  additionalProperties: false
+  additionalProperties: false,
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      properties: {},
+      example: exampleCreateResponse
+    }
+  }
 }
 const patch = {
   description: `patch a ${name}`,

@@ -9,7 +9,7 @@ const build = () => {
   Model.knex(knex)
 
   const fastify = require('fastify')({
-    logger: true
+    logger: false
   })
 
   setupFastifySwagger(fastify)

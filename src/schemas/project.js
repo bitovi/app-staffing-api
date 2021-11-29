@@ -28,7 +28,7 @@ const exampleGetResponse = {
     type: 'projects',
     id: '0b3aabce-b783-4169-bdeb-b342fc4fc70a',
     attributes: {
-      name: 'Yum Projet X',
+      name: 'Yum Project X',
       end_date: '2021-11-24T18:29:51.833Z'
     }
   }

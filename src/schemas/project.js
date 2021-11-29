@@ -11,10 +11,6 @@ const properties = {
     type: 'string',
     description: 'The name of the project'
   },
-  start_date: {
-    type: 'string',
-    description: 'The date the project begins'
-  },
   end_date: {
     type: 'string',
     description: 'The date the project ends'
@@ -32,8 +28,7 @@ const exampleGetResponse = {
     type: 'projects',
     id: '0b3aabce-b783-4169-bdeb-b342fc4fc70a',
     attributes: {
-      name: 'Okuneva Group',
-      start_date: '2021-11-24T18:29:51.833Z',
+      name: 'Yum Projet X',
       end_date: '2021-11-24T18:29:51.833Z'
     }
   }
@@ -44,7 +39,7 @@ const exampleCreateResponse = {
   data: {
     type: 'projects',
     id: '1ff5d9a0-b814-4790-b3ee-43aaf2d753f3',
-    attributes: { name: 'Kathleen Lehner', start_date: '2021-09-21T10:20:51.920Z' }
+    attributes: { name: 'Yum Project X' }
   }
 }
 const name = 'project'
@@ -88,18 +83,17 @@ const create = {
   tags,
   body: {
     type: 'object',
-    required: ['name', 'start_date'],
+    required: ['name'],
     example: {
       data: {
         type: 'projects',
-        attributes: { name: 'Kathleen Lehner', start_date: '2021-09-21T10:20:51.920Z' }
+        attributes: { name: 'Kathleen Lehner' }
       }
     }
   },
   errorMessage: {
     required: {
-      name: 'name is required',
-      age: 'start_date is required'
+      name: 'name is required'
     }
   },
   properties,

@@ -51,15 +51,12 @@ module.exports = {
         name: {
           type: 'string'
         },
-        start_date: {
-          type: 'string'
-        },
         end_date: {
           type: 'string'
         }
       },
       primaryKeys: ['id'],
-      required: ['name', 'start_date'],
+      required: ['name'],
       relations: ['roles', 'assignments']
     },
 

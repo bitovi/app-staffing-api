@@ -7,6 +7,9 @@ COPY db /usr/src/app/db
 COPY package.json package.json
 COPY package-lock.json package-lock.json
 
+# TODO: dev only target
+COPY start-dev.sh start-dev.sh
+
 RUN npm ci --production
 
 EXPOSE 3000

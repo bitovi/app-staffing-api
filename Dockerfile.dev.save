@@ -1,0 +1,18 @@
+FROM postgres AS Database
+ENV POSTGRES_USER: dbuser
+ENV POSTGRES_PASSWORD: dbpassword
+COPY *.sql ./docker-entrypoint-initdb.d/
+FROM node:14-buster AS API
+
+WORKDIR /usr/src/app
+
+COPY src /usr/src/app/src
+COPY db /usr/src/app/db
+COPY package.json package.json
+COPY package-lock.json package-lock.json
+DATABASE_CONNECTION_STRING: postgres://dbuser:dbpassword@db:5432/staffing
+RUN npm ci --production
+
+EXPOSE 3000
+
+CMD node app.js ; 

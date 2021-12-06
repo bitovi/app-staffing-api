@@ -32,7 +32,7 @@ ingress: []
   #   apiVersion: networking.k8s.io/v1
   #   for k8s 1.18, use `apiVersion: networking.k8s.io/v1beta1`
   #   host: app.localhost
-  #   # useNewBackend: true # for apiVersion.k8s.io/v1
+  #   # useOldBackend: true # for apiVersion.k8s.io/v1beta1
   #   tls: false
   #   extraAnnotations:
   #     kubernetes.io/ingress.class: nginx

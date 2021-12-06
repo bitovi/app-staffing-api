@@ -42,7 +42,7 @@ spec:
   {{- end }}
       paths:
       {{- range $item.paths }}
-      {{- if $item.useNewBackend }}
+      {{- if $item.useOldBackend }}
         - path: "{{ .path }}"
           pathType: "{{ .pathType }}"
           backend:

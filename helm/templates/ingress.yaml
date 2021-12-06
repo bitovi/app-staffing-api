@@ -44,17 +44,17 @@ spec:
       {{- range $item.paths }}
       {{- if $item.useOldBackend }}
         - path: "{{ .path }}"
+          backend:
+            serviceName: {{ .service }}
+            servicePort: {{ .port }}
+      {{- else }}
+        - path: "{{ .path }}"
           pathType: "{{ .pathType }}"
           backend:
             service:
               name: {{ .service }}
               port:
                 number: {{ .port }}
-      {{- else }}
-        - path: "{{ .path }}"
-          backend:
-            serviceName: {{ .service }}
-            servicePort: {{ .port }}
       {{- end}}
       {{- end}}
 {{- end}}

@@ -10,7 +10,7 @@ if [ -z "$ECR_REGISTRY_ID" ]; then
     ECR_REGISTRY_ID="$DEFAULT_ECR_REGISTRY_ID"
 fi
 
-REGISTRY_URL_2="${AWS_ACCOUNT_NO}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REGISTRY_ID}"
+REGISTRY_URL="${AWS_ACCOUNT_NO}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REGISTRY_ID}"
 
 #Defining the Branch name variable
 BRANCH_NAME=$(echo $GITHUB_REF | awk -F"  +|/" '{print $5, $NF}')
@@ -28,6 +28,11 @@ if [ -z "$PROD_TARGET_STAGE_NAME" ]; then
 fi
 docker build --target=${PROD_TARGET_STAGE_NAME}  -t ${IMAGE_NAME} .
 
+PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+echo "Debugging"
+echo "  GITHUB_REF: $GITHUB_REF"
+echo "  PR_NUMBER: $PR_NUMBER"
+
 
 #prepping image tag variable
 DEFAULT_IMAGE_TAG="latest"
@@ -44,14 +49,15 @@ elif [[ -n "$GITHUB_HEAD_REF" ]]; then
     echo "  is PR. Using PR branch: $GITHUB_HEAD_REF"
     IMAGE_TAG="$GITHUB_HEAD_REF"
 else
-    echo "  Using SHA: $GITHUB_SHA"
-    IMAGE_TAG=${GITHUB_SHA}
+    SHORT_SHA="$(echo ${GITHUB_SHA} | cut -c1-8)"
+    IMAGE_TAG="${BRANCH_NAME}-${SHORT_SHA}"
+    echo "  Using SHA: ${IMAGE_TAG}"
 fi
 
 #docker image deploy function
-aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REGISTRY_URL}    
+aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REGISTRY_URL}
+echo "docker tag ${IMAGE_NAME} ${REGISTRY_URL}:${IMAGE_TAG}"
 docker tag ${IMAGE_NAME} ${REGISTRY_URL}:${IMAGE_TAG}
 
 echo "Pushing the docker image to the ecr repository..."
-echo "  ${REGISTRY_URL}:${IMAGE_TAG}"
 docker push ${REGISTRY_URL}:${IMAGE_TAG}

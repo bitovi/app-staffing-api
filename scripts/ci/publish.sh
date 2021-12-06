@@ -13,7 +13,7 @@ fi
 REGISTRY_URL="${AWS_ACCOUNT_NO}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REGISTRY_ID}"
 
 #Defining the Branch name variable
-BRANCH_NAME=$(echo $GITHUB_REF | awk -F"  +|/" '{print $5, $NF}')
+BRANCH_NAME=$(echo $GITHUB_REF | awk -F"  +|/"'{print $5, $NF}')
 
 
 #Defining the Default branch variable
@@ -36,7 +36,7 @@ echo "  PR_NUMBER: $PR_NUMBER"
 
 #prepping image tag variable
 DEFAULT_IMAGE_TAG="latest"
-echo "Using image tag:"
+echo "Determining image tag:"
 if [ -n "$IMAGE_TAG" ]; then
     echo "  IMAGE_TAG set: $IMAGE_TAG"
 elif [[ ${BRANCH_NAME} == ${DEFAULT_BRANCH} ]]; then

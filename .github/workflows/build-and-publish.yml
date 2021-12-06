@@ -69,6 +69,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
         AWS_DEFAULT_REGION: us-west-2
         PROD_TARGET_STAGE_NAME: production
+        IMAGE_TAG: local-deployments
 
       run: |
         echo "running scripts/ci/publish.sh"

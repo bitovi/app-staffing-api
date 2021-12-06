@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 
 #Defining the Image name variable
 IMAGE_NAME=$(echo $GITHUB_REPOSITORY | sed 's/^.*\///')
@@ -13,7 +14,7 @@ fi
 REGISTRY_URL="${AWS_ACCOUNT_NO}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REGISTRY_ID}"
 
 #Defining the Branch name variable
-BRANCH_NAME=$(echo $GITHUB_REF | awk -F"  +|/"'{print $5, $NF}')
+BRANCH_NAME=$(echo $GITHUB_REF | awk -F"  +|/" '{print $5, $NF}' | xargs)
 
 
 #Defining the Default branch variable
@@ -31,6 +32,7 @@ docker build --target=${PROD_TARGET_STAGE_NAME}  -t ${IMAGE_NAME} .
 PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
 echo "Debugging"
 echo "  GITHUB_REF: $GITHUB_REF"
+echo "  BRANCH_NAME: $BRANCH_NAME"
 echo "  PR_NUMBER: $PR_NUMBER"
 
 
@@ -43,7 +45,8 @@ elif [[ ${BRANCH_NAME} == ${DEFAULT_BRANCH} ]]; then
     echo "  BRANCH is default branch ($BRANCH_NAME). Using default: $DEFAULT_IMAGE_TAG"
     IMAGE_TAG="$DEFAULT_IMAGE_TAG"
 elif [[ -n "$GITHUB_HEAD_REF" ]]; then
-    # TODO: https://github.com/actions/checkout/issues/58
+    # TODO: Properly handle PRs (i.e. tag with $PR_NUMBER)
+    # https://github.com/actions/checkout/issues/58
     # PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
     # if -z $PR_NUMBER
     echo "  is PR. Using PR branch: $GITHUB_HEAD_REF"

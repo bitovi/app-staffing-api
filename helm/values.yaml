@@ -29,6 +29,8 @@ extraServices: []
 ingress: []
   # - class: nginx
   #   name: app
+  #   apiVersion: networking.k8s.io/v1
+  #   for k8s 1.18, use `apiVersion: networking.k8s.io/v1beta1`
   #   host: app.localhost
   #   tls: false
   #   extraAnnotations:

@@ -1,6 +1,6 @@
 {{- range $index, $item := .Values.ingress }}
 ---
-apiVersion: networking.k8s.io/v1
+apiVersion: {{ $item.apiVersion }}
 kind: Ingress
 metadata:
   {{- if .name }}

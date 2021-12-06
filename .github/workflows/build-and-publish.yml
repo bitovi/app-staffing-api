@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Publish Docker Image
+    - name: Publish Docker and Helm
       env:
         # TODO: this isn't working as expected. Output is masked.
         # AWS_ACCOUNT_NO: ${{ secrets.AWS_ACCOUNT_NO }}

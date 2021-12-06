@@ -42,6 +42,7 @@ spec:
   {{- end }}
       paths:
       {{- range $item.paths }}
+      {{- if $item.useNewBackend }}
         - path: "{{ .path }}"
           pathType: "{{ .pathType }}"
           backend:
@@ -49,5 +50,11 @@ spec:
               name: {{ .service }}
               port:
                 number: {{ .port }}
+      {{- else }}
+        - path: "{{ .path }}"
+          backend:
+            serviceName: {{ .service }}
+            servicePort: {{ .port }}
+      {{- end}}
       {{- end}}
 {{- end}}

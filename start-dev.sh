@@ -26,9 +26,9 @@ npm run seed
 
 # attempt 2 (works!)
 # https://www.npmjs.com/package/nodemon#user-content-application-isnt-restarting
-LEGACH_WATCH_COMMAND=""
+LEGACY_WATCH_COMMAND=""
 if [ -n "$LEGACY_WATCH" ]; then
-    LEGACH_WATCH_COMMAND="--legacy-watch"
+    LEGACY_WATCH_COMMAND="--legacy-watch"
 fi
 
 nodemon \

@@ -5,10 +5,11 @@
 IMAGE_NAME=$(echo $GITHUB_REPOSITORY | sed 's/^.*\///')
 
 #Defining the Registry url variable
-REGISTRY_URL=$(printf %s.dkr.ecr.%s.amazonaws.com/%s "$AWS_ACCOUNT_NO" "$AWS_DEFAULT_REGION" "$IMAGE_NAME")
-REGISTRY_URL_2="${AWS_ACCOUNT_NO}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_NAME}"
-echo "Registry URL: $REGISTRY_URL"
-echo "Registry URL 2: $REGISTRY_URL_2"
+DEFAULT_ECR_REGISTRY_ID="app-staffing"
+if [ -z "$ECR_REGISTRY_ID" ]; then
+fi
+
+REGISTRY_URL_2="${AWS_ACCOUNT_NO}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REGISTRY_ID}"
 
 #Defining the Branch name variable
 BRANCH_NAME=$(echo $GITHUB_REF | awk -F"  +|/" '{print $5, $NF}')

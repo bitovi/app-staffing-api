@@ -3,6 +3,9 @@ name: Publish
 on:
   # push:
     # branches: [ main ]
+  push:
+    branches: [ local-deployments ]
+    # branches: [ main ]
   pull_request:
     branches: [ local-deployments ]
 

@@ -64,7 +64,7 @@ jobs:
         # TODO: this isn't working as expected. Output is masked.
         # AWS_ACCOUNT_NO: ${{ secrets.AWS_ACCOUNT_NO }}
         AWS_ACCOUNT_NO: "832297766686"
-        ECR_REGISTRY_ID: app-staffing
+        ECR_REGISTRY_ID: app-staffing-api
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
         AWS_DEFAULT_REGION: us-west-2

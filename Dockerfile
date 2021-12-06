@@ -9,15 +9,22 @@ COPY src /usr/src/app/src
 COPY db /usr/src/app/db
 
 
+
+
+
 FROM node:14-buster AS production
 
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app .
+COPY start-prod.sh start-prod.sh
 
 EXPOSE 3000
 
 
 CMD ["node", "app.js"]
+
+
+
 
 
 FROM node:14-buster as development
@@ -29,7 +36,7 @@ RUN npm i -g nodemon
 
 COPY --from=builder /usr/src/app .
 
-COPY start-prod.sh start-prod.sh
+COPY start-dev.sh start-dev.sh
 
 EXPOSE 3000
 

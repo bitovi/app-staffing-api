@@ -26,7 +26,15 @@ npm run seed
 
 # attempt 2 (works!)
 # https://www.npmjs.com/package/nodemon#user-content-application-isnt-restarting
-nodemon --inspect=0.0.0.0:9229 --legacy-watch src/app.js
+LEGACH_WATCH_COMMAND=""
+if [ -n "$LEGACY_WATCH" ]; then
+    LEGACH_WATCH_COMMAND="--legacy-watch"
+fi
+
+nodemon \
+--inspect=0.0.0.0:9229 \
+$LEGACY_WATCH_COMMAND \
+src/app.js
 
 # attempt 3
 # error: Starting inspector on nodemon.staffing-app.svc.cluster.local:9229 failed: address not available

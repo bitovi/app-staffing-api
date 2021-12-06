@@ -1,10 +1,5 @@
 #!/bin/sh
 
-
-# TODO: put in development build target
-npm i -g nodemon
-
-
 # TODO
 # if in kubernetes context
     # while true

@@ -7,6 +7,7 @@ IMAGE_NAME=$(echo $GITHUB_REPOSITORY | sed 's/^.*\///')
 #Defining the Registry url variable
 DEFAULT_ECR_REGISTRY_ID="app-staffing"
 if [ -z "$ECR_REGISTRY_ID" ]; then
+    ECR_REGISTRY_ID="$DEFAULT_ECR_REGISTRY_ID"
 fi
 
 REGISTRY_URL_2="${AWS_ACCOUNT_NO}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REGISTRY_ID}"
@@ -37,6 +38,9 @@ elif [[ ${BRANCH_NAME} == ${DEFAULT_BRANCH} ]]; then
     echo "  BRANCH is default branch ($BRANCH_NAME). Using default: $DEFAULT_IMAGE_TAG"
     IMAGE_TAG="$DEFAULT_IMAGE_TAG"
 elif [[ -n "$GITHUB_HEAD_REF" ]]; then
+    # TODO: https://github.com/actions/checkout/issues/58
+    # PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+    # if -z $PR_NUMBER
     echo "  is PR. Using PR branch: $GITHUB_HEAD_REF"
     IMAGE_TAG="$GITHUB_HEAD_REF"
 else

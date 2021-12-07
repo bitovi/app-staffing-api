@@ -1,13 +1,10 @@
-name: Publish
+name: Build and Publish
 
 on:
-  # push:
-    # branches: [ main ]
   push:
-    branches: [ local-deployments ]
-    # branches: [ main ]
+    branches: [ main ]
   pull_request:
-    branches: [ local-deployments ]
+    branches: [ main ]
 
 jobs:
   # This job will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
@@ -52,10 +49,8 @@ jobs:
     - run: npm run lint
     - run: npm test
 
-
   publish:
-    # TODO: uncomment before merge
-    # needs: [ build ]
+    needs: [ build ]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

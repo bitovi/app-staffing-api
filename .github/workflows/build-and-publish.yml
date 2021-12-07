@@ -73,7 +73,7 @@ jobs:
   # https://github.com/actions/github-script
   # https://octokit.github.io/rest.js/v18#actions-create-workflow-dispatch
   deploy-dev:
-    needs: [ publish ]
+    # needs: [ publish ]
     runs-on: ubuntu-latest
     steps:
     - name: Deploy Stage

@@ -2,78 +2,77 @@ name: Build and Publish
 
 on:
   push:
-    # branches: [ main ]
-    branches: [ main, STAF-44-cd ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
 jobs:
-  # # This job will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-  # # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
-  # build:
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     DATABASE_CONNECTION_STRING: postgres://postgres:postgres@localhost:5432/test_staffing
+  # This job will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+  # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_CONNECTION_STRING: postgres://postgres:postgres@localhost:5432/test_staffing
 
-  #   services:
-  #     # Label used to access the service container
-  #     postgres:
-  #       # Docker Hub image
-  #       image: postgres
-  #       # Provide the password for postgres
-  #       env:
-  #         POSTGRES_PASSWORD: postgres
-  #         POSTGRES_DB: test_staffing
-  #       ports:
-  #         - 5432:5432
-  #       # Set health checks to wait until postgres has started
-  #       options: >-
-  #         --health-cmd pg_isready
-  #         --health-interval 10s
-  #         --health-timeout 5s
-  #         --health-retries 5
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_staffing
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
-  #   strategy:
-  #     matrix:
-  #       node-version: [14.x]
-  #       # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+    strategy:
+      matrix:
+        node-version: [14.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Use Node.js ${{ matrix.node-version }}
-  #     uses: actions/setup-node@v2
-  #     with:
-  #       node-version: ${{ matrix.node-version }}
-  #       cache: 'npm'
-  #   - run: npm ci
-  #   - run: npm run migrate
-  #   - run: npm run lint
-  #   - run: npm test
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run migrate
+    - run: npm run lint
+    - run: npm test
 
-  # publish:
-  #   needs: [ build ]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Publish Docker and Helm
-  #     env:
-  #       # TODO: this isn't working as expected. Output is masked.
-  #       # AWS_ACCOUNT_NO: ${{ secrets.AWS_ACCOUNT_NO }}
-  #       AWS_ACCOUNT_NO: "832297766686"
-  #       ECR_REGISTRY_ID: app-staffing-api
-  #       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
-  #       AWS_DEFAULT_REGION: us-west-2
-  #       PROD_TARGET_STAGE_NAME: production
-  #       HELM_PUBLISH_S3_BUCKET: bitovi-operations-staffing-app-helm
-  #     run: |
-  #       echo "running scripts/ci/publish.sh"
-  #       ./scripts/ci/publish.sh
+  publish:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Publish Docker and Helm
+      env:
+        # TODO: this isn't working as expected. Output is masked.
+        # AWS_ACCOUNT_NO: ${{ secrets.AWS_ACCOUNT_NO }}
+        AWS_ACCOUNT_NO: "832297766686"
+        ECR_REGISTRY_ID: app-staffing-api
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+        AWS_DEFAULT_REGION: us-west-2
+        PROD_TARGET_STAGE_NAME: production
+        HELM_PUBLISH_S3_BUCKET: bitovi-operations-staffing-app-helm
+      run: |
+        echo "running scripts/ci/publish.sh"
+        ./scripts/ci/publish.sh
 
   # https://github.com/actions/github-script
   # https://octokit.github.io/rest.js/v18#actions-create-workflow-dispatch
   deploy-dev:
-    # needs: [ publish ]
+    needs: [ publish ]
     runs-on: ubuntu-latest
     steps:
     - name: Deploy Stage

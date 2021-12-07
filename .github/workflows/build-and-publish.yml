@@ -77,12 +77,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Deploy Stage
+      uses: actions/github-script@v5
       env:
         OPERATIONS_REPO: operations-staffing-app
         OPERATIONS_REPO_ORG: bitovi
         OPERATIONS_REPO_BRANCH: main
         OPERATIONS_REPO_WORKFLOW: deploy-dev.yaml
-      uses: actions/github-script@v5
       with:
         github-token: ${{ secrets.OPERATIONS_REPO_TOKEN }}
         script: |
@@ -90,14 +90,13 @@ jobs:
             OPERATIONS_REPO,
             OPERATIONS_REPO_ORG,
             OPERATIONS_REPO_BRANCH,
-            OPERATIONS_REPO_WORKFLOW,
-
+            OPERATIONS_REPO_WORKFLOW
           } = process.env
 
           await github.rest.actions.createWorkflowDispatch({
-            OPERATIONS_REPO_ORG,
-            OPERATIONS_REPO,
-            OPERATIONS_REPO_WORKFLOW,
-            OPERATIONS_REPO_BRANCH,
+            `${OPERATIONS_REPO_ORG}`,
+            `${OPERATIONS_REPO}`,
+            `${OPERATIONS_REPO_WORKFLOW}`,
+            `${OPERATIONS_REPO_BRANCH}`,
           });
 

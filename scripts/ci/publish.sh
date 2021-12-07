@@ -62,18 +62,22 @@ if [ -n "$IMAGE_TAG" ]; then
 elif [[ ${BRANCH_NAME} == ${DEFAULT_BRANCH} ]]; then
     echo "  BRANCH is default branch ($BRANCH_NAME). Using default: $DEFAULT_IMAGE_TAG"
     IMAGE_TAG="$DEFAULT_IMAGE_TAG"
-elif [[ -n "$GITHUB_HEAD_REF" ]]; then
-    # TODO: Properly handle PRs (i.e. tag with $PR_NUMBER)
-    # https://github.com/actions/checkout/issues/58
-    # PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
-    # if -z $PR_NUMBER
-    echo "  is PR. Using PR branch: $GITHUB_HEAD_REF"
-    IMAGE_TAG="$GITHUB_HEAD_REF"
 else
-    SHORT_SHA="$(echo ${GITHUB_SHA} | cut -c1-8)"
-    IMAGE_TAG="${BRANCH_NAME}-${SHORT_SHA}"
-    echo "  Using SHA: ${IMAGE_TAG}"
+    IMAGE_TAG="${BRANCH_NAME}"
+    echo "  Using branch name: ${IMAGE_TAG}"
 fi
+# TODO: Properly handle PRs (i.e. tag with $PR_NUMBER)
+# elif [[ -n "$GITHUB_HEAD_REF" ]]; then
+#     # https://github.com/actions/checkout/issues/58
+#     # PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+#     # if -z $PR_NUMBER
+#     echo "  is PR. Using PR branch: $GITHUB_HEAD_REF"
+#     IMAGE_TAG="$GITHUB_HEAD_REF"
+# else
+#     SHORT_SHA="$(echo ${GITHUB_SHA} | cut -c1-8)"
+#     IMAGE_TAG="${BRANCH_NAME}-${SHORT_SHA}"
+#     echo "  Using SHA: ${IMAGE_TAG}"
+# fi
 
 #docker image deploy function
 aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REGISTRY_URL}

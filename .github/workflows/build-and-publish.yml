@@ -1,7 +1,4 @@
-# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
-
-name: Node.js CI
+name: Build and Publish
 
 on:
   push:
@@ -10,6 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
+  # This job will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+  # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
   build:
     runs-on: ubuntu-latest
     env:
@@ -49,3 +48,24 @@ jobs:
     - run: npm run migrate
     - run: npm run lint
     - run: npm test
+
+  publish:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Publish Docker and Helm
+      env:
+        # TODO: this isn't working as expected. Output is masked.
+        # AWS_ACCOUNT_NO: ${{ secrets.AWS_ACCOUNT_NO }}
+        AWS_ACCOUNT_NO: "832297766686"
+        ECR_REGISTRY_ID: app-staffing-api
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+        AWS_DEFAULT_REGION: us-west-2
+        PROD_TARGET_STAGE_NAME: production
+        HELM_PUBLISH_S3_BUCKET: bitovi-operations-staffing-app-helm
+      run: |
+        echo "running scripts/ci/publish.sh"
+        ./scripts/ci/publish.sh
+

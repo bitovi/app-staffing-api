@@ -87,9 +87,9 @@ jobs:
         github-token: ${{ secrets.OPERATIONS_REPO_TOKEN }}
         script: |
           await github.rest.actions.createWorkflowDispatch({
-            process.env.OPERATIONS_REPO_ORG,
-            process.env.OPERATIONS_REPO,
-            process.env.OPERATIONS_REPO_WORKFLOW,
-            process.env.OPERATIONS_REPO_BRANCH
+            owner: process.env.OPERATIONS_REPO_ORG,
+            repo: process.env.OPERATIONS_REPO,
+            workflow_id: process.env.OPERATIONS_REPO_WORKFLOW,
+            ref: process.env.OPERATIONS_REPO_BRANCH
           });
 

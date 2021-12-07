@@ -3,7 +3,7 @@ const { Model } = require('objection')
 const Project = require('../../src/models/project')
 const faker = require('faker')
 
-const NUMBER_OF_RECORDS_TO_INSERT = 10
+const NUMBER_OF_RECORDS_TO_INSERT = 15
 
 const fakesCache = new Map()
 

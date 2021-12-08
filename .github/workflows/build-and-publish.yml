@@ -112,13 +112,12 @@ jobs:
               workflow_id: process.env.OPERATIONS_REPO_WORKFLOW,
               ref: process.env.OPERATIONS_REPO_BRANCH,
               inputs: {
-                caller_repo: process.env.GITHUB_REPOSITORY
+                caller_repo: process.env.GITHUB_REPOSITORY.replace('/','_')
               }
             });
             console.log("dispatchResult")
             console.log(dispatchResult)
 
-            /*
             console.log("list workflow runs")
             const listWorkflowRunsResult = await github.rest.actions.listWorkflowRuns({
               owner: process.env.OPERATIONS_REPO_ORG,
@@ -130,6 +129,7 @@ jobs:
             console.log("listWorkflowRunsResult")
             console.log(listWorkflowRunsResult)
 
+            /*
             // listWorkflowRunsResult.data["workflow_runs"].forEach(item => {
             //   console.log("item")
             //   console.log(item)
@@ -137,7 +137,7 @@ jobs:
             
             console.log("listWorkflowRunsResult.data[workflow_runs][0]")
             console.log(listWorkflowRunsResult.data["workflow_runs"][0])
-
+            /*
             const jobsResult = await github.rest.actions.listJobsForWorkflowRun({
               owner: process.env.OPERATIONS_REPO_ORG,
               repo: process.env.OPERATIONS_REPO,
@@ -149,19 +149,5 @@ jobs:
             console.log("jobsResult.data[jobs][0]")
             console.log(jobsResult.data["jobs"][0])
             */
-            const checkResult = await github.rest.checks.listForRef({
-              owner: process.env.OPERATIONS_REPO_ORG,
-              repo: process.env.OPERATIONS_REPO,
-              ref: process.env.OPERATIONS_REPO_BRANCH,
-              check_name: "test"
-            });
-            checkResult.data["check_runs"].forEach(item => {
-              console.log("item.name")
-              console.log(item.name)
-              console.log("item.id")
-              console.log(item.id)
-              console.log("item.output")
-              console.log(item.output)
-            })
           }
 

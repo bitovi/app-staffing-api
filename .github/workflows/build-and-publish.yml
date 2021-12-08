@@ -155,7 +155,8 @@ jobs:
               ref: process.env.OPERATIONS_REPO_BRANCH,
               check_name: "test"
             });
-            console.log("checkResult.data[check_runs][0]")
-            console.log(checkResult.data["check_runs"][0])
+            const checkResultLength = checkResult.data.length
+            console.log("checkResult.data[check_runs][checkResultLength-1]")
+            console.log(checkResult.data["check_runs"][checkResultLength-1])
           }
 

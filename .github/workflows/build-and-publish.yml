@@ -118,6 +118,18 @@ jobs:
             console.log("dispatchResult")
             console.log(dispatchResult)
 
+            //GET https://api.github.com/repos/$OWNER/$REPO/actions/runs/[RUN_ID]/jobs
+
+            //GET https://api.github.com/repos/$OWNER/$REPO/actions/runs?created=>$run_date_filter
+            const listWorkflowsUrl = `/repos/${process.env.OPERATIONS_REPO_ORG}/${process.env.OPERATIONS_REPO}/actions/runs`
+            const fiveMinuteAgo = new Date( Date.now() - 1000 * (60 * 5) 
+            // 2012-11-14T15:25:33Z
+            const workflowsCreatedDate = fiveMinuteAgo.toISOString()
+            const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch&created=${workflowsCreatedDate}`
+            const listWorkflowRunsResult = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
+            console.log("listWorkflowRunsResult")
+            console.log(listWorkflowRunsResult)
+            /*
             console.log("list workflow runs")
             const listWorkflowRunsResult = await github.rest.actions.listWorkflowRuns({
               owner: process.env.OPERATIONS_REPO_ORG,
@@ -129,7 +141,6 @@ jobs:
             console.log("listWorkflowRunsResult")
             console.log(listWorkflowRunsResult)
 
-            /*
             // listWorkflowRunsResult.data["workflow_runs"].forEach(item => {
             //   console.log("item")
             //   console.log(item)

@@ -122,7 +122,7 @@ jobs:
 
             // GET https://api.github.com/repos/$OWNER/$REPO/actions/runs?created=>$run_date_filter
             const listWorkflowsUrl = `/repos/${process.env.OPERATIONS_REPO_ORG}/${process.env.OPERATIONS_REPO}/actions/runs`
-            const fiveMinuteAgo = new Date( Date.now() - 1000 * (60 * 5) )
+            const fiveMinuteAgo = new Date( Date.now() - (1000 * 60) * 35) )
             // 2012-11-14T15:25:33Z
             const workflowsCreatedDate = fiveMinuteAgo.toISOString()
             const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch&created=${workflowsCreatedDate}`

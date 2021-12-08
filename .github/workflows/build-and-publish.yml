@@ -161,10 +161,10 @@ jobs:
             console.log("jobsResult")
             console.log(jobsResult)
 
-            const jobSteps = jobsResult.steps
-            jobSteps.forEach(jobStep => {
-              console.log("jobStep")
-              console.log(jobStep)
+            const jobs = jobsResult.data.jobs
+            jobs.forEach(job => {
+              console.log("job")
+              console.log(job)
             })
             /*
             console.log("list workflow runs")

@@ -147,5 +147,8 @@ jobs:
             });
             console.log("jobsResult")
             console.log(jobsResult)
+
+            console.log("jobsResult.data[jobs][0]")
+            console.log(jobsResult.data["jobs"][0])
           }
 

@@ -114,5 +114,13 @@ jobs:
             });
             console.log("dispatchResult")
             console.log(dispatchResult)
+
+            console.log("list workflow runs")
+            const listWorkflowRunsResult = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: process.env.OPERATIONS_REPO_ORG,
+              repo: process.env.OPERATIONS_REPO,
+            });
+            console.log("listWorkflowRunsResult")
+            console.log(listWorkflowRunsResult)
           }
 

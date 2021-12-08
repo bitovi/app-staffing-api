@@ -110,7 +110,10 @@ jobs:
               owner: process.env.OPERATIONS_REPO_ORG,
               repo: process.env.OPERATIONS_REPO,
               workflow_id: process.env.OPERATIONS_REPO_WORKFLOW,
-              ref: process.env.OPERATIONS_REPO_BRANCH
+              ref: process.env.OPERATIONS_REPO_BRANCH,
+              inputs: {
+                caller_repo: process.env.GITHUB_REPOSITORY
+              }
             });
             console.log("dispatchResult")
             console.log(dispatchResult)

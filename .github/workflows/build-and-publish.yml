@@ -119,6 +119,8 @@ jobs:
             console.log("dispatchResult")
             console.log(dispatchResult)
 
+
+            /*
             // GET https://api.github.com/repos/$OWNER/$REPO/actions/runs/[RUN_ID]/jobs
 
             // GET https://api.github.com/repos/$OWNER/$REPO/actions/runs?created=>$run_date_filter
@@ -138,7 +140,32 @@ jobs:
 
             console.log("listWorkflowRunsResult.data[workflow_runs][0]")
             console.log(listWorkflowRunsResult.data["workflow_runs"][0])
+            */
 
+            const listWorkflowsUrl = `/repos/${process.env.OPERATIONS_REPO_ORG}/${process.env.OPERATIONS_REPO}/actions/runs`
+            const fiveMinuteAgo = new Date( Date.now() - (1000 * 60) * 5 )
+            const workflowsCreatedDate = fiveMinuteAgo.toISOString()
+            const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch&created=>${workflowsCreatedDate}`
+            const listWorkflowRunsResult = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
+            console.log("listWorkflowRunsResult")
+            console.log(listWorkflowRunsResult)
+
+            const workflowItem = listWorkflowRunsResult.data["workflow_runs"][0]
+            console.log("workflowItem")
+            console.log(workflowItem)
+
+            // GET JOBS
+            // GET https://api.github.com/repos/$OWNER/$REPO/actions/runs/[RUN_ID]/jobs
+            const jobsUrl = workflowItem.jobs_url
+            const jobsResult = await github.request(`GET ${jobsUrl}`);
+            console.log("jobsResult")
+            console.log(jobsResult)
+
+            const jobSteps = jobsResult.steps
+            jobSteps.forEach(jobStep => {
+              console.log("jobStep")
+              console.log(jobStep)
+            })
             /*
             console.log("list workflow runs")
             const listWorkflowRunsResult = await github.rest.actions.listWorkflowRuns({

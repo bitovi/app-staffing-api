@@ -118,6 +118,7 @@ jobs:
             console.log("dispatchResult")
             console.log(dispatchResult)
 
+            /*
             console.log("list workflow runs")
             const listWorkflowRunsResult = await github.rest.actions.listWorkflowRuns({
               owner: process.env.OPERATIONS_REPO_ORG,
@@ -129,13 +130,10 @@ jobs:
             console.log("listWorkflowRunsResult")
             console.log(listWorkflowRunsResult)
 
-            /*
-            listWorkflowRunsResult.data["workflow_runs"].forEach(item => {
-              console.log("item")
-              console.log(item)
-              
-            })
-            */
+            // listWorkflowRunsResult.data["workflow_runs"].forEach(item => {
+            //   console.log("item")
+            //   console.log(item)
+            // })
             
             console.log("listWorkflowRunsResult.data[workflow_runs][0]")
             console.log(listWorkflowRunsResult.data["workflow_runs"][0])
@@ -150,5 +148,13 @@ jobs:
 
             console.log("jobsResult.data[jobs][0]")
             console.log(jobsResult.data["jobs"][0])
+            */
+            const checkResult = await github.rest.actions.listJobsForWorkflowRun({
+              owner: process.env.OPERATIONS_REPO_ORG,
+              repo: process.env.OPERATIONS_REPO,
+              check_run_id: "test",
+            });
+            console.log("checkResult")
+            console.log(checkResult)
           }
 

@@ -122,5 +122,16 @@ jobs:
             });
             console.log("listWorkflowRunsResult")
             console.log(listWorkflowRunsResult)
+
+            /*
+            listWorkflowRunsResult.data["workflow_runs"].forEach(item => {
+              console.log("item")
+              console.log(item)
+              
+            })
+            */
+            
+            console.log("listWorkflowRunsResult.data[workflow_runs][0]")
+            console.log(listWorkflowRunsResult.data["workflow_runs"][0])
           }
 

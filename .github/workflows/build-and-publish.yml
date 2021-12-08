@@ -74,6 +74,7 @@ jobs:
 
   # https://github.com/actions/github-script
   # https://octokit.github.io/rest.js/v18#actions-create-workflow-dispatch
+  # https://stackoverflow.com/questions/69479400/get-run-id-after-triggering-a-github-workflow-dispatch-event
   deploy-dev:
     # TODO: uncomment before merge
     # needs: [ publish ]
@@ -130,6 +131,10 @@ jobs:
             const listWorkflowRunsResult = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
             console.log("listWorkflowRunsResult")
             console.log(listWorkflowRunsResult)
+
+            console.log("listWorkflowRunsResult.data[workflow_runs][0]")
+            console.log(listWorkflowRunsResult.data["workflow_runs"][0])
+
             /*
             console.log("list workflow runs")
             const listWorkflowRunsResult = await github.rest.actions.listWorkflowRuns({

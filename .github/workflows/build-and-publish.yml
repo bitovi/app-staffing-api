@@ -70,68 +70,73 @@ jobs:
   #       echo "running scripts/ci/publish.sh"
   #       ./scripts/ci/publish.sh
 
+  call-workflow-passing-data:
+    uses: bitovi/operations-staffing-app/.github/workflows/downstream-testing.yaml@STAF-153-cd-downstream-results
+    # with:
+    #   username: mona
+    # secrets:
+    #   envPAT: ${{ secrets.envPAT }}
+
+  # # https://github.com/actions/github-script
+  # # https://octokit.github.io/rest.js/v18#actions-create-workflow-dispatch
+  # deploy-dev:
+  #   # TODO: uncomment before merge
+  #   # needs: [ publish ]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Deploy Stage
+  #     uses: actions/github-script@v5
+  #     # TODO: uncomment
+  #     # # this will stop the step from running if not pull request
+  #     # if: env.GITHUB_EVENT_NAME != 'pull_request'
+  #     env:
+  #       OPERATIONS_REPO: operations-staffing-app
+  #       OPERATIONS_REPO_ORG: bitovi
+  #       OPERATIONS_REPO_BRANCH: STAF-153-cd-downstream-results
+  #       OPERATIONS_REPO_WORKFLOW: downstream-testing.yaml
+  #       GITHUB_EVENT_NAME: ${{ github.event_name }}
+  #     with:
+  #       github-token: ${{ secrets.OPERATIONS_REPO_TOKEN }}
+  #       script: |
+  #         //console.log("debugging")
+  #         //console.log("GITHUB_EVENT_NAME")
+  #         //console.log(process.env.GITHUB_EVENT_NAME)
+
+  #         //console.log("context")
+  #         //console.log(context)
 
 
-  # https://github.com/actions/github-script
-  # https://octokit.github.io/rest.js/v18#actions-create-workflow-dispatch
-  deploy-dev:
-    # TODO: uncomment before merge
-    # needs: [ publish ]
-    runs-on: ubuntu-latest
-    steps:
-    - name: Deploy Stage
-      uses: actions/github-script@v5
-      # TODO: uncomment
-      # # this will stop the step from running if not pull request
-      # if: env.GITHUB_EVENT_NAME != 'pull_request'
-      env:
-        OPERATIONS_REPO: operations-staffing-app
-        OPERATIONS_REPO_ORG: bitovi
-        OPERATIONS_REPO_BRANCH: STAF-153-cd-downstream-results
-        OPERATIONS_REPO_WORKFLOW: downstream-testing.yaml
-        GITHUB_EVENT_NAME: ${{ github.event_name }}
-      with:
-        github-token: ${{ secrets.OPERATIONS_REPO_TOKEN }}
-        script: |
-          //console.log("debugging")
-          //console.log("GITHUB_EVENT_NAME")
-          //console.log(process.env.GITHUB_EVENT_NAME)
+  #         // TODO: figure out how to do this in github actions 'if:'
+  #         if(context.eventName == "pull_request"){
+  #           console.log("Pull request. not triggering deployment")
+  #         }else{
+  #           console.log("Not a pull request. Triggering deployment")
+  #           const dispatchResult = await github.rest.actions.createWorkflowDispatch({
+  #             owner: process.env.OPERATIONS_REPO_ORG,
+  #             repo: process.env.OPERATIONS_REPO,
+  #             workflow_id: process.env.OPERATIONS_REPO_WORKFLOW,
+  #             ref: process.env.OPERATIONS_REPO_BRANCH
+  #           });
+  #           console.log("dispatchResult")
+  #           console.log(dispatchResult)
 
-          //console.log("context")
-          //console.log(context)
+  #           console.log("list workflow runs")
+  #           const listWorkflowRunsResult = await github.rest.actions.listWorkflowRunsForRepo({
+  #             owner: process.env.OPERATIONS_REPO_ORG,
+  #             repo: process.env.OPERATIONS_REPO,
+  #           });
+  #           console.log("listWorkflowRunsResult")
+  #           console.log(listWorkflowRunsResult)
 
-
-          // TODO: figure out how to do this in github actions 'if:'
-          if(context.eventName == "pull_request"){
-            console.log("Pull request. not triggering deployment")
-          }else{
-            console.log("Not a pull request. Triggering deployment")
-            const dispatchResult = await github.rest.actions.createWorkflowDispatch({
-              owner: process.env.OPERATIONS_REPO_ORG,
-              repo: process.env.OPERATIONS_REPO,
-              workflow_id: process.env.OPERATIONS_REPO_WORKFLOW,
-              ref: process.env.OPERATIONS_REPO_BRANCH
-            });
-            console.log("dispatchResult")
-            console.log(dispatchResult)
-
-            console.log("list workflow runs")
-            const listWorkflowRunsResult = await github.rest.actions.listWorkflowRunsForRepo({
-              owner: process.env.OPERATIONS_REPO_ORG,
-              repo: process.env.OPERATIONS_REPO,
-            });
-            console.log("listWorkflowRunsResult")
-            console.log(listWorkflowRunsResult)
-
-            /*
-            listWorkflowRunsResult.data["workflow_runs"].forEach(item => {
-              console.log("item")
-              console.log(item)
+  #           /*
+  #           listWorkflowRunsResult.data["workflow_runs"].forEach(item => {
+  #             console.log("item")
+  #             console.log(item)
               
-            })
-            */
+  #           })
+  #           */
             
-            console.log("listWorkflowRunsResult.data[workflow_runs][0]")
-            console.log(listWorkflowRunsResult.data["workflow_runs"][0])
-          }
+  #           console.log("listWorkflowRunsResult.data[workflow_runs][0]")
+  #           console.log(listWorkflowRunsResult.data["workflow_runs"][0])
+  #         }
 

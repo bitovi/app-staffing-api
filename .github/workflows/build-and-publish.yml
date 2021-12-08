@@ -140,12 +140,12 @@ jobs:
             console.log("listWorkflowRunsResult.data[workflow_runs][0]")
             console.log(listWorkflowRunsResult.data["workflow_runs"][0])
 
-            const workflowRunResult = await github.rest.actions.getWorkflowRun({
+            const jobsResult = await github.rest.actions.listJobsForWorkflowRun({
               owner: process.env.OPERATIONS_REPO_ORG,
               repo: process.env.OPERATIONS_REPO,
               run_id: listWorkflowRunsResult.data["workflow_runs"][0].id,
             });
-            console.log("workflowRunResult")
-            console.log(workflowRunResult)
+            console.log("jobsResult")
+            console.log(jobsResult)
           }
 

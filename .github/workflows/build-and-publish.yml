@@ -149,7 +149,7 @@ jobs:
             console.log("jobsResult.data[jobs][0]")
             console.log(jobsResult.data["jobs"][0])
             */
-            const checkResult = await github.rest.actions.listJobsForWorkflowRun({
+            const checkResult = await github.rest.checks.get({
               owner: process.env.OPERATIONS_REPO_ORG,
               repo: process.env.OPERATIONS_REPO,
               check_run_id: "test",

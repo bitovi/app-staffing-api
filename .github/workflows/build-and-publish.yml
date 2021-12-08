@@ -119,9 +119,10 @@ jobs:
             console.log(dispatchResult)
 
             console.log("list workflow runs")
-            const listWorkflowRunsResult = await github.rest.actions.listWorkflowRunsForRepo({
+            const listWorkflowRunsResult = await github.rest.actions.listWorkflowRuns({
               owner: process.env.OPERATIONS_REPO_ORG,
               repo: process.env.OPERATIONS_REPO,
+              workflow_id: process.env.OPERATIONS_REPO_WORKFLOW,
               branch: process.env.OPERATIONS_REPO_BRANCH,
               event: "workflow_dispatch"
             });

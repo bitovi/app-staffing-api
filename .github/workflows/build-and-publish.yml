@@ -149,10 +149,10 @@ jobs:
             console.log("jobsResult.data[jobs][0]")
             console.log(jobsResult.data["jobs"][0])
             */
-            const checkResult = await github.rest.checks.get({
+            const checkResult = await github.rest.checks.listForRef({
               owner: process.env.OPERATIONS_REPO_ORG,
               repo: process.env.OPERATIONS_REPO,
-              check_run_id: "test",
+              ref: process.env.OPERATIONS_REPO_BRANCH,
             });
             console.log("checkResult")
             console.log(checkResult)

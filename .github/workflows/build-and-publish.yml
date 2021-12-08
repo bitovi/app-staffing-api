@@ -123,15 +123,16 @@ jobs:
 
             // GET https://api.github.com/repos/$OWNER/$REPO/actions/runs?created=>$run_date_filter
             const listWorkflowsUrl = `/repos/${process.env.OPERATIONS_REPO_ORG}/${process.env.OPERATIONS_REPO}/actions/runs`
-            const fiveMinuteAgo = new Date( Date.now() - (1000 * 60) * 35 )
-            // 2012-11-14T15:25:33Z
+            const fiveMinuteAgo = new Date( Date.now() - (1000 * 60) * 120 )
+            // 2021-12-08T15:07:46.564Z
+            // 2021-12-08T15:40:42Z
             const workflowsCreatedDate = fiveMinuteAgo.toISOString()
-            // const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch&created=${workflowsCreatedDate}`
-            const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch`
+            const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch&created=${workflowsCreatedDate}`
+            // const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch`
             const listWorkflowRunsResult = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
             console.log("workflowsCreatedDate")
             console.log(workflowsCreatedDate)
-            
+
             console.log("listWorkflowRunsResult")
             console.log(listWorkflowRunsResult)
 

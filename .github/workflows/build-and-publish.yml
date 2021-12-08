@@ -154,7 +154,7 @@ jobs:
               repo: process.env.OPERATIONS_REPO,
               ref: process.env.OPERATIONS_REPO_BRANCH,
             });
-            console.log("checkResult")
-            console.log(checkResult)
+            console.log("checkResult.data[check_runs][0]")
+            console.log(checkResult.data["check_runs"][0])
           }
 

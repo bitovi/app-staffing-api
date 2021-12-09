@@ -214,7 +214,7 @@ jobs:
                     await delay(process.env.POLL_INTERVAL_SECONDS*1000)
 
                     // GET JOBS
-                    const jobs = await getJobsForWorkflow(workflowItem)
+                    const jobs = await getJobsForWorkflow(workflowToWatch)
                     const jobParseResult = parseJobForStep({jobs,caller_repo_id})
                     jobToWatch = jobParseResult.job
                     stepToWatch = jobParseResult.step

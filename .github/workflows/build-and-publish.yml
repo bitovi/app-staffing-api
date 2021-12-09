@@ -146,8 +146,7 @@ jobs:
             })
 
             if(workflows.length){
-              workflowToWatch = null
-              workflows.some(async function (workflowItem){
+              workflowToWatch = workflows.find(async function (workflowItem){
                 console.log("workflowItem")
                 console.log(workflowItem)
 
@@ -176,7 +175,6 @@ jobs:
 
                   if(jobToWatch){
                     console.log(`job found in workflow: ${workflowItem.name}`, jobToWatch)
-                    workflowToWatch = workflowItem
                     return true
                   }else{
                     console.log(`no matching job found in workflow: ${workflowItem.name}`)
@@ -196,7 +194,7 @@ jobs:
                 console.log(`Check the deployment repo:`)
               }
             }else{
-              console.log("No workflow_runs found")
+              console.log("No workflows found")
             }
 
           }

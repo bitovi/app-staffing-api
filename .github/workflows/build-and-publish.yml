@@ -217,9 +217,14 @@ jobs:
 
                 console.log("")
                 console.log("=======================")
+                console.log("=======================")
+                console.log("=======================")
                 console.log(`Deployment has started: ${jobToWatch.html_url}`)
-                console.log(`workflow=${workflowToWatch.name},job=${jobToWatch},step=${stepToWatch}`)
-                console.log("step", stepToWatch)
+                console.log(`workflow=${workflowToWatch.name},job=${jobToWatch.name},step=${stepToWatch.name}`)
+                //console.log("step", stepToWatch)
+                console.log("=======================")
+                console.log("=======================")
+                console.log("=======================")
                 console.log("")
 
                 let stepComplete = false
@@ -243,12 +248,21 @@ jobs:
                     jobToWatch = jobParseResult.job
                     stepToWatch = jobParseResult.step
                   }else{
-                    console.log("Deployment complete")
-                    console.log(stepToWatch)
+                    console.log("")
+                    console.log("=======================")
+                    console.log("=======================")
+                    console.log("=======================")
+                    console.log(`Deployment complete: ${jobToWatch.html_url}`)
+                    console.log("=======================")
+                    console.log("=======================")
+                    console.log("=======================")
+                    console.log("")
                     stepComplete = true
                     doneProcessing = true
-                    console.log(`Deployment complete: ${jobToWatch.html_url}`)
                     if(stepToWatch.conclusion === "failure"){
+                      console.log("Deployment failed")
+                      console.log("Step")
+                      console.log(stepToWatch)
                       core.setFailed(`Deployment failed!`);
                     }else{
                       console.log("Deployment was successful!")

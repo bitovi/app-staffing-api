@@ -115,7 +115,12 @@ jobs:
                 console.log(workflows)
               }, secondsToWait*1000)
             })
-
+          }
+          const getJobsForWorkflow = async function(workflowItem){
+            const jobsResult = await github.request(`GET ${workflowItem.jobs_url}`);
+            console.log("jobsResult")
+            console.log(jobsResult)
+            return jobsResult.data.jobs
           }
 
           // TODO: figure out how to do this in github actions 'if:'
@@ -145,56 +150,51 @@ jobs:
               minutesBack: 2
             })
 
-            if(workflows.length){
-              workflowToWatch = workflows.find(async function (workflowItem){
-                console.log("workflowItem")
-                console.log(workflowItem)
+            console.log(`Workflows found: ${workflows.length}`)
+            workflowToWatch = null
+            let workflowItem = null
+            for(let workflowIndex = 0; workflowIndex < workflows.length; workflowIndex++){
+              workflowItem = workflows[workflowIndex]
+              console.log("workflowItem")
+              console.log(workflowItem)
 
-                // GET JOBS
-                const jobsResult = await github.request(`GET ${workflowItem.jobs_url}`);
-                console.log("jobsResult")
-                console.log(jobsResult)
-
-                if(jobsResult.data.jobs.length){
-                  jobToWatch = jobsResult.data.jobs.find(async function (job){
-                    console.log(`Checking steps in job: ${job.name}`)
-                    console.log(job.steps)
-                    if(job.steps.length){
-                      console.log(`Looking for step: deploy_${caller_repo_id}`)
-                      stepToWatch = job.steps.find(step => step.name === `deploy_${caller_repo_id}`)
-                      if(stepToWatch){
-                        console.log(`step found in job: ${job.name}`, stepToWatch)
-                        return true
-                      }else{
-                        console.log(`No step found in job (${job.name}) that matches deploy_${caller_repo_id}`)
-                      }
-                    }else{
-                      console.log("no steps found")
-                    }
-                  })
-
-                  if(jobToWatch){
-                    console.log(`job found in workflow: ${workflowItem.name}`, jobToWatch)
-                    return true
-                  }else{
-                    console.log(`no matching job found in workflow: ${workflowItem.name}`)
-                  }
+              // GET JOBS
+              const jobs = await getJobsForWorkflow(workflowItem)
+              console.log(`Jobs found for workflow (${workflowItem.name}): ${jobs.length}`)
+              let job = null
+              jobToWatch = null
+              for(let jobIndex = 0; jobIndex < jobs.length; jobIndex++){
+                job = jobs[jobIndex]
+                console.log(`Steps found for job (${job.name}): ${job.steps.length}`)
+                console.log(job.steps)
+                console.log(`Looking for step: deploy_${caller_repo_id}`)
+                stepToWatch = job.steps.find(step => step.name === `deploy_${caller_repo_id}`)
+                if(stepToWatch){
+                  console.log(`step found in job: ${job.name}`, stepToWatch)
+                  jobToWatch = job
+                  break
                 }else{
-                  console.log("no jobs found")
+                  console.log(`No step found in job (${job.name}) that matches deploy_${caller_repo_id}`)
                 }
-              })
-
-              if(stepToWatch){
-                console.log("workflow found to watch")
-                console.log("workflow", workflowToWatch.name)
-                console.log("job", jobToWatch.name)
-                console.log("step", stepToWatch.name)
-              }else{
-                console.log("No steps to watch found. Maybe the deploy job is taking time to start up.")
-                console.log(`Check the deployment repo:`)
               }
+
+              if(jobToWatch){
+                console.log(`job found in workflow: ${workflowItem.name}`, jobToWatch)
+                workflowToWatch = workflowItem
+                break
+              }else{
+                console.log(`no matching job found in workflow: ${workflowItem.name}`)
+              }
+            }
+
+            if(stepToWatch){
+              console.log("workflow found to watch")
+              console.log("workflow", workflowToWatch.name)
+              console.log("job", jobToWatch.name)
+              console.log("step", stepToWatch.name)
             }else{
-              console.log("No workflows found")
+              console.log("No steps to watch found. Maybe the deploy job is taking time to start up.")
+              console.log(`Check the deployment repo:`)
             }
 
           }

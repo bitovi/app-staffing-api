@@ -94,6 +94,23 @@ jobs:
       with:
         github-token: ${{ secrets.OPERATIONS_REPO_TOKEN }}
         script: |
+          const getWorkflows = async function({secondsToWait, minutesBack}){
+            const listWorkflowsUrl = `/repos/${process.env.OPERATIONS_REPO_ORG}/${process.env.OPERATIONS_REPO}/actions/runs`
+            const workflowsCreatedDate = (new Date( Date.now() - (1000 * 60) * minutesBack )).toISOString()
+            const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch&created=>${workflowsCreatedDate}`
+            let workflows = null
+
+            console.log(`Waiting ${secondsToWait} seconds before checking workflows`)
+            await new Promise(resolve => setTimeout(() => {
+              workflows = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
+            },secondsToWait*1000));
+
+            console.log("workflows")
+            console.log(workflows)
+
+            return workflows
+          }
+
           // TODO: figure out how to do this in github actions 'if:'
           if(context.eventName == "pull_request"){
             console.log("Pull request. not triggering deployment")
@@ -116,18 +133,16 @@ jobs:
             console.log("dispatchResult")
             console.log(dispatchResult)
 
-            const listWorkflowsUrl = `/repos/${process.env.OPERATIONS_REPO_ORG}/${process.env.OPERATIONS_REPO}/actions/runs`
-            const workflowsCreatedDate = (new Date( Date.now() - (1000 * 60) * 1 )).toISOString()
-            const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch&created=>${workflowsCreatedDate}`
-            const listWorkflowRunsResult = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
-            console.log("listWorkflowRunsResult")
-            console.log(listWorkflowRunsResult)
+            const workflows = getWorkflows({
+              secondsToWait: 20, 
+              minutesBack: 2
+            })
 
-            if(listWorkflowRunsResult.data["workflow_runs"].length){
+            if(workflows.data["workflow_runs"].length){
               workflowToWatch = null
               jobToWatch = null
               stepToWatch = null
-              listWorkflowRunsResult.data["workflow_runs"].some(async function (workflowItem){
+              workflows.data["workflow_runs"].some(async function (workflowItem){
                 console.log("workflowItem")
                 console.log(workflowItem)
 
@@ -143,7 +158,7 @@ jobs:
                     if(job.steps.length){
 
                       console.log(`Looking for step: deploy_${caller_repo_id}`)
-                      job.steps.some(async function (step){
+                      job.steps.some(step => {
                         if(step.name === `deploy_${caller_repo_id}`){
                           stepToWatch = step
                           return true
@@ -178,7 +193,11 @@ jobs:
               console.log("workflow", workflowToWatch.name)
               console.log("job", jobToWatch.name)
               console.log("step", stepToWatch.name)
+            }else{
+              console.log("No steps to watch found. Maybe the deploy job is taking time to start up.")
+              console.log(`Check the deployment repo:`)
             }
+
 
           }
 

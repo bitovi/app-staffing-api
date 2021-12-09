@@ -97,21 +97,25 @@ jobs:
           const delay = function(time) {
             return new Promise(resolve => setTimeout(resolve, time));
           }
+
           const getWorkflows = async function({secondsToWait, minutesBack}){
             const listWorkflowsUrl = `/repos/${process.env.OPERATIONS_REPO_ORG}/${process.env.OPERATIONS_REPO}/actions/runs`
             const workflowsCreatedDate = (new Date( Date.now() - (1000 * 60) * minutesBack )).toISOString()
             const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch&created=>${workflowsCreatedDate}`
-            let workflows = null
 
-            console.log(`Waiting ${secondsToWait} seconds before checking workflows`)
-            await delay(secondsToWait*1000)
+            //await delay(secondsToWait*1000)
+            return new Promise(async function(resolve){
+              console.log(`Waiting ${secondsToWait} seconds before checking workflows`)
+              setTimeout(() => {
+                console.log("getting workflows")
+                const workflows = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
+                resolve(workflows.data["workflow_runs"])
+                
+                console.log("workflows")
+                console.log(workflows)
+              }, secondsToWait*1000)
+            })
 
-            workflows = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
-            
-            console.log("workflows")
-            console.log(workflows)
-
-            return workflows.data["workflow_runs"]
           }
 
           // TODO: figure out how to do this in github actions 'if:'
@@ -145,7 +149,7 @@ jobs:
               workflowToWatch = null
               jobToWatch = null
               stepToWatch = null
-              workflows.data["workflow_runs"].some(async function (workflowItem){
+              workflows.some(async function (workflowItem){
                 console.log("workflowItem")
                 console.log(workflowItem)
 

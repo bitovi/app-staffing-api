@@ -89,7 +89,7 @@ jobs:
         OPERATIONS_REPO: operations-staffing-app
         OPERATIONS_REPO_ORG: bitovi
         OPERATIONS_REPO_BRANCH: STAF-153-cd-downstream-results
-        OPERATIONS_REPO_WORKFLOW: downstream-testing.yaml
+        OPERATIONS_REPO_WORKFLOW: deploy-dev.yaml
         GITHUB_EVENT_NAME: ${{ github.event_name }}
         POLL_INTERVAL_SECONDS: 3
         POLL_TIMEOUT_SECONDS: 600

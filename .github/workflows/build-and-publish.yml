@@ -171,7 +171,7 @@ jobs:
               console.log(`Steps found for job (${job.name}): ${job.steps.length}`)
               console.log(`Looking for step: ${caller_repo_id}`)
               res.step = job.steps.find(step => step.name === `${caller_repo_id}`)
-              if(stepToWatch){
+              if(res.step){
                 console.log(`step found in job (${job.name}) that matches ${caller_repo_id}`)
                 res.job = job
                 break
@@ -200,7 +200,7 @@ jobs:
 
             let doneProcessing = false
             while(!doneProcessing){
-              const {workflowToWatch, jobToWatch, stepToWatch} = await findWatchItems({caller_repo_id})
+              let {workflowToWatch, jobToWatch, stepToWatch} = await findWatchItems({caller_repo_id})
               if(stepToWatch){
                 console.log("workflow found to watch")
                 console.log("workflow", workflowToWatch.name)

@@ -211,6 +211,7 @@ jobs:
                 while(!stepComplete){
                   if(stepToWatch.status === "in_progress"){
                     console.log(`Deployment still in_progress. Trying again in ${process.env.POLL_INTERVAL_SECONDS}s`)
+                    console.log("")
                     await delay(process.env.POLL_INTERVAL_SECONDS*1000)
 
                     // GET JOBS
@@ -223,11 +224,19 @@ jobs:
                     console.log(stepToWatch)
                     stepComplete = true
                     doneProcessing = true
+                    if(stepToWatch.conclusion === "failure"){
+                      console.log("Job")
+                      console.log(job)
+                      core.setFailed(`Deployment failed!`);
+                    }else{
+                      console.log("Deployment was successful!")
+                    }
                   }
                 }
               }else{
                 console.log("No steps to watch found. Maybe the deploy job is still starting up.")
                 console.log(`Trying again in ${process.env.POLL_INTERVAL_SECONDS}s`)
+                console.log("")
                 await delay(process.env.POLL_INTERVAL_SECONDS*1000)
               }
             }

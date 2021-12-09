@@ -132,21 +132,10 @@ jobs:
               // GET JOBS
               const jobs = await getJobsForWorkflow(workflowItem)
               console.log(`Jobs found for workflow (${workflowItem.name}): ${jobs.length}`)
-              let job = null
-              jobToWatch = null
-              for(let jobIndex = 0; jobIndex < jobs.length; jobIndex++){
-                job = jobs[jobIndex]
-                console.log(`Steps found for job (${job.name}): ${job.steps.length}`)
-                console.log(`Looking for step: ${caller_repo_id}`)
-                stepToWatch = job.steps.find(step => step.name === `${caller_repo_id}`)
-                if(stepToWatch){
-                  console.log(`step found in job (${job.name}) that matches ${caller_repo_id}`)
-                  jobToWatch = job
-                  break
-                }else{
-                  console.log(`No step found in job (${job.name}) that matches ${caller_repo_id}`)
-                }
-              }
+
+              const jobParseResult = parseJobForStep(jobs)
+              jobToWatch = jobParseResult.job
+              stepToWatch = jobParseResult.step
 
               if(jobToWatch){
                 console.log(`job found in workflow: ${workflowItem.name}`)
@@ -170,6 +159,27 @@ jobs:
           const getJobsForWorkflow = async function(workflowItem){
             const jobsResult = await github.request(`GET ${workflowItem.jobs_url}`);
             return jobsResult.data.jobs
+          }
+
+          const parseJobForStep = function(jobs){
+            let res = {
+              job: null,
+              step: null
+            }
+            for(let jobIndex = 0; jobIndex < jobs.length; jobIndex++){
+              let job = jobs[jobIndex]
+              console.log(`Steps found for job (${job.name}): ${job.steps.length}`)
+              console.log(`Looking for step: ${caller_repo_id}`)
+              res.step = job.steps.find(step => step.name === `${caller_repo_id}`)
+              if(stepToWatch){
+                console.log(`step found in job (${job.name}) that matches ${caller_repo_id}`)
+                res.job = job
+                break
+              }else{
+                console.log(`No step found in job (${job.name}) that matches ${caller_repo_id}`)
+              }
+            }
+            return res
           }
 
           // TODO: figure out how to do this in github actions 'if:'
@@ -197,7 +207,24 @@ jobs:
                 console.log("job", jobToWatch.name)
                 console.log("step", stepToWatch.name)
                 console.log(stepToWatch)
-                doneProcessing = true
+                let stepComplete = false
+                while(!stepComplete){
+                  if(stepToWatch.status === "in_progress"){
+                    console.log(`Deployment still in_progress. Trying again in ${process.env.POLL_INTERVAL_SECONDS}s`)
+                    await delay(process.env.POLL_INTERVAL_SECONDS*1000)
+
+                    // GET JOBS
+                    const jobs = await getJobsForWorkflow(workflowItem)
+                    const jobParseResult = parseJobForStep(jobs)
+                    jobToWatch = jobParseResult.job
+                    stepToWatch = jobParseResult.step
+                  }else{
+                    console.log("Deployment complete")
+                    console.log(stepToWatch)
+                    stepComplete = true
+                    doneProcessing = true
+                  }
+                }
               }else{
                 console.log("No steps to watch found. Maybe the deploy job is still starting up.")
                 console.log(`Trying again in ${process.env.POLL_INTERVAL_SECONDS}s`)

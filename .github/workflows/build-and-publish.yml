@@ -133,7 +133,7 @@ jobs:
             console.log("dispatchResult")
             console.log(dispatchResult)
 
-            const workflows = getWorkflows({
+            const workflows = await getWorkflows({
               secondsToWait: 20, 
               minutesBack: 2
             })

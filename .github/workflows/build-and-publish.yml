@@ -94,6 +94,9 @@ jobs:
       with:
         github-token: ${{ secrets.OPERATIONS_REPO_TOKEN }}
         script: |
+          const delay = function(time) {
+            return new Promise(resolve => setTimeout(resolve, time));
+          }
           const getWorkflows = async function({secondsToWait, minutesBack}){
             const listWorkflowsUrl = `/repos/${process.env.OPERATIONS_REPO_ORG}/${process.env.OPERATIONS_REPO}/actions/runs`
             const workflowsCreatedDate = (new Date( Date.now() - (1000 * 60) * minutesBack )).toISOString()
@@ -101,11 +104,10 @@ jobs:
             let workflows = null
 
             console.log(`Waiting ${secondsToWait} seconds before checking workflows`)
-            await new Promise(resolve => setTimeout(async function(){
-              workflows = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
-              resolve()
-            },secondsToWait*1000));
+            await delay(secondsToWait*1000)
 
+            workflows = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
+            
             console.log("workflows")
             console.log(workflows)
 

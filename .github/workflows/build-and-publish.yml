@@ -190,9 +190,11 @@ jobs:
             console.log("Not a pull request. Triggering deployment")
             const caller_repo_id = `deploy_${process.env.GITHUB_REPOSITORY.replace('/','_')}_${Date.now()}`
 
+            const deploymentRepoActionsUrl = `https://github.com/${process.env.OPERATIONS_REPO_ORG}/${process.env.OPERATIONS_REPO}/actions`
             const dispatchResult = await triggerDeployment({caller_repo_id});
             if(dispatchResult.status == 204){
               console.log("Deployment triggered successfully.")
+              console.log(`To see the deployment, visit: ${deploymentRepoActionsUrl}`)
             }else{
               console.log("Deployment trigger failed.")
               console.log("dispatchResult")
@@ -212,15 +214,20 @@ jobs:
               }
               let {workflowToWatch, jobToWatch, stepToWatch} = await findWatchItems({caller_repo_id})
               if(stepToWatch){
-                console.log("workflow found to watch")
-                console.log("workflow", workflowToWatch.name)
-                console.log("job", jobToWatch.name)
-                console.log("step", stepToWatch.name)
-                console.log(stepToWatch)
+
+                console.log("")
+                console.log("=======================")
+                console.log("Deployment has started: ")
+                console.log(`workflow=${workflowToWatch.name},job=${jobToWatch},step=${stepToWatch}`)
+                console.log("job", jobToWatch)
+                console.log("step", stepToWatch)
+                console.log("")
+
                 let stepComplete = false
                 while(!stepComplete){
                   let pollCurrentTime = Date.now()
                   let secondsSinceStart = (pollCurrentTime - pollStartTime) / 1000
+                  console.log("")
                   console.log(`Seconds elapsed: ${secondsSinceStart}`)
                   if(secondsSinceStart >= process.env.POLL_TIMEOUT_SECONDS){
                     core.setFailed(`Deployment failed!`);
@@ -229,7 +236,6 @@ jobs:
                   }
                   if(stepToWatch.status === "in_progress"){
                     console.log(`Deployment still in_progress. Trying again in ${process.env.POLL_INTERVAL_SECONDS}s`)
-                    console.log("")
                     await delay(process.env.POLL_INTERVAL_SECONDS*1000)
 
                     // GET JOBS

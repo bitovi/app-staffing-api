@@ -217,9 +217,8 @@ jobs:
 
                 console.log("")
                 console.log("=======================")
-                console.log("Deployment has started: ")
+                console.log(`Deployment has started: ${jobToWatch.html_url}`)
                 console.log(`workflow=${workflowToWatch.name},job=${jobToWatch},step=${stepToWatch}`)
-                console.log("job", jobToWatch)
                 console.log("step", stepToWatch)
                 console.log("")
 
@@ -248,9 +247,8 @@ jobs:
                     console.log(stepToWatch)
                     stepComplete = true
                     doneProcessing = true
+                    console.log(`Deployment complete: ${jobToWatch.html_url}`)
                     if(stepToWatch.conclusion === "failure"){
-                      console.log("Job")
-                      console.log(jobToWatch)
                       core.setFailed(`Deployment failed!`);
                     }else{
                       console.log("Deployment was successful!")

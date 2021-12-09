@@ -128,7 +128,7 @@ jobs:
             console.log("Pull request. not triggering deployment")
           }else{
             console.log("Not a pull request. Triggering deployment")
-            const caller_repo_id = process.env.GITHUB_REPOSITORY.replace('/','_')
+            const caller_repo_id = `deploy_${process.env.GITHUB_REPOSITORY.replace('/','_')}_${Date.now()}`
             let workflowToWatch = null
             let jobToWatch = null
             let stepToWatch = null
@@ -139,7 +139,7 @@ jobs:
               workflow_id: process.env.OPERATIONS_REPO_WORKFLOW,
               ref: process.env.OPERATIONS_REPO_BRANCH,
               inputs: {
-                caller_repo: caller_repo_id
+                caller_repo_id: caller_repo_id
               }
             });
             console.log("dispatchResult")
@@ -167,14 +167,14 @@ jobs:
                 job = jobs[jobIndex]
                 console.log(`Steps found for job (${job.name}): ${job.steps.length}`)
                 console.log(job.steps)
-                console.log(`Looking for step: deploy_${caller_repo_id}`)
-                stepToWatch = job.steps.find(step => step.name === `deploy_${caller_repo_id}`)
+                console.log(`Looking for step: ${caller_repo_id}`)
+                stepToWatch = job.steps.find(step => step.name === `${caller_repo_id}`)
                 if(stepToWatch){
                   console.log(`step found in job: ${job.name}`, stepToWatch)
                   jobToWatch = job
                   break
                 }else{
-                  console.log(`No step found in job (${job.name}) that matches deploy_${caller_repo_id}`)
+                  console.log(`No step found in job (${job.name}) that matches ${caller_repo_id}`)
                 }
               }
 

@@ -127,7 +127,7 @@ jobs:
               workflowToWatch = null
               jobToWatch = null
               stepToWatch = null
-              listWorkflowRunsResult.data["workflow_runs"].some(workflowItem => {
+              listWorkflowRunsResult.data["workflow_runs"].some(async function (workflowItem){
                 console.log("workflowItem")
                 console.log(workflowItem)
 
@@ -137,13 +137,13 @@ jobs:
                 console.log(jobsResult)
 
                 if(jobsResult.data.jobs.length){
-                  jobsResult.data.jobs.some(job => {
+                  jobsResult.data.jobs.some(async function (job){
                     console.log(`Checking steps in job: ${job.name}`)
                     console.log(job.steps)
                     if(job.steps.length){
 
                       console.log(`Looking for step: deploy_${caller_repo_id}`)
-                      job.steps.some(step => {
+                      job.steps.some(async function (step){
                         if(step.name === `deploy_${caller_repo_id}`){
                           stepToWatch = step
                           return true

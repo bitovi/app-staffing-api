@@ -91,6 +91,7 @@ jobs:
         OPERATIONS_REPO_BRANCH: STAF-153-cd-downstream-results
         OPERATIONS_REPO_WORKFLOW: downstream-testing.yaml
         GITHUB_EVENT_NAME: ${{ github.event_name }}
+        POLL_INTERVAL_SECONDS: 2
       with:
         github-token: ${{ secrets.OPERATIONS_REPO_TOKEN }}
         script: |
@@ -116,8 +117,8 @@ jobs:
 
 
             // GET WORKFLOWS
+            console.log("getting workflows...")
             const workflows = await getWorkflows({
-              secondsToWait: 1, 
               minutesBack: 2
             })
 
@@ -158,15 +159,10 @@ jobs:
             return {workflowToWatch,jobToWatch,stepToWatch}
           }
 
-          const getWorkflows = async function({secondsToWait, minutesBack}){
+          const getWorkflows = async function({minutesBack}){
             const listWorkflowsUrl = `/repos/${process.env.OPERATIONS_REPO_ORG}/${process.env.OPERATIONS_REPO}/actions/runs`
             const workflowsCreatedDate = (new Date( Date.now() - (1000 * 60) * minutesBack )).toISOString()
             const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch&created=>${workflowsCreatedDate}`
-
-            console.log(`Waiting ${secondsToWait} seconds before checking workflows`)
-            await delay(secondsToWait*1000)
-
-            console.log("getting workflows")
             const workflows = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
             return workflows.data.workflow_runs
           }
@@ -200,12 +196,12 @@ jobs:
                 console.log("workflow", workflowToWatch.name)
                 console.log("job", jobToWatch.name)
                 console.log("step", stepToWatch.name)
-                console.log(step)
+                console.log(stepToWatch)
                 doneProcessing = true
               }else{
-                console.log("No steps to watch found. Maybe the deploy job is taking time to start up.")
-                console.log(`Trying again in 2s`)
-                await delay(2*1000)
+                console.log("No steps to watch found. Maybe the deploy job is still starting up.")
+                console.log(`Trying again in ${process.env.POLL_INTERVAL_SECONDS}s`)
+                await delay(process.env.POLL_INTERVAL_SECONDS*1000)
               }
             }
           }

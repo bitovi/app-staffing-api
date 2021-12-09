@@ -276,6 +276,8 @@ jobs:
                       console.log(stepToWatch)
                       core.setFailed(`Deployment failed!`);
                     }else{
+                      console.log("Step")
+                      console.log(stepToWatch)
                       console.log("Deployment was successful!")
                     }
                   }

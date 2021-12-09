@@ -92,6 +92,7 @@ jobs:
         OPERATIONS_REPO_WORKFLOW: downstream-testing.yaml
         GITHUB_EVENT_NAME: ${{ github.event_name }}
         POLL_INTERVAL_SECONDS: 2
+        POLL_TIMEOUT_SECONDS: 60
       with:
         github-token: ${{ secrets.OPERATIONS_REPO_TOKEN }}
         script: |
@@ -198,8 +199,17 @@ jobs:
               console.log(dispatchResult)
             }
 
+            const pollStartTime = Date.now()
             let doneProcessing = false
             while(!doneProcessing){
+              let pollCurrentTime = Date.now()
+              let secondsSinceStart = (pollCurrentTime - pollStartTime) / 1000
+              console.log(`Seconds elapsed: ${secondsSinceStart}`)
+              if(secondsSinceStart >= process.env.POLL_TIMEOUT_SECONDS){
+                core.setFailed(`Deployment failed!`);
+                doneProcessing = true
+                continue
+              }
               let {workflowToWatch, jobToWatch, stepToWatch} = await findWatchItems({caller_repo_id})
               if(stepToWatch){
                 console.log("workflow found to watch")
@@ -209,6 +219,14 @@ jobs:
                 console.log(stepToWatch)
                 let stepComplete = false
                 while(!stepComplete){
+                  let pollCurrentTime = Date.now()
+                  let secondsSinceStart = (pollCurrentTime - pollStartTime) / 1000
+                  console.log(`Seconds elapsed: ${secondsSinceStart}`)
+                  if(secondsSinceStart >= process.env.POLL_TIMEOUT_SECONDS){
+                    core.setFailed(`Deployment failed!`);
+                    doneProcessing = true
+                    continue
+                  }
                   if(stepToWatch.status === "in_progress"){
                     console.log(`Deployment still in_progress. Trying again in ${process.env.POLL_INTERVAL_SECONDS}s`)
                     console.log("")
@@ -226,7 +244,7 @@ jobs:
                     doneProcessing = true
                     if(stepToWatch.conclusion === "failure"){
                       console.log("Job")
-                      console.log(job)
+                      console.log(jobToWatch)
                       core.setFailed(`Deployment failed!`);
                     }else{
                       console.log("Deployment was successful!")

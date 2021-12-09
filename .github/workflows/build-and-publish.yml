@@ -94,108 +94,91 @@ jobs:
       with:
         github-token: ${{ secrets.OPERATIONS_REPO_TOKEN }}
         script: |
-          //console.log("debugging")
-          //console.log("GITHUB_EVENT_NAME")
-          //console.log(process.env.GITHUB_EVENT_NAME)
-
-          //console.log("context")
-          //console.log(context)
-
-
           // TODO: figure out how to do this in github actions 'if:'
           if(context.eventName == "pull_request"){
             console.log("Pull request. not triggering deployment")
           }else{
             console.log("Not a pull request. Triggering deployment")
+            const caller_repo_id = process.env.GITHUB_REPOSITORY.replace('/','_')
+            let workflowToWatch = null
+            let jobToWatch = null
+            let stepToWatch = null
+
             const dispatchResult = await github.rest.actions.createWorkflowDispatch({
               owner: process.env.OPERATIONS_REPO_ORG,
               repo: process.env.OPERATIONS_REPO,
               workflow_id: process.env.OPERATIONS_REPO_WORKFLOW,
               ref: process.env.OPERATIONS_REPO_BRANCH,
               inputs: {
-                caller_repo: process.env.GITHUB_REPOSITORY.replace('/','_')
+                caller_repo: caller_repo_id
               }
             });
             console.log("dispatchResult")
             console.log(dispatchResult)
 
-
-            /*
-            // GET https://api.github.com/repos/$OWNER/$REPO/actions/runs/[RUN_ID]/jobs
-
-            // GET https://api.github.com/repos/$OWNER/$REPO/actions/runs?created=>$run_date_filter
             const listWorkflowsUrl = `/repos/${process.env.OPERATIONS_REPO_ORG}/${process.env.OPERATIONS_REPO}/actions/runs`
-            const fiveMinuteAgo = new Date( Date.now() - (1000 * 60) * 5 )
-            // 2021-12-08T15:07:46.564Z
-            // 2021-12-08T15:40:42Z
-            const workflowsCreatedDate = fiveMinuteAgo.toISOString()
-            const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch&created=>${workflowsCreatedDate}`
-            // const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch`
-            const listWorkflowRunsResult = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
-            console.log("workflowsCreatedDate")
-            console.log(workflowsCreatedDate)
-
-            console.log("listWorkflowRunsResult")
-            console.log(listWorkflowRunsResult)
-
-            console.log("listWorkflowRunsResult.data[workflow_runs][0]")
-            console.log(listWorkflowRunsResult.data["workflow_runs"][0])
-            */
-
-            const listWorkflowsUrl = `/repos/${process.env.OPERATIONS_REPO_ORG}/${process.env.OPERATIONS_REPO}/actions/runs`
-            const fiveMinuteAgo = new Date( Date.now() - (1000 * 60) * 5 )
-            const workflowsCreatedDate = fiveMinuteAgo.toISOString()
+            const workflowsCreatedDate = (new Date( Date.now() - (1000 * 60) * 1 )).toISOString()
             const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch&created=>${workflowsCreatedDate}`
             const listWorkflowRunsResult = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
             console.log("listWorkflowRunsResult")
             console.log(listWorkflowRunsResult)
 
-            const workflowItem = listWorkflowRunsResult.data["workflow_runs"][0]
-            console.log("workflowItem")
-            console.log(workflowItem)
+            if(listWorkflowRunsResult.data["workflow_runs"].length){
+              workflowToWatch = null
+              jobToWatch = null
+              stepToWatch = null
+              listWorkflowRunsResult.data["workflow_runs"].some(workflowItem => {
+                console.log("workflowItem")
+                console.log(workflowItem)
 
-            // GET JOBS
-            // GET https://api.github.com/repos/$OWNER/$REPO/actions/runs/[RUN_ID]/jobs
-            const jobsUrl = workflowItem.jobs_url
-            const jobsResult = await github.request(`GET ${jobsUrl}`);
-            console.log("jobsResult")
-            console.log(jobsResult)
+                // GET JOBS
+                const jobsResult = await github.request(`GET ${workflowItem.jobs_url}`);
+                console.log("jobsResult")
+                console.log(jobsResult)
 
-            const jobs = jobsResult.data.jobs
-            jobs.forEach(job => {
-              console.log("job")
-              console.log(job)
-            })
-            /*
-            console.log("list workflow runs")
-            const listWorkflowRunsResult = await github.rest.actions.listWorkflowRuns({
-              owner: process.env.OPERATIONS_REPO_ORG,
-              repo: process.env.OPERATIONS_REPO,
-              workflow_id: process.env.OPERATIONS_REPO_WORKFLOW,
-              branch: process.env.OPERATIONS_REPO_BRANCH,
-              event: "workflow_dispatch"
-            });
-            console.log("listWorkflowRunsResult")
-            console.log(listWorkflowRunsResult)
+                if(jobsResult.data.jobs.length){
+                  jobsResult.data.jobs.some(job => {
+                    console.log(`Checking steps in job: ${job.name}`)
+                    console.log(job.steps)
+                    if(job.steps.length){
 
-            // listWorkflowRunsResult.data["workflow_runs"].forEach(item => {
-            //   console.log("item")
-            //   console.log(item)
-            // })
-            
-            console.log("listWorkflowRunsResult.data[workflow_runs][0]")
-            console.log(listWorkflowRunsResult.data["workflow_runs"][0])
-            /*
-            const jobsResult = await github.rest.actions.listJobsForWorkflowRun({
-              owner: process.env.OPERATIONS_REPO_ORG,
-              repo: process.env.OPERATIONS_REPO,
-              run_id: listWorkflowRunsResult.data["workflow_runs"][0].id,
-            });
-            console.log("jobsResult")
-            console.log(jobsResult)
+                      console.log(`Looking for step: deploy_${caller_repo_id}`)
+                      job.steps.some(step => {
+                        if(step.name === `deploy_${caller_repo_id}`){
+                          stepToWatch = step
+                          return true
+                        }
+                      })
 
-            console.log("jobsResult.data[jobs][0]")
-            console.log(jobsResult.data["jobs"][0])
-            */
+                      if(stepToWatch){
+                        console.log(`step found in job: ${job.name}`, stepToWatch)
+                        jobToWatch = job
+                        return true
+                      }
+                    }else{
+                      console.log("no steps found")
+                    }
+                  })
+
+                  if(jobToWatch){
+                    console.log(`job found in workflow: ${workflowItem.name}`, jobToWatch)
+                    workflowToWatch = workflowItem
+                    return true
+                  }
+                }else{
+                  console.log("no jobs found")
+                }
+              })
+            }else{
+              console.log("No workflow_runs found")
+            }
+
+            if(stepToWatch){
+              console.log("workflow found to watch")
+              console.log("workflow", workflowToWatch.name)
+              console.log("job", jobToWatch.name)
+              console.log("step", stepToWatch.name)
+            }
+
           }
 

@@ -275,9 +275,12 @@ jobs:
                       console.log("Step")
                       console.log(stepToWatch)
                       core.setFailed(`Deployment failed!`);
-                    }else{
+                    }else if(stepToWatch.conclusion === "cancelled"){
+                      console.log("Deployment cancelled")
                       console.log("Step")
                       console.log(stepToWatch)
+                      core.setFailed(`Deployment cancelled!`);
+                    }else{
                       console.log("Deployment was successful!")
                     }
                   }

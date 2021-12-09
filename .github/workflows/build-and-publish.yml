@@ -163,7 +163,15 @@ jobs:
             const workflowsCreatedDate = (new Date( Date.now() - (1000 * 60) * minutesBack )).toISOString()
             const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch&created=>${workflowsCreatedDate}`
 
-            //await delay(secondsToWait*1000)
+            await delay(secondsToWait*1000)
+            
+            console.log("getting workflows")
+            const workflows = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
+            
+            console.log("workflows")
+            console.log(workflows)
+            return workflows.data.workflow_runs
+            /*
             return new Promise(async function(resolve){
               console.log(`Waiting ${secondsToWait} seconds before checking workflows`)
               setTimeout(async function(){
@@ -175,6 +183,7 @@ jobs:
                 console.log(workflows)
               }, secondsToWait*1000)
             })
+            */
           }
           const getJobsForWorkflow = async function(workflowItem){
             const jobsResult = await github.request(`GET ${workflowItem.jobs_url}`);

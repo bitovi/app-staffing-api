@@ -185,9 +185,9 @@ jobs:
 
             const dispatchResult = await triggerDeployment({caller_repo_id});
             if(dispatchResult.status == 204){
-              echo "Deployment triggered successfully."
+              console.log("Deployment triggered successfully.")
             }else{
-              echo "Deployment trigger failed."
+              console.log("Deployment trigger failed.")
               console.log("dispatchResult")
               console.log(dispatchResult)
             }

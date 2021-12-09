@@ -101,7 +101,7 @@ jobs:
             let workflows = null
 
             console.log(`Waiting ${secondsToWait} seconds before checking workflows`)
-            await new Promise(resolve => setTimeout(() => {
+            await new Promise(resolve => setTimeout(async function(){
               workflows = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
             },secondsToWait*1000));
 

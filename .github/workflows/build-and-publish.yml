@@ -208,7 +208,14 @@ jobs:
               let secondsSinceStart = (pollCurrentTime - pollStartTime) / 1000
               console.log(`Seconds elapsed: ${secondsSinceStart}`)
               if(secondsSinceStart >= process.env.POLL_TIMEOUT_SECONDS){
-                core.setFailed(`Deployment failed!`);
+                console.log(`Polling timed out after ${process.env.POLL_TIMEOUT_SECONDS}!`)
+                console.log(`The deployment might still be running.  See:`)
+                if(jobToWatch){
+                  console.log(jobToWatch.html_url)
+                }else{
+                  console.log(deploymentRepoActionsUrl)
+                }
+                core.setFailed(`Polling timed out after ${process.env.POLL_TIMEOUT_SECONDS}!`)
                 doneProcessing = true
                 continue
               }
@@ -234,7 +241,10 @@ jobs:
                   console.log("")
                   console.log(`Seconds elapsed: ${secondsSinceStart}`)
                   if(secondsSinceStart >= process.env.POLL_TIMEOUT_SECONDS){
-                    core.setFailed(`Deployment failed!`);
+                    console.log(`Polling timed out after ${process.env.POLL_TIMEOUT_SECONDS}!`)
+                    console.log(`The deployment might still be running.  See:`)
+                    console.log(jobToWatch.html_url)
+                    core.setFailed(`Polling timed out after ${process.env.POLL_TIMEOUT_SECONDS}!`);
                     doneProcessing = true
                     continue
                   }

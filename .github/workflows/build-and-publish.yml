@@ -114,8 +114,10 @@ jobs:
             let jobToWatch = null
             let stepToWatch = null
 
+
+            // GET WORKFLOWS
             const workflows = await getWorkflows({
-              secondsToWait: 20, 
+              secondsToWait: 1, 
               minutesBack: 2
             })
 
@@ -124,8 +126,7 @@ jobs:
             let workflowItem = null
             for(let workflowIndex = 0; workflowIndex < workflows.length; workflowIndex++){
               workflowItem = workflows[workflowIndex]
-              console.log("workflowItem")
-              console.log(workflowItem)
+              console.log(`workflow: ${workflowItem.name}`)
 
               // GET JOBS
               const jobs = await getJobsForWorkflow(workflowItem)
@@ -135,11 +136,10 @@ jobs:
               for(let jobIndex = 0; jobIndex < jobs.length; jobIndex++){
                 job = jobs[jobIndex]
                 console.log(`Steps found for job (${job.name}): ${job.steps.length}`)
-                console.log(job.steps)
                 console.log(`Looking for step: ${caller_repo_id}`)
                 stepToWatch = job.steps.find(step => step.name === `${caller_repo_id}`)
                 if(stepToWatch){
-                  console.log(`step found in job: ${job.name}`, stepToWatch)
+                  console.log(`step found in job (${job.name}) that matches ${caller_repo_id}`)
                   jobToWatch = job
                   break
                 }else{
@@ -148,7 +148,7 @@ jobs:
               }
 
               if(jobToWatch){
-                console.log(`job found in workflow: ${workflowItem.name}`, jobToWatch)
+                console.log(`job found in workflow: ${workflowItem.name}`)
                 workflowToWatch = workflowItem
                 break
               }else{
@@ -163,32 +163,16 @@ jobs:
             const workflowsCreatedDate = (new Date( Date.now() - (1000 * 60) * minutesBack )).toISOString()
             const listWorkflowsParams = `branch=${process.env.OPERATIONS_REPO_BRANCH}&event=workflow_dispatch&created=>${workflowsCreatedDate}`
 
+            console.log(`Waiting ${secondsToWait} seconds before checking workflows`)
             await delay(secondsToWait*1000)
-            
+
             console.log("getting workflows")
             const workflows = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
-            
-            console.log("workflows")
-            console.log(workflows)
             return workflows.data.workflow_runs
-            /*
-            return new Promise(async function(resolve){
-              console.log(`Waiting ${secondsToWait} seconds before checking workflows`)
-              setTimeout(async function(){
-                console.log("getting workflows")
-                const workflows = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
-                resolve(workflows.data["workflow_runs"])
-                
-                console.log("workflows")
-                console.log(workflows)
-              }, secondsToWait*1000)
-            })
-            */
           }
+
           const getJobsForWorkflow = async function(workflowItem){
             const jobsResult = await github.request(`GET ${workflowItem.jobs_url}`);
-            console.log("jobsResult")
-            console.log(jobsResult)
             return jobsResult.data.jobs
           }
 
@@ -200,20 +184,29 @@ jobs:
             const caller_repo_id = `deploy_${process.env.GITHUB_REPOSITORY.replace('/','_')}_${Date.now()}`
 
             const dispatchResult = await triggerDeployment({caller_repo_id});
-            console.log("dispatchResult")
-            console.log(dispatchResult)
-
-            const {workflowToWatch, jobToWatch, stepToWatch} = await findWatchItems({caller_repo_id})
-
-            if(stepToWatch){
-              console.log("workflow found to watch")
-              console.log("workflow", workflowToWatch.name)
-              console.log("job", jobToWatch.name)
-              console.log("step", stepToWatch.name)
+            if(dispatchResult.status == 204){
+              echo "Deployment triggered successfully."
             }else{
-              console.log("No steps to watch found. Maybe the deploy job is taking time to start up.")
-              console.log(`Check the deployment repo:`)
+              echo "Deployment trigger failed."
+              console.log("dispatchResult")
+              console.log(dispatchResult)
             }
 
+            let doneProcessing = false
+            while(!doneProcessing){
+              const {workflowToWatch, jobToWatch, stepToWatch} = await findWatchItems({caller_repo_id})
+              if(stepToWatch){
+                console.log("workflow found to watch")
+                console.log("workflow", workflowToWatch.name)
+                console.log("job", jobToWatch.name)
+                console.log("step", stepToWatch.name)
+                console.log(step)
+                doneProcessing = true
+              }else{
+                console.log("No steps to watch found. Maybe the deploy job is taking time to start up.")
+                console.log(`Trying again in 2s`)
+                await delay(2*1000)
+              }
+            }
           }
 

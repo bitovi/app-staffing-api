@@ -133,7 +133,7 @@ jobs:
               const jobs = await getJobsForWorkflow(workflowItem)
               console.log(`Jobs found for workflow (${workflowItem.name}): ${jobs.length}`)
 
-              const jobParseResult = parseJobForStep(jobs)
+              const jobParseResult = parseJobForStep({jobs,caller_repo_id})
               jobToWatch = jobParseResult.job
               stepToWatch = jobParseResult.step
 
@@ -161,7 +161,7 @@ jobs:
             return jobsResult.data.jobs
           }
 
-          const parseJobForStep = function(jobs){
+          const parseJobForStep = function({jobs,caller_repo_id}){
             let res = {
               job: null,
               step: null
@@ -215,7 +215,7 @@ jobs:
 
                     // GET JOBS
                     const jobs = await getJobsForWorkflow(workflowItem)
-                    const jobParseResult = parseJobForStep(jobs)
+                    const jobParseResult = parseJobForStep({jobs,caller_repo_id})
                     jobToWatch = jobParseResult.job
                     stepToWatch = jobParseResult.step
                   }else{

@@ -92,8 +92,7 @@ jobs:
         OPERATIONS_REPO_WORKFLOW: downstream-testing.yaml
         GITHUB_EVENT_NAME: ${{ github.event_name }}
         POLL_INTERVAL_SECONDS: 2
-        # POLL_TIMEOUT_SECONDS: 600
-        POLL_TIMEOUT_SECONDS: 30
+        POLL_TIMEOUT_SECONDS: 600
       with:
         github-token: ${{ secrets.OPERATIONS_REPO_TOKEN }}
         script: |

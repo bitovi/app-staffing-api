@@ -103,12 +103,13 @@ jobs:
             console.log(`Waiting ${secondsToWait} seconds before checking workflows`)
             await new Promise(resolve => setTimeout(async function(){
               workflows = await github.request(`GET ${listWorkflowsUrl}?${listWorkflowsParams}`);
+              resolve()
             },secondsToWait*1000));
 
             console.log("workflows")
             console.log(workflows)
 
-            return workflows
+            return workflows.data["workflow_runs"]
           }
 
           // TODO: figure out how to do this in github actions 'if:'
@@ -138,7 +139,7 @@ jobs:
               minutesBack: 2
             })
 
-            if(workflows.data["workflow_runs"].length){
+            if(workflows.length){
               workflowToWatch = null
               jobToWatch = null
               stepToWatch = null

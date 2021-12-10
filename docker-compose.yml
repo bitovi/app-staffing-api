@@ -8,7 +8,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-        - ./initdb-scripts:/docker-entrypoint-initdb.d
+      - ./initdb-scripts:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: dbuser
       POSTGRES_PASSWORD: dbpassword
@@ -19,7 +19,7 @@ services:
     container_name: app-staffing-backend-api
     depends_on:
       - db
-    volumes: 
+    volumes:
       - ./src:/usr/src/app/src
       - ./db:/usr/src/app/db
       - /usr/src/app/node_modules
@@ -31,8 +31,8 @@ services:
       APP_PORT: 3000
       DATABASE_CONNECTION_STRING: postgres://dbuser:dbpassword@db:5432/staffing
     ports:
-      - 3000:3000
-      - 9229:9229
+      - 4000:3000
+      - 9230:9229
     command: >
       sh start-dev.sh
     networks:

@@ -30,6 +30,7 @@
     "convict": "^6.2.1",
     "faker": "^5.5.3",
     "fastify": "^3.0.0",
+    "fastify-cors": "^6.0.2",
     "fastify-swagger": "^4.12.6",
     "http-errors": "^1.8.0",
     "json-api-serializer": "^2.6.6",

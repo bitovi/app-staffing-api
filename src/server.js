@@ -12,6 +12,9 @@ const build = () => {
     logger: false
   })
 
+  // Enable CORS for all routes
+  fastify.register(require('fastify-cors'))
+
   setupFastifySwagger(fastify)
 
   // Custom Content-Type parser for JSON-API spec

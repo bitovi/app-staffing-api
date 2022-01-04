@@ -84,6 +84,8 @@ const create = {
   body: {
     type: 'object',
     required: ['name'],
+    properties,
+    additionalProperties: false,
     example: {
       data: {
         type: 'projects',
@@ -96,8 +98,6 @@ const create = {
       name: 'name is required'
     }
   },
-  properties,
-  additionalProperties: false,
   response: {
     default: {
       description: 'Success: Object created and returned',
@@ -111,9 +111,11 @@ const patch = {
   description: `patch a ${name}`,
   summary: `patch a ${name}`,
   tags,
-  type: 'object',
-  properties,
-  additionalProperties: false
+  body: {
+    type: 'object',
+    properties,
+    additionalProperties: false
+  }
 }
 const remove = {
   description: `delete a ${name}`,

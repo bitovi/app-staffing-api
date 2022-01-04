@@ -11,7 +11,8 @@
     "start": "node src/app.js",
     "pretest": "npm run migrate",
     "test": "jest --verbose test/",
-    "test:watch": "jest --watch test/"
+    "test:watch": "jest --watch test/",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand test/"
   },
   "standard": {
     "env": [

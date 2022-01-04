@@ -89,10 +89,10 @@ const create = {
   body: {
     type: 'object',
     required: ['name'],
+    properties,
+    additionalProperties: false,
     example: { data: { type: 'employees', attributes: { name: 'Donnie Larson' } } }
   },
-  properties,
-  additionalProperties: false,
   response: {
     default: {
       description: 'Success: Object created and returned',
@@ -106,9 +106,11 @@ const patch = {
   description: `patch an ${name}`,
   summary: `patch an ${name}`,
   tags,
-  type: 'object',
-  properties,
-  additionalProperties: false
+  body: {
+    type: 'object',
+    properties,
+    additionalProperties: false
+  }
 }
 const remove = {
   description: `delete an ${name}`,

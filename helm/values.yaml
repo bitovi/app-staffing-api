@@ -77,9 +77,13 @@ prometheus:
 #     name: local-files-app-staffing
 
 
-# TODO: implement serviceaccount.yaml
+
 serviceAccount:
   enabled: false
+  annotations: {}
+  # annotations:
+  #   # this will connect the serviceaccount to the role in AWS
+  #   eks.amazonaws.com/rolearn: 'arn:aws:iam::0000000:role/add-your-aws-role-here'
 
 startupCommand:
 

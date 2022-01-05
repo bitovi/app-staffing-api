@@ -110,9 +110,10 @@ const create = {
   summary: `create an ${name}`,
   tags,
   body: {
-    properties,
     type: 'object',
     required: ['employee_id', 'role_id', 'start_date'],
+    properties,
+    additionalProperties: false,
     example: {
       data: {
         type: 'assignments',
@@ -124,7 +125,6 @@ const create = {
       }
     }
   },
-  additionalProperties: false,
   response: {
     default: {
       description: 'Success: Object created and returned',
@@ -138,9 +138,11 @@ const patch = {
   description: `patch an ${name}`,
   summary: `patch an ${name}`,
   tags,
-  type: 'object',
-  body: { properties },
-  additionalProperties: false,
+  body: {
+    type: 'object',
+    properties,
+    additionalProperties: false
+  },
   params: makeIdParams(name),
   response: {
     default: {

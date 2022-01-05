@@ -9,7 +9,12 @@ const build = () => {
   Model.knex(knex)
 
   const fastify = require('fastify')({
-    logger: false
+    logger: false,
+    ajv: {
+      customOptions: {
+        removeAdditional: false
+      }
+    }
   })
 
   // Enable CORS for all routes
@@ -28,18 +33,20 @@ const build = () => {
       done(error)
     }
   })
+
   // Custom Error handler for JSON-API spec
   fastify.setErrorHandler(function (error, request, reply) {
-    if (error?.validation) {
-      error.statusCode = 400
+    let status = error.status || error.statusCode || 500
+    if (error.validation) {
+      status = 422
     }
-    const status = error.status || error.statusCode || 500
-    this.log.error(error)
+    this.log.error({ ...error, statusCode: status })
     reply.status(status).send({
       status: status,
       title: error.message
     })
   })
+
   fastify.addHook('onClose', async (server, done) => {
     await knex.destroy()
     done()

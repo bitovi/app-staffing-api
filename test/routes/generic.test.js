@@ -1,498 +1,581 @@
-const schema = require('./setup-generic')
 const faker = require('faker')
-schema.routes = schema.routes.map(route => Object.assign(route, { toString: function () { return this.routeName } }))
+const schema = require('./setup-generic')
 
-// -----------Start-here-----------------
-// #1
-testGets(schema.routes)
+const routesSchemas = schema.routes.map((route) =>
+  Object.assign(route, {
+    // Use the route name when generating test titles with %s
+    toString () {
+      return this.routeName
+    }
+  })
+)
 
-// #2
-testPostCreates(schema.routes)
+describe.each(routesSchemas)('POST /%s', (myroute) => {
+  const createdIDs = {}
 
-// ----------End-Here------------------
+  afterAll(async () => {
+    await deleteCreatedIDs(createdIDs)
+  })
 
-//
-function testPostCreates (mylist) {
-  describe('POST, PATCH, DELETE Component Tests', () => {
-    const createdIDs = {}
+  it('should insert row and return the new record id', async () => {
+    const obj = {}
+    const required = myroute.required
+    const foreignKeys = myroute?.foreignKeys || {}
+    const primaryKeys = myroute?.primaryKeys || ['id']
+    const pkey = primaryKeys[0]
+    const routeName = myroute.routeName
 
-    afterAll(async () => {
-      await deleteCreatedIDs(createdIDs)
+    if (myroute?.foreignKeys) {
+      for (const [key, value] of Object.entries(foreignKeys)) {
+        const createdObj = await createDbObject(key, createdIDs)
+        // console.log('POST createdObj', createdObj)
+        const keyFrom = createdObj[value.from]
+        obj[value.into] = keyFrom
+      }
+    }
+    for (const [key, value] of Object.entries(myroute.properties)) {
+      if (required.includes(key) && !obj[key] && key !== pkey) {
+        obj[key] = createFakeData(key, value)
+      }
+    }
+    const testBody = {
+      data: {
+        type: routeName,
+        attributes: { ...obj }
+      }
+    }
+
+    const response = await global.app.inject({
+      url: `${routeName}`,
+      body: JSON.stringify(testBody),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json'
+      }
     })
-    describe('Test POST for creating new row', () => {
-      test.concurrent.each(mylist)('%s: POST should insert and return an id', async (myroute) => {
-        const obj = {}
-        const required = myroute.required
-        const foreignKeys = myroute?.foreignKeys || {}
-        const primaryKeys = myroute?.primaryKeys || ['id']
-        const pkey = primaryKeys[0]
-        const routeName = myroute.routeName
 
-        if (myroute?.foreignKeys) {
-          for (const [key, value] of Object.entries(foreignKeys)) {
-            const createdObj = await createDbObject(key, createdIDs)
-            // console.log('POST createdObj', createdObj)
-            const keyFrom = createdObj[value.from]
-            obj[value.into] = keyFrom
-          }
+    expect(response.statusCode).toEqual(201)
+
+    const result = JSON.parse(response.body)
+    // use console.log to get sample request and response
+    // console.log('testBody', testBody)
+    // console.log('result', result)
+    expect(result?.data).toHaveProperty(pkey)
+    expect(result?.links?.self).toBe(`/${routeName}/${result.data[pkey]}`)
+
+    // add to list to be deleted with afterAll
+    createdIDs[routeName] = createdIDs[routeName] || []
+    const idObj = {}
+    idObj[pkey] = result.data[pkey]
+    createdIDs[routeName].push(idObj)
+  })
+
+  it('should fail with 422 if payload is missing required field', async () => {
+    const obj = {}
+    const required = myroute.required
+    const foreignKeys = myroute?.foreignKeys || {}
+    const primaryKeys = myroute?.primaryKeys || ['id']
+    const pkey = primaryKeys[0]
+    const routeName = myroute.routeName
+
+    if (myroute?.foreignKeys) {
+      for (const [key, value] of Object.entries(foreignKeys)) {
+        const createdObj = await createDbObject(key, createdIDs)
+        // console.log('POST createdObj', createdObj)
+        const keyFrom = createdObj[value.from]
+        obj[value.into] = keyFrom
+      }
+    }
+    for (const [key, value] of Object.entries(myroute.properties)) {
+      if (required.includes(key) && !obj[key] && key !== pkey) {
+        obj[key] = createFakeData(key, value)
+      }
+    }
+    const testBody = {
+      data: {
+        type: routeName,
+        attributes: { ...obj }
+      }
+    }
+    // Remove one required column at a time and test
+    for (let i = 0; i < required.length; i++) {
+      const missingTestBody = { ...testBody }
+
+      delete missingTestBody.data.attributes[required[i]]
+
+      const response = await global.app.inject({
+        url: `${routeName}`,
+        body: JSON.stringify(missingTestBody),
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/vnd.api+json',
+          Accept: 'application/vnd.api+json'
         }
-        for (const [key, value] of Object.entries(myroute.properties)) {
-          if (required.includes(key) && !obj[key] && key !== pkey) {
-            obj[key] = createFakeData(key, value)
-          }
-        }
-        const testBody = {
-          data: {
-            type: routeName,
-            attributes: { ...obj }
-          }
-        }
+      })
 
-        const response = await global.app.inject({
-          url: `${routeName}`,
-          body: JSON.stringify(testBody),
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/vnd.api+json',
-            Accept: 'application/vnd.api+json'
-          }
-        })
-
-        expect(response.statusCode).toEqual(201)
-
+      expect(response.statusCode).toEqual(422)
+      if (response.statusCode === 201) {
         const result = JSON.parse(response.body)
-        // use console.log to get sample request and response
-        // console.log('testBody', testBody)
-        // console.log('result', result)
-        expect(result?.data).toHaveProperty(pkey)
-        expect(result?.links?.self).toBe(`/${routeName}/${result.data[pkey]}`)
 
         // add to list to be deleted with afterAll
         createdIDs[routeName] = createdIDs[routeName] || []
         const idObj = {}
         idObj[pkey] = result.data[pkey]
         createdIDs[routeName].push(idObj)
-      })
-    })
-    describe('Test POST with missing required column', () => {
-    // Test CREATE with missing required
-      test.concurrent.each(mylist)('%s: POST with missing required column', async (myroute) => {
-        const obj = {}
-        const required = myroute.required
-        const foreignKeys = myroute?.foreignKeys || {}
-        const primaryKeys = myroute?.primaryKeys || ['id']
-        const pkey = primaryKeys[0]
-        const routeName = myroute.routeName
+      }
+    }
+  })
 
-        if (myroute?.foreignKeys) {
-          for (const [key, value] of Object.entries(foreignKeys)) {
-            const createdObj = await createDbObject(key, createdIDs)
-            // console.log('POST createdObj', createdObj)
-            const keyFrom = createdObj[value.from]
-            obj[value.into] = keyFrom
-          }
+  it('should fail with 422 if payload has unknown fields', async () => {
+    const { routeName, required, properties, primaryKeys } = myroute
+    const primaryKey = primaryKeys[0]
+
+    const attrs = {
+      aPropertyMissingFromTheSchema: 'foo bar baz'
+    }
+
+    // make sure the payload includes required properties
+    for (const [key, value] of Object.entries(properties)) {
+      if (required.includes(key) && !(key in attrs) && key !== primaryKey) {
+        attrs[key] = createFakeData(key, value)
+      }
+    }
+
+    const response = await global.app.inject({
+      url: `${routeName}`,
+      body: JSON.stringify({
+        data: {
+          type: routeName,
+          attributes: attrs
         }
-        for (const [key, value] of Object.entries(myroute.properties)) {
-          if (required.includes(key) && !obj[key] && key !== pkey) {
-            obj[key] = createFakeData(key, value)
-          }
-        }
-        const testBody = {
-          data: {
-            type: routeName,
-            attributes: { ...obj }
-          }
-        }
-        // Remove one required column at a time and test
-        for (let i = 0; i < required.length; i++) {
-          const missingTestBody = { ...testBody }
-
-          delete missingTestBody.data.attributes[required[i]]
-
-          const response = await global.app.inject({
-            url: `${routeName}`,
-            body: JSON.stringify(missingTestBody),
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/vnd.api+json',
-              Accept: 'application/vnd.api+json'
-            }
-          })
-
-          expect(response.statusCode).toEqual(400)
-          if (response.statusCode === 201) {
-            const result = JSON.parse(response.body)
-
-            // add to list to be deleted with afterAll
-            createdIDs[routeName] = createdIDs[routeName] || []
-            const idObj = {}
-            idObj[pkey] = result.data[pkey]
-            createdIDs[routeName].push(idObj)
-          }
-        }
-      })
+      }),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json'
+      }
     })
 
-    // PATCH update
-    describe('Test PATCH for update', () => {
-      test.concurrent.each(mylist)('%s: PATCH should update record', async (myroute) => {
-        const required = myroute.required
-        const foreignKeys = myroute?.foreignKeys || {}
-        const primaryKeys = myroute?.primaryKeys || ['id']
-        const pkey = primaryKeys[0]
-        const routeName = myroute.routeName
+    expect(response.statusCode).toEqual(422)
+    const { title } = JSON.parse(response.body)
+    expect(title).toBe('body should NOT have additional properties')
+  })
+})
 
-        const createdObj = await createDbObject(routeName, createdIDs)
+describe.each(routesSchemas)('PATCH /%s', (myroute) => {
+  const createdIDs = {}
+  const required = myroute.required
+  const foreignKeys = myroute.foreignKeys || {}
+  const primaryKeys = myroute.primaryKeys || ['id']
+  const pkey = primaryKeys[0]
+  const routeName = myroute.routeName
 
-        const obj = {}
-        let sampleProperty
-        if (myroute?.foreignKeys) {
-          for (const [key, value] of Object.entries(foreignKeys)) {
-            const createdObj = await createDbObject(key, createdIDs)
-            // console.log('POST createdObj', createdObj)
-            const keyFrom = createdObj[value.from]
-            obj[value.into] = keyFrom
-          }
+  afterAll(async () => {
+    await deleteCreatedIDs(createdIDs)
+  })
+
+  it('should update record', async () => {
+    const createdObj = await createDbObject(routeName, createdIDs)
+
+    const obj = {}
+    let sampleProperty
+    if (myroute?.foreignKeys) {
+      for (const [key, value] of Object.entries(foreignKeys)) {
+        const createdObj = await createDbObject(key, createdIDs)
+        // console.log('POST createdObj', createdObj)
+        const keyFrom = createdObj[value.from]
+        obj[value.into] = keyFrom
+      }
+    }
+    for (const [key, value] of Object.entries(myroute.properties)) {
+      if (required.includes(key) && !obj[key] && key !== pkey) {
+        obj[key] = createFakeData(key, value)
+        if (!sampleProperty) {
+          sampleProperty = key
         }
-        for (const [key, value] of Object.entries(myroute.properties)) {
-          if (required.includes(key) && !obj[key] && key !== pkey) {
-            obj[key] = createFakeData(key, value)
-            if (!sampleProperty) {
-              sampleProperty = key
-            }
-          }
-        }
+      }
+    }
 
-        const testBody = {
-          data: {
-            type: routeName,
-            attributes: { ...obj }
-          }
-        }
-        testBody.data[pkey] = createdObj[pkey]
+    const testBody = {
+      data: {
+        type: routeName,
+        attributes: { ...obj }
+      }
+    }
+    testBody.data[pkey] = createdObj[pkey]
 
-        const response = await global.app.inject({
-          url: `${routeName}/${createdObj[pkey]}`,
-          body: JSON.stringify(testBody),
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/vnd.api+json',
-            Accept: 'application/vnd.api+json'
-          }
-        })
-        expect(response.statusCode).toEqual(204)
-        const result = await myroute.model.query().findById(createdObj[pkey])
-        expect(result[sampleProperty]).toEqual(obj[sampleProperty])
-      })
+    const response = await global.app.inject({
+      url: `${routeName}/${createdObj[pkey]}`,
+      body: JSON.stringify(testBody),
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json'
+      }
     })
-    // DELETE
-    describe('Test DELETE', () => {
-      test.concurrent.each(mylist)('%s: DELETE record', async (myroute) => {
-        const primaryKeys = myroute?.primaryKeys || ['id']
-        const pkey = primaryKeys[0]
-        const routeName = myroute.routeName
+    expect(response.statusCode).toEqual(204)
+    const result = await myroute.model.query().findById(createdObj[pkey])
+    expect(result[sampleProperty]).toEqual(obj[sampleProperty])
+  })
 
-        const createdObj = await createDbObject(routeName, createdIDs)
+  it('should fail with 422 if payload has unknown fields', async () => {
+    const dbRecord = await createDbObject(routeName, createdIDs)
 
-        const response = await global.app.inject({
-          url: `${routeName}/${createdObj[pkey]}`,
-          method: 'DELETE'
-        })
-        expect(response.statusCode).toEqual(204)
+    // json:api payload attributes
+    const attrs = {
+      aPropertyMissingFromTheSchema: 'foo bar baz'
+    }
 
-        const deletedObj = await myroute.model.query().findById(createdObj[pkey])
+    // create the database records for the resource relationships
+    for (const [key, value] of Object.entries(foreignKeys)) {
+      const createdObj = await createDbObject(key, createdIDs)
+      const keyFrom = createdObj[value.from]
+      attrs[value.into] = keyFrom
+    }
 
-        expect(deletedObj).toBeUndefined()
+    // make sure the payload includes required attributes
+    for (const [key, value] of Object.entries(myroute.properties)) {
+      if (required.includes(key) && !(key in attrs) && key !== pkey) {
+        attrs[key] = createFakeData(key, value)
+      }
+    }
+
+    const pkeyValue = dbRecord[pkey]
+    const payload = {
+      data: {
+        type: routeName,
+        [pkey]: pkeyValue,
+        attributes: { ...attrs }
+      }
+    }
+
+    const response = await global.app.inject({
+      url: `${routeName}/${pkeyValue}`,
+      body: JSON.stringify(payload),
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json'
+      }
+    })
+    expect(response.statusCode).toEqual(422)
+    const { title } = JSON.parse(response.body)
+    expect(title).toBe('body should NOT have additional properties')
+
+    // make sure the DB record was not mutated
+    const result = await myroute.model.query().findById(pkeyValue)
+    expect(result).toStrictEqual(dbRecord)
+  })
+})
+
+describe.each(routesSchemas)('DELETE /%s', (myroute) => {
+  const createdIDs = {}
+
+  afterAll(async () => {
+    await deleteCreatedIDs(createdIDs)
+  })
+
+  it('should delete record and return 204', async () => {
+    const primaryKeys = myroute?.primaryKeys || ['id']
+    const pkey = primaryKeys[0]
+    const routeName = myroute.routeName
+
+    const createdObj = await createDbObject(routeName, createdIDs)
+
+    const response = await global.app.inject({
+      url: `${routeName}/${createdObj[pkey]}`,
+      method: 'DELETE'
+    })
+    expect(response.statusCode).toEqual(204)
+
+    const deletedObj = await myroute.model.query().findById(createdObj[pkey])
+
+    expect(deletedObj).toBeUndefined()
+  })
+
+  it('should return 404 if record does not exist', async () => {
+    const routeName = myroute.routeName
+
+    const response = await global.app.inject({
+      url: `${routeName}/7761b531-50b7-457e-803e-dd8897f86dd2`,
+      method: 'DELETE'
+    })
+    expect(response.statusCode).toEqual(404)
+  })
+})
+
+describe('All GET tests', () => {
+  const createdIDs = {}
+
+  afterAll(async () => {
+    await deleteCreatedIDs(createdIDs)
+  })
+
+  describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
+    const primaryKeys = myroute?.primaryKeys || ['id']
+    const pkey = primaryKeys[0]
+    const properties = myroute.properties
+    const createdObjects = []
+    const objname = myroute.routeName
+
+    beforeAll(async () => {
+      // create 4 of objname, why not a loop you might ask.
+      for (let i = 0; i < 8; i++) {
+        createdObjects[i] = await createDbObject(objname, createdIDs)
+      }
+    })
+
+    test(`GET: should get listing for GET /${objname}`, async () => {
+      expect.assertions(4)
+      const resp = await global.app.inject({
+        url: objname,
+        method: 'GET',
+        headers: { 'Content-Type': 'application/vnd.api+json' }
       })
+      const json = JSON.parse(resp.body)
 
-      // DELETE non existing record
-      test.concurrent.each(mylist)('%s: DELETE non-existing record', async (myroute) => {
-        const routeName = myroute.routeName
+      const results = json.data
+      expect(resp.statusCode).toBe(200)
+      expect(results.length).toBeGreaterThan(1)
+      expect(results.findIndex(el => el[pkey] === createdObjects[0][pkey])).toBeGreaterThan(-1)
+      expect(results.findIndex(el => el[pkey] === createdObjects[1][pkey])).toBeGreaterThan(-1)
+    })
 
-        const response = await global.app.inject({
-          url: `${routeName}/7761b531-50b7-457e-803e-dd8897f86dd2`,
-          method: 'DELETE'
-        })
-        expect(response.statusCode).toEqual(404)
+    test(`GET by ID: should get 1 row for GET /${objname}/id`, async () => {
+      const id = createdObjects[0][pkey]
+      const url = `${objname}/${id}`
+
+      expect.assertions(2)
+
+      const resp = await global.app.inject({
+        url: url,
+        method: 'GET',
+        headers: { 'Content-Type': 'application/vnd.api+json' }
       })
+      const json = JSON.parse(resp.body)
+
+      const results = json.data
+
+      expect(resp.statusCode).toBe(200)
+      expect(results[pkey]).toBe(id)
+    })
+
+    test(`GET by NONE-EXISTING-ID: should return 404. GET /${objname}/nonexisting`, async () => {
+      const url = `${objname}/f3eae4c7-1234-409f-9a84-8d66df519876`
+
+      const resp = await global.app.inject({
+        url: url,
+        method: 'GET',
+        headers: { 'Content-Type': 'application/vnd.api+json' }
+      })
+      expect(resp.statusCode).toBe(404)
+    })
+
+    // test Pagination
+    test(`GET /${objname} paginated with links`, async () => {
+      const response = await global.app.inject({
+        url: `${objname}`,
+        method: 'GET',
+        query: {
+          'page[number]': '1',
+          'page[size]': '2'
+        }
+      })
+      const results = JSON.parse(response.body)
+      expect(results.data.attributes.results.length).toBe(2)
+      const selfLinkParams = (new URL('http://localhost:3000/' + results?.links?.self)).searchParams
+
+      expect(selfLinkParams.get('page[number]')).toBe('1')
+      expect(selfLinkParams.get('page[size]')).toBe('2')
+
+      const nextLinkParams = (new URL('http://localhost:3000/' + results?.links?.next)).searchParams
+      expect(nextLinkParams.get('page[number]')).toBe('2')
+      expect(selfLinkParams.get('page[size]')).toBe('2')
+
+      const prevLinkParams = (new URL('http://localhost:3000/' + results?.links?.prev)).searchParams
+      expect(prevLinkParams.get('page[number]')).toBe('0')
+      expect(prevLinkParams.get('page[size]')).toBe('2')
+    })
+
+    // test Invalid Pagination
+    test(`GET /${objname} with invalid page[number]`, async () => {
+      const response = await global.app.inject({
+        url: `${objname}`,
+        method: 'GET',
+        query: {
+          'page[number]': '-1',
+          'page[size]': '2'
+        }
+      })
+      expect(response.statusCode).toBe(400)
+    })
+
+    // test Invalid Page size
+    test(`GET /${objname} with invalid page[size]`, async () => {
+      const response = await global.app.inject({
+        url: `${objname}`,
+        method: 'GET',
+        query: {
+          'page[number]': '1',
+          'page[size]': '0'
+        }
+      })
+      expect(response.statusCode).toBe(400)
+    })
+
+    // testing SORT
+    const props = Object.keys(properties).filter(el => el)
+    test.each(props)(`SORT ${objname}?sort=%s`, async (prop) => {
+      // expect.assertions(2)
+      // console.log(objname, relation)
+      const resp = await global.app.inject({
+        url: `${objname}`,
+        query: { sort: `${prop}` },
+        method: 'GET',
+        headers: { 'Content-Type': 'application/vnd.api+json' }
+      })
+      const json = JSON.parse(resp.body)
+
+      const results = json.data
+      expect(resp.statusCode).toBe(200)
+      // console.log('results', results)
+      expect(results.length).toBeGreaterThan(0)
+      const index1 = results.findIndex(el => el[pkey] === createdObjects[0][pkey])
+      const index2 = results.findIndex(el => el[pkey] === createdObjects[1][pkey])
+      // console.log(prop, 'index1', index1, 'index2', index2)
+      // console.log(prop, 'createdObject1[prop]', createdObject1[prop], 'createdObjects[1][prop]', createdObjects[1][prop])
+      if (createdObjects[1][prop] !== createdObjects[0][prop]) {
+        expect(index2 > index1).toBe(createdObjects[1][prop] > createdObjects[0][prop])
+      }
+    })
+    // Testing SORT DESC
+    test.each(props)(`SORT DESC ${objname}?sort=-%s`, async (prop) => {
+      // expect.assertions(2)
+      // console.log(objname, relation)
+      const resp = await global.app.inject({
+        url: `${objname}`,
+        query: { sort: `-${prop}` },
+        method: 'GET',
+        headers: { 'Content-Type': 'application/vnd.api+json' }
+      })
+      const json = JSON.parse(resp.body)
+
+      const results = json.data
+      expect(resp.statusCode).toBe(200)
+      // console.log('results', results)
+      expect(results.length).toBeGreaterThan(0)
+      const index1 = results.findIndex(el => el[pkey] === createdObjects[0][pkey])
+      const index2 = results.findIndex(el => el[pkey] === createdObjects[1][pkey])
+      // console.log(prop, 'index1', index1, 'index2', index2)
+      // console.log(prop, 'createdObject1[prop]', createdObject1[prop], 'createdObjects[1][prop]', createdObjects[1][prop])
+      if (createdObjects[1][prop] !== createdObjects[0][prop]) {
+        expect(index2 > index1).toBe(createdObjects[1][prop] < createdObjects[0][prop])
+      }
+    })
+
+    // testing SORT on invalid key
+    test(`SORT on non-existing: ${objname}?sort=foobooNo`, async () => {
+      const routeName = myroute.routeName
+      const result = await global.app.inject({
+        url: `${routeName}`,
+        method: 'GET',
+        query: {
+          sort: 'foobooNo'
+        }
+      })
+      expect(result.statusCode).toBe(400)
+    })
+
+    // Testing FILTER
+    // @TODO: fix after fixing swagger schema
+    test.each(props.filter(el => properties[el]?.format !== 'uuid'))(`FILTER ${objname}?filter[%s]=`, async (prop) => {
+      const isString = properties[prop].type === 'string'
+      const unixTime = Date.parse(createdObjects[0][prop])
+
+      const filterby = (isString && unixTime) ? (new Date(unixTime)).toISOString().slice(0, 10) || createdObjects[0][prop] : createdObjects[0][prop]
+      const url = `${objname}?filter[${prop}]=${filterby}`
+      const response = await global.app.inject({
+        url: url,
+        method: 'GET',
+        headers: { 'Content-Type': 'application/vnd.api+json' }
+      })
+      const json = JSON.parse(response.body)
+      const results = json.data
+      expect(response.statusCode).toBe(200)
+      expect(Array.isArray(results)).toBe(true)
     })
   })
-}
 
-// to be moved to seperate file
-function testGets (mylist) {
-  describe('All GET tests', () => {
-    const createdIDs = {}
+  describe.each(routesSchemas)('%s: Testing include relations requests', (myroute) => {
+    const primaryKeys = myroute?.primaryKeys || ['id']
+    const pkey = primaryKeys[0]
+    const createdObjects = []
+    const objname = myroute.routeName
+    const relations = myroute.relations
 
-    afterAll(async () => {
-      await deleteCreatedIDs(createdIDs)
+    beforeAll(async () => {
+      // create 2 of objname
+      createdObjects[0] = await createDbObject(objname, createdIDs)
+      createdObjects[1] = await createDbObject(objname, createdIDs)
     })
 
-    describe.each(mylist)('%s: GET Listing Component Tests', (myroute) => {
-      const primaryKeys = myroute?.primaryKeys || ['id']
-      const pkey = primaryKeys[0]
-      const properties = myroute.properties
-      const createdObjects = []
-      const objname = myroute.routeName
-
-      beforeAll(async () => {
-        // create 4 of objname, why not a loop you might ask.
-        for (let i = 0; i < 8; i++) {
-          createdObjects[i] = await createDbObject(objname, createdIDs)
-        }
+    // test non-existing include
+    test(`get non-existing include GET ${objname}?include=nonexisting`, async () => {
+      const url = `${objname}?include=nonexisting`
+      const resp = await global.app.inject({
+        url: url,
+        method: 'GET',
+        headers: { 'Content-Type': 'application/vnd.api+json' }
       })
-
-      test(`GET: should get listing for GET /${objname}`, async () => {
-        expect.assertions(4)
-        const resp = await global.app.inject({
-          url: objname,
-          method: 'GET',
-          headers: { 'Content-Type': 'application/vnd.api+json' }
-        })
-        const json = JSON.parse(resp.body)
-
-        const results = json.data
-        expect(resp.statusCode).toBe(200)
-        expect(results.length).toBeGreaterThan(1)
-        expect(results.findIndex(el => el[pkey] === createdObjects[0][pkey])).toBeGreaterThan(-1)
-        expect(results.findIndex(el => el[pkey] === createdObjects[1][pkey])).toBeGreaterThan(-1)
-      })
-
-      test(`GET by ID: should get 1 row for GET /${objname}/id`, async () => {
-        const id = createdObjects[0][pkey]
-        const url = `${objname}/${id}`
-
-        expect.assertions(2)
-
-        const resp = await global.app.inject({
-          url: url,
-          method: 'GET',
-          headers: { 'Content-Type': 'application/vnd.api+json' }
-        })
-        const json = JSON.parse(resp.body)
-
-        const results = json.data
-
-        expect(resp.statusCode).toBe(200)
-        expect(results[pkey]).toBe(id)
-      })
-
-      test(`GET by NONE-EXISTING-ID: should return 404. GET /${objname}/nonexisting`, async () => {
-        const url = `${objname}/f3eae4c7-1234-409f-9a84-8d66df519876`
-
-        const resp = await global.app.inject({
-          url: url,
-          method: 'GET',
-          headers: { 'Content-Type': 'application/vnd.api+json' }
-        })
-        expect(resp.statusCode).toBe(404)
-      })
-
-      // test Pagination
-      test(`GET /${objname} paginated with links`, async () => {
-        const response = await global.app.inject({
-          url: `${objname}`,
-          method: 'GET',
-          query: {
-            'page[number]': '1',
-            'page[size]': '2'
-          }
-        })
-        const results = JSON.parse(response.body)
-        expect(results.data.attributes.results.length).toBe(2)
-        const selfLinkParams = (new URL('http://localhost:3000/' + results?.links?.self)).searchParams
-
-        expect(selfLinkParams.get('page[number]')).toBe('1')
-        expect(selfLinkParams.get('page[size]')).toBe('2')
-
-        const nextLinkParams = (new URL('http://localhost:3000/' + results?.links?.next)).searchParams
-        expect(nextLinkParams.get('page[number]')).toBe('2')
-        expect(selfLinkParams.get('page[size]')).toBe('2')
-
-        const prevLinkParams = (new URL('http://localhost:3000/' + results?.links?.prev)).searchParams
-        expect(prevLinkParams.get('page[number]')).toBe('0')
-        expect(prevLinkParams.get('page[size]')).toBe('2')
-      })
-
-      // test Invalid Pagination
-      test(`GET /${objname} with invalid page[number]`, async () => {
-        const response = await global.app.inject({
-          url: `${objname}`,
-          method: 'GET',
-          query: {
-            'page[number]': '-1',
-            'page[size]': '2'
-          }
-        })
-        expect(response.statusCode).toBe(400)
-      })
-
-      // test Invalid Page size
-      test(`GET /${objname} with invalid page[size]`, async () => {
-        const response = await global.app.inject({
-          url: `${objname}`,
-          method: 'GET',
-          query: {
-            'page[number]': '1',
-            'page[size]': '0'
-          }
-        })
-        expect(response.statusCode).toBe(400)
-      })
-
-      // testing SORT
-      const props = Object.keys(properties).filter(el => el)
-      test.each(props)(`SORT ${objname}?sort=%s`, async (prop) => {
-        // expect.assertions(2)
-        // console.log(objname, relation)
-        const resp = await global.app.inject({
-          url: `${objname}`,
-          query: { sort: `${prop}` },
-          method: 'GET',
-          headers: { 'Content-Type': 'application/vnd.api+json' }
-        })
-        const json = JSON.parse(resp.body)
-
-        const results = json.data
-        expect(resp.statusCode).toBe(200)
-        // console.log('results', results)
-        expect(results.length).toBeGreaterThan(0)
-        const index1 = results.findIndex(el => el[pkey] === createdObjects[0][pkey])
-        const index2 = results.findIndex(el => el[pkey] === createdObjects[1][pkey])
-        // console.log(prop, 'index1', index1, 'index2', index2)
-        // console.log(prop, 'createdObject1[prop]', createdObject1[prop], 'createdObjects[1][prop]', createdObjects[1][prop])
-        if (createdObjects[1][prop] !== createdObjects[0][prop]) {
-          expect(index2 > index1).toBe(createdObjects[1][prop] > createdObjects[0][prop])
-        }
-      })
-      // Testing SORT DESC
-      test.each(props)(`SORT DESC ${objname}?sort=-%s`, async (prop) => {
-        // expect.assertions(2)
-        // console.log(objname, relation)
-        const resp = await global.app.inject({
-          url: `${objname}`,
-          query: { sort: `-${prop}` },
-          method: 'GET',
-          headers: { 'Content-Type': 'application/vnd.api+json' }
-        })
-        const json = JSON.parse(resp.body)
-
-        const results = json.data
-        expect(resp.statusCode).toBe(200)
-        // console.log('results', results)
-        expect(results.length).toBeGreaterThan(0)
-        const index1 = results.findIndex(el => el[pkey] === createdObjects[0][pkey])
-        const index2 = results.findIndex(el => el[pkey] === createdObjects[1][pkey])
-        // console.log(prop, 'index1', index1, 'index2', index2)
-        // console.log(prop, 'createdObject1[prop]', createdObject1[prop], 'createdObjects[1][prop]', createdObjects[1][prop])
-        if (createdObjects[1][prop] !== createdObjects[0][prop]) {
-          expect(index2 > index1).toBe(createdObjects[1][prop] < createdObjects[0][prop])
-        }
-      })
-
-      // testing SORT on invalid key
-      test(`SORT on non-existing: ${objname}?sort=foobooNo`, async () => {
-        const routeName = myroute.routeName
-        const result = await global.app.inject({
-          url: `${routeName}`,
-          method: 'GET',
-          query: {
-            sort: 'foobooNo'
-          }
-        })
-        expect(result.statusCode).toBe(400)
-      })
-
-      // Testing FILTER
-      // @TODO: fix after fixing swagger schema
-      test.each(props.filter(el => properties[el]?.format !== 'uuid'))(`FILTER ${objname}?filter[%s]=`, async (prop) => {
-        const isString = properties[prop].type === 'string'
-        const unixTime = Date.parse(createdObjects[0][prop])
-
-        const filterby = (isString && unixTime) ? (new Date(unixTime)).toISOString().slice(0, 10) || createdObjects[0][prop] : createdObjects[0][prop]
-        const url = `${objname}?filter[${prop}]=${filterby}`
-        const response = await global.app.inject({
-          url: url,
-          method: 'GET',
-          headers: { 'Content-Type': 'application/vnd.api+json' }
-        })
-        const json = JSON.parse(response.body)
-        const results = json.data
-        expect(response.statusCode).toBe(200)
-        expect(Array.isArray(results)).toBe(true)
-      })
+      expect(resp.statusCode).toBe(400)
+      const json = JSON.parse(resp.body)
+      expect(json.title).toBe('Cannot include non-existing relation')
     })
 
-    describe.each(mylist)('%s: Testing include relations requests', (myroute) => {
-      const primaryKeys = myroute?.primaryKeys || ['id']
-      const pkey = primaryKeys[0]
-      const createdObjects = []
-      const objname = myroute.routeName
-      const relations = myroute.relations
-
-      beforeAll(async () => {
-        // create 2 of objname
-        createdObjects[0] = await createDbObject(objname, createdIDs)
-        createdObjects[1] = await createDbObject(objname, createdIDs)
-      })
-
-      // test non-existing include
-      test(`get non-existing include GET ${objname}?include=nonexisting`, async () => {
-        const url = `${objname}?include=nonexisting`
-        const resp = await global.app.inject({
-          url: url,
-          method: 'GET',
-          headers: { 'Content-Type': 'application/vnd.api+json' }
-        })
-        expect(resp.statusCode).toBe(400)
-        const json = JSON.parse(resp.body)
-        expect(json.title).toBe('Cannot include non-existing relation')
-      })
-
-      test.each(relations)(`get ONE included relation of GET ${objname}?include=%s`, async (relation) => {
+    test.each(relations)(`get ONE included relation of GET ${objname}?include=%s`, async (relation) => {
       // expect.assertions(2)
       // console.log(objname, relation)
-        const url = `${objname}?include=${relation}`
-        const resp = await global.app.inject({
-          url: url,
-          method: 'GET',
-          headers: { 'Content-Type': 'application/vnd.api+json' }
-        })
-        const json = JSON.parse(resp.body)
-
-        const results = json.data
-        expect(resp.statusCode).toBe(200)
-        // console.log(url, results[0].relationships)
-        expect(results.length).toBeGreaterThan(0)
-        expect(results.filter(el => el[pkey] === createdObjects[0][pkey])[0]).toHaveProperty(`relationships.${relation}`)
+      const url = `${objname}?include=${relation}`
+      const resp = await global.app.inject({
+        url: url,
+        method: 'GET',
+        headers: { 'Content-Type': 'application/vnd.api+json' }
       })
+      const json = JSON.parse(resp.body)
 
-      const multiIncludes = getAllSubsets(relations).filter(el => el.length > 1).map(el => el.join(','))
+      const results = json.data
+      expect(resp.statusCode).toBe(200)
+      // console.log(url, results[0].relationships)
+      expect(results.length).toBeGreaterThan(0)
+      expect(results.filter(el => el[pkey] === createdObjects[0][pkey])[0]).toHaveProperty(`relationships.${relation}`)
+    })
 
-      test.each(multiIncludes)(`get MULTIPLE included relations of GET ${objname}?include=%s`, async (relation) => {
+    const multiIncludes = getAllSubsets(relations).filter(el => el.length > 1).map(el => el.join(','))
+
+    test.each(multiIncludes)(`get MULTIPLE included relations of GET ${objname}?include=%s`, async (relation) => {
       // expect.assertions(2)
       // console.log(objname, relation)
-        const resp = await global.app.inject({
-          url: `${objname}?include=${relation}`,
-          method: 'GET',
-          headers: { 'Content-Type': 'application/vnd.api+json' }
-        })
-        const json = JSON.parse(resp.body)
+      const resp = await global.app.inject({
+        url: `${objname}?include=${relation}`,
+        method: 'GET',
+        headers: { 'Content-Type': 'application/vnd.api+json' }
+      })
+      const json = JSON.parse(resp.body)
 
-        const results = json.data
-        expect(resp.statusCode).toBe(200)
-        // console.log('results', results)
-        expect(results.length).toBeGreaterThan(0)
-        const relationParts = relation.split(',')
-        for (let i = 0; i < relationParts.length; i++) {
+      const results = json.data
+      expect(resp.statusCode).toBe(200)
+      // console.log('results', results)
+      expect(results.length).toBeGreaterThan(0)
+      const relationParts = relation.split(',')
+      for (let i = 0; i < relationParts.length; i++) {
         // console.log('relations[i]', relationParts[i])
-          expect(results[0]).toHaveProperty(`relationships.${relationParts[i]}`)
-          // console.log('results', results.filter(el => el[pkey] === createdObject1[pkey])[0])
-        }
-      })
+        expect(results[0]).toHaveProperty(`relationships.${relationParts[i]}`)
+        // console.log('results', results.filter(el => el[pkey] === createdObject1[pkey])[0])
+      }
     })
   })
-}
+})
 
 // Recursivey create object and its required connected objects
 async function createDbObject (objname, createdIDs, useExisting = false) {
@@ -543,7 +626,6 @@ async function getCreatedObjectbyID (objname, createdIDs) {
   return await Model.query().findById(id)
 }
 
-// Delete createdIDs
 async function deleteCreatedIDs (createdIDs) {
   for (const [key, value] of Object.entries(createdIDs)) {
     // console.log('Inside deleteCreatedIDS', key)
@@ -582,9 +664,11 @@ function randomIntFromInterval (min = 0, max = 100) {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-/*
-// Generate subsets from array
-*/
+/**
+ * Generate subsets from array
+ * @param {any[]} theArray
+ * @returns {any[]}
+ */
 function getAllSubsets (theArray) {
   return theArray.reduce(
     (subsets, value) => subsets.concat(

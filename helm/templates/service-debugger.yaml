@@ -1,0 +1,27 @@
+{{- if .Values.local.debuggerService.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.appname }}-debugger
+  labels:
+    app: {{ .Values.appname }}
+    chart: {{ .Chart.Name }}
+  annotations:
+    {{- if .Values.local.debuggerService.annotations }}
+    {{- range $key, $val := .Values.local.debuggerService.annotations }}
+    {{ $key }}: {{ $val | quote }}
+    {{- end }}
+    {{- end }}
+spec:
+  type: {{ .Values.local.debuggerService.type }}
+  ports:
+  - name: debugger
+    port: {{ .Values.local.debuggerService.port }}
+    protocol: TCP
+    targetPort:  {{ .Values.local.debuggerService.targetPort }}
+
+  selector:
+    app: {{ .Values.appname }}
+    chart: {{ .Chart.Name }}
+{{- end }}

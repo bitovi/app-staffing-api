@@ -20,13 +20,6 @@ spec:
     port: {{ .Values.service.port }}
     protocol: TCP
     targetPort:  {{ .Values.service.targetPort }}
-  {{- if .Values.local.websocketPort.enabled }}
-  - name: websocket
-    port: {{ .Values.local.websocketPort.port }}
-    protocol: TCP
-    targetPort:  {{ .Values.local.websocketPort.targetPort }}
-  {{- end }}
-
   selector:
     app: {{ .Values.appname }}
     chart: {{ .Chart.Name }}

@@ -74,9 +74,9 @@ spec:
         - name: service
           containerPort: {{ .Values.service.targetPort }}
           protocol: TCP
-        {{- if .Values.local.websocketPort.enabled }}
+        {{- if .Values.local.debuggerService.enabled }}
         - name: debugger
-          containerPort: {{ .Values.local.websocketPort.targetPort }}
+          containerPort: {{ .Values.local.debuggerService.targetPort }}
           protocol: TCP
         {{- end }}
         # envFrom:

@@ -20,9 +20,9 @@ service:
   # add the following extra service
 extraServices: []
 # extraServices:
-#   - name: nodemon
-#     port: 9229
-#     targetPort: 9229
+#   - name: extra-service
+#     port: 80
+#     targetPort: 3000
 #     type: ClusterIP
 #     annotations: {}
 
@@ -39,12 +39,14 @@ ingress: []
   #       service: app-staffing
   #       port: 80
 
-
+# used when docker target is "development"
 local:
-  websocketPort:
+  debuggerService:
     enabled: false
     port: 9229
     targetPort: 9229
+    type: LoadBalancer
+    annotations: {}
 
 cacheBusting:
   timestamp: false

@@ -28,18 +28,41 @@ module.exports = {
       properties: {
         id: { type: 'string', format: 'uuid' },
         name: {
-          type: 'string'
+          type: 'string',
+          faker: 'name.findName'
         },
         start_date: {
-          type: 'string'
+          type: 'string',
+          format: 'date'
         },
         end_date: {
-          type: 'string'
+          type: 'string',
+          format: 'date'
+        },
+        skills: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: [
+              'id'
+            ],
+            properties: {
+              id: {
+                type: 'string',
+                format: 'uuid'
+              },
+              name: {
+                type: 'string'
+              }
+            },
+            additionalProperties: false
+          },
+          uniqueItems: true
         }
       },
       primaryKeys: ['id'],
       required: ['name'],
-      relations: ['skills', 'roles', 'assignments']
+      relations: ['skills', 'assignments']
     },
 
     // projects schema

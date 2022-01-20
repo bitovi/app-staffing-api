@@ -1,0 +1,183 @@
+const faker = require('faker')
+const map = require('lodash/map')
+const range = require('lodash/range')
+const cloneDeep = require('lodash/cloneDeep')
+const { transaction, Model } = require('objection')
+
+const Skill = require('../../src/models/skill')
+const Employee = require('../../src/models/employee')
+const { Serializer } = require('../../src/json-api-serializer')
+
+describe('PATCH /employees/:id', function () {
+  let trx
+  const knex = Model.knex()
+
+  beforeEach(async () => {
+    trx = await transaction.start(knex)
+    Model.knex(trx)
+  })
+
+  afterEach(async () => {
+    await trx.rollback()
+    Model.knex(knex)
+  })
+
+  test('should return 404 if employee id does not exist', async function () {
+    const notFoundId = faker.datatype.uuid()
+    const payload = Serializer.serialize('employees', {
+      id: notFoundId,
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+    const response = await patch(notFoundId, payload)
+    expect(response.statusCode).toBe(404)
+  })
+
+  test('should return 404 if employee skill does not exist', async function () {
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+
+    const employeeSkills = await employee.$relatedQuery('skills')
+    expect(employeeSkills).toHaveLength(0)
+
+    const updatedEmployee = cloneDeep(employee)
+    updatedEmployee.skills = [
+      faker.datatype.uuid(),
+      faker.datatype.uuid(),
+      faker.datatype.uuid()
+    ]
+
+    const payload = Serializer.serialize('employees', updatedEmployee)
+    const response = await patch(employee.id, payload)
+    expect(response.statusCode).toBe(404)
+  })
+
+  test('should add skills to employee record without previous relations', async function () {
+    // create an employee record with no skills
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+
+    const employeeSkills = await employee.$relatedQuery('skills')
+    expect(employeeSkills).toHaveLength(0)
+
+    // create some skills records
+    const howManySkills = 3
+    const skills = await Skill.query()
+      .insert(
+        range(howManySkills).map(() => ({
+          name: faker.lorem.word()
+        }))
+      )
+      .returning('*')
+
+    // Update the employee to have the skills we just created
+    const updatedEmployee = cloneDeep(employee)
+    updatedEmployee.skills = map(skills, 'id')
+
+    const payload = Serializer.serialize('employees', updatedEmployee)
+    const response = await patch(employee.id, payload)
+
+    // must return 200 and include updated employee in the body
+    expect(response.statusCode).toBe(200)
+    const responseBody = Serializer.deserialize(
+      'employees',
+      JSON.parse(response.body)
+    )
+    expect(responseBody.skills).toHaveLength(updatedEmployee.skills.length)
+
+    // make sure the employee associated skills are updated correctly
+    const updatedEmployeeSkills = await employee.$relatedQuery('skills')
+    expect(updatedEmployeeSkills).toHaveLength(howManySkills)
+    expect(map(updatedEmployeeSkills, 'id')).toEqual(
+      expect.arrayContaining(map(skills, 'id'))
+    )
+  })
+
+  test('should return 200 when updating employee with existing skills', async function () {
+    // first create an employee with associated skills in the DB
+    const howManySkills = 3
+    const skills = await Skill.query()
+      .insert(
+        range(howManySkills).map(() => ({
+          name: faker.lorem.word()
+        }))
+      )
+      .returning('*')
+
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+    await employee.$relatedQuery('skills').relate(map(skills, 'id'))
+
+    // make sure the skills are related to the employee
+    const employeeSkills = await employee.$relatedQuery('skills')
+    expect(skills).toEqual(expect.arrayContaining(employeeSkills))
+
+    // Update the employee so it only has 1 skill
+    const updatedEmployee = cloneDeep(employee)
+    updatedEmployee.skills = [employeeSkills[0].id]
+
+    const payload = Serializer.serialize('employees', updatedEmployee)
+    const response = await patch(employee.id, payload)
+    expect(response.statusCode).toBe(200)
+
+    const responseBody = Serializer.deserialize(
+      'employees',
+      JSON.parse(response.body)
+    )
+    expect(responseBody.skills).toHaveLength(1)
+
+    // make sure the employee associated skills are updated correctly
+    const updatedEmployeeSkills = await employee.$relatedQuery('skills')
+    expect(updatedEmployeeSkills).toHaveLength(1)
+    expect(updatedEmployeeSkills[0].id).toEqual(employeeSkills[0].id)
+  })
+
+  test('should update date fields to null', async function () {
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+
+    const updatedEmployee = cloneDeep(employee)
+    updatedEmployee.start_date = null
+    updatedEmployee.end_date = null
+
+    const payload = Serializer.serialize('employees', updatedEmployee)
+    const response = await patch(employee.id, payload)
+
+    expect(response.statusCode).toBe(200)
+    const responseBody = Serializer.deserialize(
+      'employees',
+      JSON.parse(response.body)
+    )
+    expect(responseBody.start_date).toBeNull()
+    expect(responseBody.end_date).toBeNull()
+
+    const dbEmployee = await Employee.query().findById(employee.id)
+    expect(dbEmployee.start_date).toBeNull()
+    expect(dbEmployee.end_date).toBeNull()
+  })
+
+  function patch (id, payload) {
+    return global.app.inject({
+      method: 'PATCH',
+      url: `/employees/${id}`,
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json'
+      },
+      payload: JSON.stringify(payload)
+    })
+  }
+})

@@ -13,12 +13,32 @@ const properties = {
     description: 'The name of the employee'
   },
   start_date: {
-    type: 'string',
+    type: ['string', 'null'],
     description: 'The date the employee started their employment'
   },
   end_date: {
-    type: 'string',
+    type: ['string', 'null'],
     description: 'The date the employee will or did end their employment'
+  },
+  skills: {
+    type: 'array',
+    items: {
+      type: 'object',
+      required: [
+        'id'
+      ],
+      properties: {
+        id: {
+          type: 'string',
+          format: 'uuid'
+        },
+        name: {
+          type: 'string'
+        }
+      },
+      additionalProperties: false
+    },
+    uniqueItems: true
   }
 }
 const exampleGetResponse = {

@@ -1,5 +1,7 @@
 const faker = require('faker')
-const schema = require('./setup-generic')
+const omitBy = require('lodash/omitBy')
+const isUndefined = require('lodash/isUndefined')
+const schema = require('./schema')
 
 const routesSchemas = schema.routes.map((route) =>
   Object.assign(route, {
@@ -214,7 +216,7 @@ describe.each(routesSchemas)('PATCH /%s', (myroute) => {
         Accept: 'application/vnd.api+json'
       }
     })
-    expect(response.statusCode).toEqual(204)
+    expect(response.statusCode).toEqual(200)
     const result = await myroute.model.query().findById(createdObj[pkey])
     expect(result[sampleProperty]).toEqual(obj[sampleProperty])
   })
@@ -425,7 +427,7 @@ describe('All GET tests', () => {
     })
 
     // testing SORT
-    const props = Object.keys(properties).filter(el => el)
+    const props = Object.keys(properties).filter(prop => !myroute.relations.includes(prop))
     test.each(props)(`SORT ${objname}?sort=%s`, async (prop) => {
       // expect.assertions(2)
       // console.log(objname, relation)
@@ -605,7 +607,9 @@ async function createDbObject (objname, createdIDs, useExisting = false) {
     objectToBeCreated[key] = objectToBeCreated[key] || createFakeData(key, value)
   }
 
-  const createdObject = await Model.query().insert(objectToBeCreated)
+  const createdObject = await Model.query().insert(
+    omitBy(objectToBeCreated, isUndefined)
+  )
 
   if (createdObject) {
     createdIDs[objname] = createdIDs[objname] || []

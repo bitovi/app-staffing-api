@@ -1,3 +1,4 @@
+const pluralize = require('pluralize')
 const { Serializer } = require('../json-api-serializer')
 const { getIncludeStr, parseJsonApiParams } = require('../utils')
 const modelHasColumn = require('../schemas/all-properties')
@@ -159,7 +160,7 @@ const getListHandler = (Model) => {
       return reply.code(404).send()
     }
 
-    const result = Serializer.serialize(`${tableName}s`, data, {
+    const result = Serializer.serialize(pluralize(tableName), data, {
       count: data?.total || 0,
       pageSize: size,
       page: number,
@@ -181,14 +182,16 @@ const getDeleteHandler = (Model) => {
 const getUpdateHandler = (Model) => {
   return async (request, reply) => {
     try {
-      const data = await Model.query().upsertGraphAndFetch(request.body,
-        {
-          update: false,
-          relate: true,
-          unrelate: true
-        })
-      reply.code(data ? 204 : 404)
-      reply.send()
+      const updatedGraph = await Model.query().upsertGraphAndFetch(request.body, {
+        update: false,
+        relate: true,
+        unrelate: true
+      })
+      const serialized = Serializer.serialize(
+        pluralize(Model.name.toLowerCase()),
+        updatedGraph
+      )
+      reply.code(200).send(serialized)
     } catch (e) {
       reply.status(404).send()
     }
@@ -200,11 +203,11 @@ const getPostHandler = (Model) => {
     const { body, url } = request
 
     if (body.id) {
-      return reply.send().status(403)
+      return reply.status(403).send()
     }
 
     const newModel = await Model.query().insertGraph(body, { relate: true })
-    const modelName = Model.name.toLowerCase() + 's'
+    const modelName = pluralize(Model.name.toLowerCase())
     const data = Serializer.serialize(modelName, newModel, { url: `/${modelName}/${newModel.id}` })
     const location = `${url}/${newModel.id}`
     return reply.status(201).header('Location', location).send(data)

@@ -74,7 +74,7 @@ module.exports = {
         name: {
           type: 'string'
         },
-        end_date: {
+        description: {
           type: 'string'
         }
       },

@@ -78,7 +78,7 @@ const seed = async (knex) => {
     await Project.query().insertGraph([
       {
         name: fakeProject(i + 1),
-        end_date: new Date(),
+        description: faker.lorem.sentences(),
 
         roles: [
           {

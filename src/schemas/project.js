@@ -11,9 +11,9 @@ const properties = {
     type: 'string',
     description: 'The name of the project'
   },
-  end_date: {
+  description: {
     type: 'string',
-    description: 'The date the project ends'
+    description: 'The project description'
   }
 }
 
@@ -29,7 +29,7 @@ const exampleGetResponse = {
     id: '0b3aabce-b783-4169-bdeb-b342fc4fc70a',
     attributes: {
       name: 'Yum Project X',
-      end_date: '2021-11-24T18:29:51.833Z'
+      description: 'Yum super special project'
     }
   }
 }

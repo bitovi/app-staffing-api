@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "migrate": "knex migrate:latest --knexfile src/knexfile.js",
+    "migrate:make": "knex migrate:make --knexfile src/knexfile.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "seed": "knex seed:run --knexfile src/knexfile.js",

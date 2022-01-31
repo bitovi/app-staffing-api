@@ -12,7 +12,9 @@
 
 npm run migrate
 
-# TODO: move seed to a helm job to enable conditionally
-npm run seed 
+if [ -n "$SEED_DATABASE" ]; then
+    echo "Environment variable set (SEED_DATABASE). Seeding database."
+    npm run seed 
+fi
 
 node src/app.js

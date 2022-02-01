@@ -1,5 +1,4 @@
 const convict = require('convict')
-const path = require('path')
 
 const config = convict({
   APP_PORT: {
@@ -16,7 +15,7 @@ const config = convict({
   },
   DB_SEEDS_DIR: {
     doc: 'The database seeds directory.',
-    default: path.relative(process.cwd(), '../db/skills-seeds'),
+    default: 'db/seeds',
     env: 'DB_SEEDS_DIR'
   }
 })

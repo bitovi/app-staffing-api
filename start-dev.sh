@@ -13,7 +13,7 @@
 npm run migrate
 
 # TODO: move seed to a helm job to enable conditionally
-npm run seed 
+# npm run seed 
 
 
 ###

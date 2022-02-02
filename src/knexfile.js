@@ -9,7 +9,7 @@ module.exports = {
     extension: 'js'
   },
   seeds: {
-    directory: '../db/seeds',
+    directory: config.get('DB_SEEDS_DIR'),
     extension: 'js'
   }
 }

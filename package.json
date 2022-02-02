@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "seed": "knex seed:run --knexfile src/knexfile.js",
+    "seed-skills": "DB_SEEDS_DIR=../db/skills-seeds knex seed:run --knexfile src/knexfile.js",
     "start": "node src/app.js",
     "pretest": "npm run migrate",
     "test": "jest --verbose test/",

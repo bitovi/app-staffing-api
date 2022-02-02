@@ -12,6 +12,11 @@ const config = convict({
     format: String,
     default: 'postgres://dbuser:dbpassword@localhost:5432/staffing_test',
     env: 'DATABASE_CONNECTION_STRING'
+  },
+  DB_SEEDS_DIR: {
+    doc: 'The database seeds directory.',
+    default: '../db/seeds',
+    env: 'DB_SEEDS_DIR'
   }
 })
 

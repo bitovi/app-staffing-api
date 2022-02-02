@@ -87,7 +87,10 @@ docker tag ${IMAGE_NAME} ${REGISTRY_URL}:${IMAGE_TAG}
 echo "Pushing the docker image to the ecr repository..."
 docker push ${REGISTRY_URL}:${IMAGE_TAG}
 
-
+if [[ ${BRANCH_NAME} != ${DEFAULT_BRANCH} ]]; then
+  echo "Branch is not default. Do not publish helm.  We're done here."
+  exit 0
+fi
 
 ###
 ### PUBLISH HELM

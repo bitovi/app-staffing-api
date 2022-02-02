@@ -15,7 +15,7 @@ const config = convict({
   },
   DB_SEEDS_DIR: {
     doc: 'The database seeds directory.',
-    default: 'db/seeds',
+    default: '../db/seeds',
     env: 'DB_SEEDS_DIR'
   }
 })

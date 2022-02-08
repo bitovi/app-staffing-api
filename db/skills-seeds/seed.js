@@ -10,7 +10,7 @@ const seed = async (knex) => {
   await Skill.query().insert({ name: 'Angular' })
   await Skill.query().insert({ name: 'Frontend' })
   await Skill.query().insert({ name: 'Backend' })
-  await Skill.query().insert({ name: 'Devops' })
+  await Skill.query().insert({ name: 'DevOps' })
 }
 
 module.exports = {

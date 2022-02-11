@@ -84,8 +84,8 @@ Serializer.register('projects', {
 Serializer.register('assignments', {
   id: 'id',
   relationships: {
-    employees: { type: 'employees', deserialize },
-    roles: { type: 'roles', deserialize },
+    employee: { type: 'employees', deserialize },
+    role: { type: 'roles', deserialize },
     projects: { type: 'projects', deserialize }
   },
   topLevelLinks: topLevelLinksfn

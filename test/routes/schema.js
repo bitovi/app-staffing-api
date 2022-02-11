@@ -133,19 +133,31 @@ module.exports = {
           type: 'string',
           format: 'uuid'
         },
-        employee_id: {
-          type: 'string',
-          format: 'uuid'
-        },
-        role_id: {
-          type: 'string',
-          format: 'uuid'
-        },
         start_date: {
           type: 'string'
         },
         end_date: {
           type: 'string'
+        },
+        employee: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: {
+              type: 'string',
+              format: 'uuid'
+            }
+          }
+        },
+        role: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: {
+              type: 'string',
+              format: 'uuid'
+            }
+          }
         }
       },
       primaryKeys: ['id'],
@@ -160,7 +172,7 @@ module.exports = {
           into: 'role_id'
         }
       },
-      relations: ['roles', 'projects', 'employees']
+      relations: ['role', 'projects', 'employee']
     }
   ]
 

@@ -96,7 +96,7 @@ const seed = async (knex) => {
               start_date: new Date(faker.date.recent()).toISOString(),
               end_date: new Date(faker.date.future()).toISOString(),
 
-              employees: [{
+              employee: {
                 name: fakeEmployee(i),
                 start_date: new Date(faker.date.past()).toISOString(),
                 end_date: null,
@@ -106,7 +106,7 @@ const seed = async (knex) => {
                     '#ref': fakeSkill(i + 1)
                   }
                 ]
-              }]
+              }
             }]
           }
         ]

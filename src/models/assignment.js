@@ -11,7 +11,7 @@ module.exports = class Assignment extends Model {
     const Employee = require('./employee')
 
     return {
-      roles: {
+      role: {
         relation: Model.BelongsToOneRelation,
         modelClass: Role,
         join: {
@@ -19,7 +19,7 @@ module.exports = class Assignment extends Model {
           to: 'role.id'
         }
       },
-      employees: {
+      employee: {
         relation: Model.BelongsToOneRelation,
         modelClass: Employee,
         join: {

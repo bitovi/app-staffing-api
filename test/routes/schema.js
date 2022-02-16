@@ -108,20 +108,26 @@ module.exports = {
           minimum: 0,
           maximum: 10
         },
-        project_id: {
-          type: 'string',
-          format: 'uuid'
+        project: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: {
+              type: 'string',
+              format: 'uuid'
+            }
+          }
         }
       },
       primaryKeys: ['id'],
-      required: ['project_id'],
+      required: ['start_date', 'start_confidence', 'project'],
       foreignKeys: {
         projects: {
           from: 'id',
           into: 'project_id'
         }
       },
-      relations: ['skills', 'assignments', 'projects', 'employees']
+      relations: ['skills', 'assignments', 'project', 'employees']
     },
 
     // assignments schema

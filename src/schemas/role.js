@@ -19,19 +19,25 @@ const properties = {
     maximum: 10
   },
   end_date: {
-    type: 'string',
+    type: ['string', 'null'],
     description: 'The date the role ends'
   },
   end_confidence: {
-    type: 'integer',
+    type: ['integer', 'null'],
     description: 'A number representing percentage likelihood of the end date',
     minimum: 0,
     maximum: 10
   },
-  project_id: {
-    type: 'string',
-    format: 'uuid',
-    description: 'The id of the project record'
+  project: {
+    type: 'object',
+    required: ['id'],
+    properties: {
+      id: {
+        type: 'string',
+        format: 'uuid'
+      }
+    },
+    description: 'the assigned project'
   }
 }
 const exampleGetResponse = {
@@ -54,12 +60,28 @@ const exampleGetResponse = {
   }
 }
 const exampleCreateResponse = {
-  jsonapi: { version: '1.0' },
-  links: { self: '/roles/1b083dce-51e4-4d3b-9412-f113a259bf50' },
+  jsonapi: {
+    version: '1.0'
+  },
+  links: {
+    self: '/roles/0af180b4-f331-4d49-a99e-44b7e90ae5a6'
+  },
   data: {
     type: 'roles',
-    id: '1b083dce-51e4-4d3b-9412-f113a259bf50',
-    attributes: { project_id: '62171769-871a-403c-b5c8-a47b93e5999a' }
+    id: '0af180b4-f331-4d49-a99e-44b7e90ae5a6',
+    attributes: {
+      start_date: '2022-04-27T01:19:33.939Z',
+      start_confidence: 5,
+      project_id: '24e10d11-edd9-4879-9533-c1578a30e8fe'
+    },
+    relationships: {
+      project: {
+        data: {
+          type: 'projects',
+          id: '24e10d11-edd9-4879-9533-c1578a30e8fe'
+        }
+      }
+    }
   }
 }
 const name = 'role'
@@ -103,15 +125,9 @@ const create = {
   tags,
   body: {
     type: 'object',
-    required: ['project_id'],
+    required: ['start_date', 'start_confidence', 'project'],
     properties,
-    additionalProperties: false,
-    example: {
-      data: {
-        type: 'roles',
-        attributes: { project_id: '62171769-871a-403c-b5c8-a47b93e5999a' }
-      }
-    }
+    additionalProperties: false
   },
   response: {
     default: {

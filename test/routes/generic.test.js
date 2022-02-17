@@ -3,6 +3,11 @@ const omitBy = require('lodash/omitBy')
 const isUndefined = require('lodash/isUndefined')
 const schema = require('./schema')
 
+const routesWithIndividualTests = new Map([
+  ['assignments', true],
+  ['roles', true]
+])
+
 const routesSchemas = schema.routes.map((route) =>
   Object.assign(route, {
     // Use the route name when generating test titles with %s
@@ -11,11 +16,11 @@ const routesSchemas = schema.routes.map((route) =>
     }
   })
 )
-const schemasSansAssignments = routesSchemas.filter(
-  r => r.routeName !== 'assignments'
+const schemasForGenericTests = routesSchemas.filter(
+  r => !routesWithIndividualTests.has(r.routeName)
 )
 
-describe.each(schemasSansAssignments)('POST /%s', (myroute) => {
+describe.each(schemasForGenericTests)('POST /%s', (myroute) => {
   const createdIDs = {}
 
   afterAll(async () => {
@@ -168,7 +173,7 @@ describe.each(schemasSansAssignments)('POST /%s', (myroute) => {
   })
 })
 
-describe.each(schemasSansAssignments)('PATCH /%s', (myroute) => {
+describe.each(schemasForGenericTests)('PATCH /%s', (myroute) => {
   const createdIDs = {}
   const required = myroute.required
   const foreignKeys = myroute.foreignKeys || {}

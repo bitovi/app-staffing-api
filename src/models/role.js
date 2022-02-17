@@ -24,7 +24,7 @@ class Role extends Model {
           to: 'assignment.role_id'
         }
       },
-      projects: {
+      project: {
         relation: Model.BelongsToOneRelation,
         modelClass: Project,
         join: {

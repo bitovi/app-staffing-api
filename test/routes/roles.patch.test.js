@@ -1,0 +1,135 @@
+const faker = require('faker')
+const omit = require('lodash/omit')
+const { transaction, Model } = require('objection')
+
+const Role = require('../../src/models/role')
+const Project = require('../../src/models/project')
+const { Serializer } = require('../../src/json-api-serializer')
+
+describe('PATCH /roles/:id', function () {
+  let trx
+  const knex = Model.knex()
+
+  beforeEach(async () => {
+    trx = await transaction.start(knex)
+    Model.knex(trx)
+  })
+
+  afterEach(async () => {
+    await trx.rollback()
+    Model.knex(knex)
+  })
+
+  test('should return 404 if role id does not exist', async function () {
+    const notFoundId = faker.datatype.uuid()
+    const payload = serialize({
+      id: notFoundId,
+      start_date: faker.date.future(),
+      start_confidence: faker.datatype.number({ min: 0, max: 10 }),
+      project: { id: faker.datatype.uuid() }
+    })
+    const response = await patch(notFoundId, payload)
+    expect(response.statusCode).toBe(404)
+  })
+
+  test('should return 404 if associated project does not exist', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const role = await Role.query().insert({
+      start_date: faker.date.recent(),
+      start_confidence: faker.datatype.number(10),
+      end_date: faker.date.future(),
+      end_confidence: faker.datatype.number(10),
+      project_id: project.id
+    })
+
+    const payload = serialize({
+      project: { id: faker.datatype.uuid() }
+    })
+    const response = await patch(role.id, payload)
+    expect(response.statusCode).toEqual(404)
+  })
+
+  test('should return 200 if update is successful', async function () {
+    const oldProject = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const newProject = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const roleData = {
+      start_date: faker.date.recent(),
+      start_confidence: faker.datatype.number(10),
+      end_date: faker.date.future(),
+      end_confidence: faker.datatype.number(10),
+      project_id: oldProject.id
+    }
+    const role = await Role.query().insert(roleData)
+
+    const payload = serialize({
+      ...omit(roleData, ['project_id']),
+      project: { id: newProject.id }
+    })
+    const response = await patch(role.id, payload)
+    expect(response.statusCode).toEqual(200)
+
+    const responseBody = deserialize(JSON.parse(response.body))
+    expect(responseBody.project.id).toEqual(newProject.id)
+  })
+
+  test('should allow end_date / end_confidence updates to null', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const roleData = {
+      start_date: faker.date.recent(),
+      start_confidence: faker.datatype.number(10),
+      end_date: faker.date.future(),
+      end_confidence: faker.datatype.number(10),
+      project_id: project.id
+    }
+    const role = await Role.query().insert(roleData)
+
+    const payload = serialize({
+      ...omit(roleData, ['project_id']),
+      project: { id: project.id },
+      end_date: null,
+      end_confidence: null
+    })
+    const response = await patch(role.id, payload)
+    expect(response.statusCode).toEqual(200)
+
+    const responseBody = deserialize(JSON.parse(response.body))
+    expect(responseBody.end_date).toBeNull()
+    expect(responseBody.end_confidence).toBeNull()
+  })
+
+  function patch (id, payload) {
+    return global.app.inject({
+      method: 'PATCH',
+      url: `/roles/${id}`,
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json'
+      },
+      payload: JSON.stringify(payload)
+    })
+  }
+
+  function serialize (obj) {
+    return Serializer.serialize('roles', obj)
+  }
+
+  function deserialize (obj) {
+    return Serializer.deserialize('roles', obj)
+  }
+})

@@ -83,9 +83,9 @@ const seed = async (knex) => {
         roles: [
           {
             start_date: new Date(faker.date.recent()).toISOString(),
-            start_confidence: faker.datatype.number(10),
+            start_confidence: faker.datatype.float({ min: 0, max: 1, precision: 0.1 }),
             end_date: new Date(faker.date.future()).toISOString(),
-            end_confidence: faker.datatype.number(10),
+            end_confidence: faker.datatype.float({ min: 0, max: 1, precision: 0.1 }),
 
             skills: [{
               '#id': fakeSkill(i + 1),

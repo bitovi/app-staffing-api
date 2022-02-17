@@ -9,6 +9,7 @@ const { Serializer } = require('../../src/json-api-serializer')
 describe('PATCH /roles/:id', function () {
   let trx
   const knex = Model.knex()
+  const precision = 0.1
 
   beforeEach(async () => {
     trx = await transaction.start(knex)
@@ -25,7 +26,7 @@ describe('PATCH /roles/:id', function () {
     const payload = serialize({
       id: notFoundId,
       start_date: faker.date.future(),
-      start_confidence: faker.datatype.number({ min: 0, max: 10 }),
+      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project: { id: faker.datatype.uuid() }
     })
     const response = await patch(notFoundId, payload)
@@ -40,9 +41,9 @@ describe('PATCH /roles/:id', function () {
 
     const role = await Role.query().insert({
       start_date: faker.date.recent(),
-      start_confidence: faker.datatype.number(10),
+      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       end_date: faker.date.future(),
-      end_confidence: faker.datatype.number(10),
+      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project_id: project.id
     })
 
@@ -51,6 +52,50 @@ describe('PATCH /roles/:id', function () {
     })
     const response = await patch(role.id, payload)
     expect(response.statusCode).toEqual(404)
+  })
+
+  test('should return 422 if start_confidence is negative', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const role = await Role.query().insert({
+      start_date: faker.date.recent(),
+      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      end_date: faker.date.future(),
+      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      project_id: project.id
+    })
+
+    const payload = serialize({
+      ...omit(role, ['project_id']),
+      start_confidence: -1
+    })
+    const response = await patch(role.id, payload)
+    expect(response.statusCode).toEqual(422)
+  })
+
+  test('should return 422 if start_confidence is greater than 1', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const role = await Role.query().insert({
+      start_date: faker.date.recent(),
+      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      end_date: faker.date.future(),
+      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      project_id: project.id
+    })
+
+    const payload = serialize({
+      ...omit(role, ['project_id']),
+      start_confidence: 1.01
+    })
+    const response = await patch(role.id, payload)
+    expect(response.statusCode).toEqual(422)
   })
 
   test('should return 200 if update is successful', async function () {
@@ -66,9 +111,9 @@ describe('PATCH /roles/:id', function () {
 
     const roleData = {
       start_date: faker.date.recent(),
-      start_confidence: faker.datatype.number(10),
+      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       end_date: faker.date.future(),
-      end_confidence: faker.datatype.number(10),
+      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project_id: oldProject.id
     }
     const role = await Role.query().insert(roleData)
@@ -92,9 +137,9 @@ describe('PATCH /roles/:id', function () {
 
     const roleData = {
       start_date: faker.date.recent(),
-      start_confidence: faker.datatype.number(10),
+      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       end_date: faker.date.future(),
-      end_confidence: faker.datatype.number(10),
+      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project_id: project.id
     }
     const role = await Role.query().insert(roleData)

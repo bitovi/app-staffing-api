@@ -3,6 +3,7 @@ const omit = require('lodash/omit')
 const { transaction, Model } = require('objection')
 
 const Role = require('../../src/models/role')
+const Skill = require('../../src/models/skill')
 const Project = require('../../src/models/project')
 const { Serializer } = require('../../src/json-api-serializer')
 
@@ -49,6 +50,29 @@ describe('PATCH /roles/:id', function () {
 
     const payload = serialize({
       project: { id: faker.datatype.uuid() }
+    })
+    const response = await patch(role.id, payload)
+    expect(response.statusCode).toEqual(404)
+  })
+
+  test('should return 404 if associated skill does not exist', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const role = await Role.query().insert({
+      start_date: faker.date.recent(),
+      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      end_date: faker.date.future(),
+      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      project_id: project.id
+    })
+
+    const payload = serialize({
+      ...omit(role, ['project_id']),
+      project: { id: project.id },
+      skills: [{ id: faker.datatype.uuid() }]
     })
     const response = await patch(role.id, payload)
     expect(response.statusCode).toEqual(404)
@@ -127,6 +151,43 @@ describe('PATCH /roles/:id', function () {
 
     const responseBody = deserialize(JSON.parse(response.body))
     expect(responseBody.project.id).toEqual(newProject.id)
+  })
+
+  test('should return 200 if skills update is successful', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const oldSkill = await Skill.query().insert({
+      name: faker.lorem.word()
+    })
+
+    const newSkill = await Skill.query().insert({
+      name: faker.lorem.word()
+    })
+
+    const roleData = {
+      start_date: faker.date.recent(),
+      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      end_date: faker.date.future(),
+      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      project: { id: project.id },
+      skills: [{ id: oldSkill.id }]
+    }
+    const role = await Role.query().insertGraph(roleData, { relate: true })
+
+    const payload = serialize({
+      ...omit(roleData, ['project_id']),
+      project: { id: project.id },
+      skills: [{ id: newSkill.id }]
+    })
+    const response = await patch(role.id, payload)
+    expect(response.statusCode).toEqual(200)
+
+    const responseBody = deserialize(JSON.parse(response.body))
+    expect(responseBody.project.id).toEqual(project.id)
+    expect(responseBody.skills[0].id).toEqual(newSkill.id)
   })
 
   test('should allow end_date / end_confidence updates to null', async function () {

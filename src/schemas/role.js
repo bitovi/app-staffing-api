@@ -38,6 +38,26 @@ const properties = {
       }
     },
     description: 'the assigned project'
+  },
+  skills: {
+    type: 'array',
+    items: {
+      type: 'object',
+      required: [
+        'id'
+      ],
+      properties: {
+        id: {
+          type: 'string',
+          format: 'uuid'
+        },
+        name: {
+          type: 'string'
+        }
+      },
+      additionalProperties: false
+    },
+    uniqueItems: true
   }
 }
 const exampleGetResponse = {

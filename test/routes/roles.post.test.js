@@ -3,6 +3,7 @@ const isString = require('lodash/isString')
 const { transaction, Model } = require('objection')
 
 const Role = require('../../src/models/role')
+const Skill = require('../../src/models/skill')
 const Project = require('../../src/models/project')
 const { Serializer } = require('../../src/json-api-serializer')
 
@@ -105,6 +106,23 @@ describe('POST /roles', function () {
     expect(response.statusCode).toBe(500)
   })
 
+  test('should fail if associated skill does not exist', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const newRole = {
+      start_date: faker.date.future(),
+      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      project: { id: project.id },
+      skills: [{ id: faker.datatype.uuid() }]
+    }
+    const payload = serialize(newRole)
+    const response = await post(payload)
+    expect(response.statusCode).toBe(500)
+  })
+
   test('should return 201 for valid payload', async function () {
     const project = await Project.query().insert({
       name: faker.company.companyName(),
@@ -127,6 +145,39 @@ describe('POST /roles', function () {
     expect(savedRole.project_id).toEqual(newRole.project.id)
     expect(savedRole.start_date).toEqual(newRole.start_date)
     expect(savedRole.start_confidence).toEqual(newRole.start_confidence)
+  })
+
+  test('should return 201 for valid payload with skills', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const skill = await Skill.query().insert({
+      name: faker.lorem.word()
+    })
+
+    const newRole = {
+      start_date: faker.date.future(),
+      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      project: { id: project.id },
+      skills: [skill]
+    }
+    const payload = serialize(newRole)
+    const response = await post(payload)
+    expect(response.statusCode).toBe(201)
+
+    const body = JSON.parse(response.body)
+    expect(isString(body.data.id)).toEqual(true)
+
+    const savedRole = await Role.query().findById(body.data.id)
+    expect(savedRole.project_id).toEqual(newRole.project.id)
+    expect(savedRole.start_date).toEqual(newRole.start_date)
+    expect(savedRole.start_confidence).toEqual(newRole.start_confidence)
+
+    const savedRoleSkills = await savedRole.$relatedQuery('skills')
+    expect(savedRoleSkills.length).toEqual(1)
+    expect(savedRoleSkills[0].id).toEqual(skill.id)
   })
 
   function post (payload) {

@@ -45,6 +45,7 @@
     "sqlite3": "^5.0.2"
   },
   "devDependencies": {
+    "can-param": "^1.2.0",
     "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.2",

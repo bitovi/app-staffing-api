@@ -1,3 +1,4 @@
+const omit = require('lodash/omit')
 const { makeQueryStringFilters, makeQueryStringFields } = require('../utils')
 const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
@@ -27,6 +28,10 @@ const properties = {
     description: 'A floating point number representing percentage likelihood of the end date',
     minimum: 0,
     maximum: 1
+  },
+  project_id: {
+    type: 'string',
+    format: 'uuid'
   },
   project: {
     type: 'object',
@@ -115,7 +120,7 @@ const list = {
     type: 'object',
     properties: {
       ...queryStringSchema.common,
-      ...makeQueryStringFilters(properties),
+      ...makeQueryStringFilters(omit(properties, ['project', 'skills'])),
       ...makeQueryStringFields(name)
     }
   }
@@ -146,7 +151,7 @@ const create = {
   body: {
     type: 'object',
     required: ['start_date', 'start_confidence', 'project'],
-    properties,
+    properties: omit(properties, ['project_id']),
     additionalProperties: false
   },
   response: {
@@ -164,7 +169,7 @@ const patch = {
   tags,
   body: {
     type: 'object',
-    properties,
+    properties: omit(properties, ['project_id']),
     additionalProperties: false
   }
 }

@@ -1,5 +1,58 @@
-const getIncludeStr = (q) => {
+const getRelationExpressionOld = (q) => {
   return '[' + (q?.include || '') + ']'
+}
+
+/**
+ * Transforms the jsonapi "include" request parameter into an objection RelationExpression
+ * @see https://jsonapi.org/format/#fetching-includes
+ * @see https://vincit.github.io/objection.js/api/types/#type-relationexpression
+ * 
+ * @param {*} q the request query object
+ * @returns {string}
+ */
+ const getRelationExpression = (q) => {
+  const {include} = q
+  if (!include) {
+    return '[]';
+  }
+
+  /**
+    Recursively group nested sibling relations together under shared path
+
+    example 1: "roles.skills,roles.assignments" =>
+               "roles.[skills,assignments]"
+
+    example 2: "children.movies.actors.children,children.movies.actors.pets,children.pets,pets" =>
+               "[children.[movies.actors.[children,pets],pets],pets]"
+   */
+  const relationshipPaths = include.split(',')
+  const consolidatedPathsMap = relationshipPaths.reduce((prev, curr) => {
+    let cursor = prev;
+    const pathSegments = curr.split('.');
+    for (const pathSegment of pathSegments) {
+      if (pathSegment in cursor) {
+        cursor = cursor[pathSegment];
+      } else {
+         cursor[pathSegment] = {};
+         cursor = cursor[pathSegment];
+      }
+    }
+    return prev;
+  }, {})
+
+  function stringifyPathsMap(paths) {
+    const result = Object.entries(paths).map(([key, value]) => {
+      if (Object.keys(value).length > 0) {
+        return `${key}.${stringifyPathsMap(value)}` // recursive case
+      } else {
+        return key; // base case
+      }
+    }).join(',');
+
+    return Object.keys(paths).length > 1 ? `[${result}]` : result;
+  }
+
+  return stringifyPathsMap(consolidatedPathsMap);
 }
 
 function createUUID () {
@@ -123,7 +176,7 @@ function makeQueryStringFields (name) {
   return fields
 }
 module.exports = {
-  getIncludeStr,
+  getRelationExpression,
   createUUID,
   parseJsonApiParams,
   makeQueryStringFilters,

@@ -12,9 +12,9 @@ const getRelationExpression = (q) => {
   }
   const { include } = q
 
-  // Consolidate sibling relations together into one nested map
+  // Consolidate sibling relations together into a single tree representation
   const relationshipPaths = include.split(',')
-  const consolidatedPathsMap = relationshipPaths.reduce((prev, curr) => {
+  const consolidatedPathsTree = relationshipPaths.reduce((prev, curr) => {
     let cursor = prev
     const pathSegments = curr.split('.')
     for (const pathSegment of pathSegments) {
@@ -28,11 +28,11 @@ const getRelationExpression = (q) => {
     return prev
   }, {})
 
-  // Recursively transform the nested map into a string representation
-  function recStringifyPathsMap (paths) {
+  // Recursively transform tree into a string representation (an Objection.js RelationExpression)
+  function recStringifyPathsTree (paths) {
     const result = Object.entries(paths).map(([key, value]) => {
       if (Object.keys(value).length > 0) {
-        return `${key}.${recStringifyPathsMap(value)}` // recursive case
+        return `${key}.${recStringifyPathsTree(value)}` // recursive case
       } else {
         return key // base case
       }
@@ -41,7 +41,7 @@ const getRelationExpression = (q) => {
     return Object.keys(paths).length > 1 ? `[${result}]` : result
   }
 
-  return recStringifyPathsMap(consolidatedPathsMap)
+  return recStringifyPathsTree(consolidatedPathsTree)
 }
 
 function createUUID () {

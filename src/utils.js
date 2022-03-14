@@ -1,58 +1,47 @@
-const getRelationExpressionOld = (q) => {
-  return '[' + (q?.include || '') + ']'
-}
-
 /**
- * Transforms the jsonapi "include" request parameter into an objection RelationExpression
+ * Transforms the jsonapi request parameter ("include") into an Objection.js RelationExpression
  * @see https://jsonapi.org/format/#fetching-includes
  * @see https://vincit.github.io/objection.js/api/types/#type-relationexpression
- * 
+ *
  * @param {*} q the request query object
  * @returns {string}
  */
- const getRelationExpression = (q) => {
-  const {include} = q
-  if (!include) {
-    return '[]';
+const getRelationExpression = (q) => {
+  if (!q || !q.include) {
+    return '[]'
   }
+  const { include } = q
 
-  /**
-    Recursively group nested sibling relations together under shared path
-
-    example 1: "roles.skills,roles.assignments" =>
-               "roles.[skills,assignments]"
-
-    example 2: "children.movies.actors.children,children.movies.actors.pets,children.pets,pets" =>
-               "[children.[movies.actors.[children,pets],pets],pets]"
-   */
+  // Consolidate sibling relations together into one nested map
   const relationshipPaths = include.split(',')
   const consolidatedPathsMap = relationshipPaths.reduce((prev, curr) => {
-    let cursor = prev;
-    const pathSegments = curr.split('.');
+    let cursor = prev
+    const pathSegments = curr.split('.')
     for (const pathSegment of pathSegments) {
       if (pathSegment in cursor) {
-        cursor = cursor[pathSegment];
+        cursor = cursor[pathSegment]
       } else {
-         cursor[pathSegment] = {};
-         cursor = cursor[pathSegment];
+        cursor[pathSegment] = {}
+        cursor = cursor[pathSegment]
       }
     }
-    return prev;
+    return prev
   }, {})
 
-  function stringifyPathsMap(paths) {
+  // Recursively transform the nested map into a string representation
+  function recStringifyPathsMap (paths) {
     const result = Object.entries(paths).map(([key, value]) => {
       if (Object.keys(value).length > 0) {
-        return `${key}.${stringifyPathsMap(value)}` // recursive case
+        return `${key}.${recStringifyPathsMap(value)}` // recursive case
       } else {
-        return key; // base case
+        return key // base case
       }
-    }).join(',');
+    }).join(',')
 
-    return Object.keys(paths).length > 1 ? `[${result}]` : result;
+    return Object.keys(paths).length > 1 ? `[${result}]` : result
   }
 
-  return stringifyPathsMap(consolidatedPathsMap);
+  return recStringifyPathsMap(consolidatedPathsMap)
 }
 
 function createUUID () {

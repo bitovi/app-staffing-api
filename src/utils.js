@@ -1,5 +1,47 @@
-const getIncludeStr = (q) => {
-  return '[' + (q?.include || '') + ']'
+/**
+ * Transforms the jsonapi request parameter ("include") into an Objection.js RelationExpression
+ * @see https://jsonapi.org/format/#fetching-includes
+ * @see https://vincit.github.io/objection.js/api/types/#type-relationexpression
+ *
+ * @param {*} q the request query object
+ * @returns {string}
+ */
+const getRelationExpression = (q) => {
+  if (!q || !q.include) {
+    return '[]'
+  }
+  const { include } = q
+
+  // Consolidate sibling relations together into a single tree representation
+  const relationshipPaths = include.split(',')
+  const consolidatedPathsTree = relationshipPaths.reduce((prev, curr) => {
+    let cursor = prev
+    const pathSegments = curr.split('.')
+    for (const pathSegment of pathSegments) {
+      if (pathSegment in cursor) {
+        cursor = cursor[pathSegment]
+      } else {
+        cursor[pathSegment] = {}
+        cursor = cursor[pathSegment]
+      }
+    }
+    return prev
+  }, {})
+
+  // Recursively transform tree into a string representation (an Objection.js RelationExpression)
+  function recStringifyPathsTree (paths) {
+    const result = Object.entries(paths).map(([key, value]) => {
+      if (Object.keys(value).length > 0) {
+        return `${key}.${recStringifyPathsTree(value)}` // recursive case
+      } else {
+        return key // base case
+      }
+    }).join(',')
+
+    return Object.keys(paths).length > 1 ? `[${result}]` : result
+  }
+
+  return recStringifyPathsTree(consolidatedPathsTree)
 }
 
 function createUUID () {
@@ -123,7 +165,7 @@ function makeQueryStringFields (name) {
   return fields
 }
 module.exports = {
-  getIncludeStr,
+  getRelationExpression,
   createUUID,
   parseJsonApiParams,
   makeQueryStringFilters,

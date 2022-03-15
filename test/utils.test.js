@@ -1,5 +1,5 @@
 
-const { parseJsonApiParams } = require('../src/utils')
+const { parseJsonApiParams, getRelationExpression } = require('../src/utils')
 jest.useFakeTimers()
 
 describe('parseJsonApiParams', () => {
@@ -86,5 +86,32 @@ describe('parseJsonApiParams', () => {
 
   test.concurrent.each(testCases)('.parsequery($title)', ({ requestQuery, expected }) => {
     expect(parseJsonApiParams(requestQuery)).toEqual(expected)
+  })
+})
+
+describe('getRelationExpression', function () {
+  test('should return "[]" if there is no request parameter for "include"', function () {
+    expect(getRelationExpression()).toEqual('[]')
+    expect(getRelationExpression({})).toEqual('[]')
+    expect(getRelationExpression({ include: null })).toEqual('[]')
+    expect(getRelationExpression({ include: undefined })).toEqual('[]')
+    expect(getRelationExpression({ include: '' })).toEqual('[]')
+  })
+
+  describe('should transform the jsonapi request parameter into an Objection.js RelationExpression', function () {
+    const testCases = [
+      {
+        include: 'roles.skills,roles.assignments',
+        expected: 'roles.[skills,assignments]'
+      },
+      {
+        include: 'children.movies.actors.children,children.movies.actors.pets,children.pets,pets',
+        expected: '[children.[movies.actors.[children,pets],pets],pets]'
+      }
+    ]
+
+    test.concurrent.each(testCases)('should transform "$include" into "$expected"', ({ include, expected }) => {
+      expect(getRelationExpression({ include })).toEqual(expected)
+    })
   })
 })

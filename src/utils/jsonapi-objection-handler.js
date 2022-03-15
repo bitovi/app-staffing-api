@@ -1,6 +1,6 @@
 const pluralize = require('pluralize')
 const { Serializer } = require('../json-api-serializer')
-const { getIncludeStr, parseJsonApiParams } = require('../utils')
+const { getRelationExpression, parseJsonApiParams } = require('../utils')
 const modelHasColumn = require('../schemas/all-properties')
 
 const normalizeColumn = (tableName, column) => column.includes('.') ? column : `${tableName}.${column}`
@@ -9,7 +9,7 @@ let databaseName
 
 const getListHandler = (Model) => {
   return async (request, reply) => {
-    const includeStr = getIncludeStr(request.query)
+    const relationExpression = getRelationExpression(request.query)
     const parsedParams = parseJsonApiParams(request.query)
     const tableName = Model.tableName
 
@@ -38,7 +38,7 @@ const getListHandler = (Model) => {
       queryBuilder.findById(request.params.id)
     }
 
-    queryBuilder.withGraphJoined(includeStr)
+    queryBuilder.withGraphJoined(relationExpression)
     queryBuilder.skipUndefined()
 
     // @TODO verify column names

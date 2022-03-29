@@ -266,6 +266,7 @@ describe('PATCH /assignments/:id', function () {
       newAssignment,
       { relate: true }
     )
+    // eslint-disable-next-line no-unused-vars
     const assignment2 = await Assignment.query().insertGraph(
       oldAssignment,
       { relate: true }
@@ -315,6 +316,7 @@ describe('PATCH /assignments/:id', function () {
       newAssignment,
       { relate: true }
     )
+    // eslint-disable-next-line no-unused-vars
     const assignment2 = await Assignment.query().insertGraph(
       oldAssignment,
       { relate: true }
@@ -364,6 +366,7 @@ describe('PATCH /assignments/:id', function () {
       newAssignment,
       { relate: true }
     )
+    // eslint-disable-next-line no-unused-vars
     const assignment2 = await Assignment.query().insertGraph(
       oldAssignment,
       { relate: true }

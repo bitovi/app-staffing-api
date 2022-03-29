@@ -165,7 +165,7 @@ function makeQueryStringFields (name) {
   return fields
 }
 // Throws 403 if start_date is after end_date in Assignment POST and PATCH
-const checkAssignmentStartDate = (request, reply, next) => {
+const checkAssignmentStartDate = async (request, reply, next) => {
   const start = new Date(request.body.start_date)
   const end = new Date(request.body.end_date)
 
@@ -181,44 +181,48 @@ const checkAssignmentOverlap = async (request, reply, next) => {
   const Assignment = require('./models/assignment')
   let assignments = ''
   const body = request.body
-  if (body.end_date) {
-    assignments = await Assignment.query()
-      .where('employee_id', '=', body.employee.id)
-      // Starts at end Date
-      .andWhere('end_date', '=', body.start_date)
-      // Ends at start date
-      .orWhere('start_date', '=', body.end_date)
-      // Inside of range
-      .orWhere('start_date', '<=', body.start_date)
-      .andWhere('end_date', '>=', body.end_date)
-      // Outside of range
-      .orWhere('start_date', '>=', body.start_date)
-      .andWhere('end_date', '<=', body.end_date)
-      // starts before start date, ends after start date, ends before end date
-      .orWhere('start_date', '>=', body.start_date)
-      .andWhere('start_date', '<=', body.end_date)
-      .andWhere('end_date', '>=', body.end_date)
-      // starts after start date, ends after end
-      .orWhere('start_date', '<=', body.start_date)
-      .andWhere('end_date', '>=', body.start_date)
-      .andWhere('end_date', '<=', body.end_date)
-  } else { // If end_date is entered is blank or null
-    assignments = await Assignment.query()
-      .where('employee_id', '=', body.employee.id)
-      .andWhere('start_date', '<=', body.start_date)
-      .andWhere('end_date', '>=', body.start_date)
-      .orWhere('end_date', '=', body.start_date)
+  if (body.id) {
+    next()
+  }
+  console.log(body)
+  if (body.start_date) {
+    if (body.end_date) {
+      assignments = await Assignment.query()
+        .where('employee_id', '=', body.employee.id)
+        // Starts at end Date
+        .andWhere('end_date', '=', body.start_date)
+        // Ends at start date
+        .orWhere('start_date', '=', body.end_date)
+        // Inside of range
+        .orWhere('start_date', '<=', body.start_date)
+        .andWhere('end_date', '>=', body.end_date)
+        // Outside of range
+        .orWhere('start_date', '>=', body.start_date)
+        .andWhere('end_date', '<=', body.end_date)
+        // starts before start date, ends after start date, ends before end date
+        .orWhere('start_date', '>=', body.start_date)
+        .andWhere('start_date', '<=', body.end_date)
+        .andWhere('end_date', '>=', body.end_date)
+        // starts after start date, ends after end
+        .orWhere('start_date', '<=', body.start_date)
+        .andWhere('end_date', '>=', body.start_date)
+        .andWhere('end_date', '<=', body.end_date)
+    } else { // If end_date is entered is blank or null
+      assignments = await Assignment.query()
+        .where('employee_id', '=', body.employee.id)
+        .andWhere('start_date', '<=', body.start_date)
+        .andWhere('end_date', '>=', body.start_date)
+        .orWhere('end_date', '=', body.start_date)
+    }
+
     if (request.method === 'PATCH') {
       assignments = assignments.filter(e => e.id !== request.params.id)
     }
-  }
-  if (request.method === 'PATCH') {
-    assignments = assignments.filter(e => e.id === request.params.id)
-  }
-  if (assignments.length > 0) {
-    return reply.status(403).send(
-      'Employee already is working on a different assignment'
-    )
+    if (assignments.length > 0) {
+      return reply.status(403).send(
+        'Employee already is working on a different assignment'
+      )
+    }
   }
 }
 

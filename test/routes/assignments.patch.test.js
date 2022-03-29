@@ -91,9 +91,9 @@ describe('PATCH /assignments/:id', function () {
 
     const assignment = await Assignment.query().insertGraph(
       {
-        start_date: faker.date.future(),
         employee: { id: employee.id },
-        role: { id: role.id }
+        role: { id: role.id },
+        start_date: faker.date.future()
       },
       { relate: true }
     )
@@ -163,8 +163,8 @@ describe('PATCH /assignments/:id', function () {
     })
 
     const newAssignment = {
-      start_date: faker.date.past(),
-      end_date: faker.date.future(),
+      start_date: '2024-02-25 03:44:48.640 -0400',
+      end_date: '2025-02-25 03:44:48.640 -0400',
       employee: { id: employee.id },
       role: { id: role.id }
     }
@@ -182,8 +182,8 @@ describe('PATCH /assignments/:id', function () {
     const payload = serialize({
       ...newAssignment,
       employee: { id: newAssociatedEmployee.id },
-      start_date: faker.date.future(10),
-      end_date: faker.date.future(20)
+      start_date: '2024-03-25 03:44:48.640 -0400',
+      end_date: '2024-05-25 03:44:48.640 -0400'
     })
     const response = await patch(assignment.id, payload)
 
@@ -399,21 +399,31 @@ describe('PATCH /assignments/:id', function () {
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })
+    const newAssignment = {
+      start_date: faker.date.future(),
+      end_date: faker.date.future(),
+      employee: { id: employee.id },
+      role: { id: role.id }
+    }
     const oldAssignment = {
       start_date: '2027-02-15 03:44:48.640 -0400',
       end_date: '2027-02-20 03:44:48.640 -0400',
       employee: { id: employee.id },
       role: { id: role.id }
     }
-
     const assignment = await Assignment.query().insertGraph(
+      newAssignment,
+      { relate: true }
+    )
+    // eslint-disable-next-line no-unused-vars
+    const assignment2 = await Assignment.query().insertGraph(
       oldAssignment,
       { relate: true }
     )
     const payload = serialize({
-      ...oldAssignment,
-      start_date: '2027-02-12 03:44:48.640 -0400',
-      end_date: '2027-03-15 03:44:48.640 -0400'
+      ...newAssignment,
+      start_date: '2027-02-13 03:44:48.640 -0400',
+      end_date: '2027-02-24 03:44:48.640 -0400'
     })
     const response = await patch(assignment.id, payload)
     expect(response.statusCode).toBe(403)

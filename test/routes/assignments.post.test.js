@@ -63,7 +63,6 @@ describe('POST /assignments', function () {
     const response = await post(payload)
     expect(response.statusCode).toBe(500)
   })
-
   test('should return 201 for valid payload', async function () {
     const project = await Project.query().insert({
       name: faker.company.companyName(),
@@ -100,6 +99,149 @@ describe('POST /assignments', function () {
     expect(isString(savedAssignment.id)).toEqual(true)
     expect(savedAssignment.employee_id).toEqual(employee.id)
     expect(savedAssignment.role_id).toEqual(role.id)
+  })
+  test('should return 403 if start_date is after end_date', async function () {
+    const payload = serialize({
+      start_date: faker.date.future(10),
+      end_date: faker.date.soon(),
+      employee: { id: faker.datatype.uuid() },
+      role: { id: faker.datatype.uuid() }
+    })
+    const response = await post(payload)
+    expect(response.statusCode).toBe(403)
+    expect(response.body).toBe('start_date is after end_date')
+  })
+  test('should return 403 if start_date falls in between another assignment', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+    const role = await Role.query().insert({
+      start_date: faker.date.recent(),
+      start_confidence: faker.datatype.number(10),
+      end_date: faker.date.future(),
+      end_confidence: faker.datatype.number(10),
+      project_id: project.id
+    })
+    const assign = await Assignment.query().insert({
+      employee_id: employee.id,
+      role_id: role.id,
+      start_date: '2027-02-15 03:44:48.640 -0400',
+      end_date: '2027-02-20 03:44:48.640 -0400'
+    })
+    const payload = serialize({
+      start_date: '2027-02-18 03:44:48.640 -0400',
+      end_date: '2027-03-15 03:44:48.640 -0400',
+      employee: { id: faker.datatype.uuid() },
+      role: { id: faker.datatype.uuid() }
+    })
+    const response = await post(payload)
+    expect(response.statusCode).toBe(403)
+    expect(response.body).toBe('Employee already is working on a different assignment')
+  })
+  test('should return 403 if end_date falls in between another assignment', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+    const role = await Role.query().insert({
+      start_date: faker.date.recent(),
+      start_confidence: faker.datatype.number(10),
+      end_date: faker.date.future(),
+      end_confidence: faker.datatype.number(10),
+      project_id: project.id
+    })
+    const assign = await Assignment.query().insert({
+      employee_id: employee.id,
+      role_id: role.id,
+      start_date: '2027-02-15 03:44:48.640 -0400',
+      end_date: '2027-02-20 03:44:48.640 -0400'
+    })
+    const payload = serialize({
+      start_date: '2027-02-02 03:44:48.640 -0400',
+      end_date: '2027-02-20 03:44:48.640 -0400',
+      employee: { id: faker.datatype.uuid() },
+      role: { id: faker.datatype.uuid() }
+    })
+    const response = await post(payload)
+    expect(response.statusCode).toBe(403)
+    expect(response.body).toBe('Employee already is working on a different assignment')
+  })
+  test('should return 403 if assignment dates falls inside another assignment', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+    const role = await Role.query().insert({
+      start_date: faker.date.recent(),
+      start_confidence: faker.datatype.number(10),
+      end_date: faker.date.future(),
+      end_confidence: faker.datatype.number(10),
+      project_id: project.id
+    })
+    const assign = await Assignment.query().insert({
+      employee_id: employee.id,
+      role_id: role.id,
+      start_date: '2027-02-15 03:44:48.640 -0400',
+      end_date: '2027-02-20 03:44:48.640 -0400'
+    })
+    const payload = serialize({
+      start_date: '2027-02-16 03:44:48.640 -0400',
+      end_date: '2027-02-18 03:44:48.640 -0400',
+      employee: { id: faker.datatype.uuid() },
+      role: { id: faker.datatype.uuid() }
+    })
+    const response = await post(payload)
+    expect(response.statusCode).toBe(403)
+    expect(response.body).toBe('Employee already is working on a different assignment')
+  })
+  test('should return 403 if another assignment is inside current assignment date range', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+    const role = await Role.query().insert({
+      start_date: faker.date.recent(),
+      start_confidence: faker.datatype.number(10),
+      end_date: faker.date.future(),
+      end_confidence: faker.datatype.number(10),
+      project_id: project.id
+    })
+    const assign = await Assignment.query().insert({
+      employee_id: employee.id,
+      role_id: role.id,
+      start_date: '2027-02-15 03:44:48.640 -0400',
+      end_date: '2027-02-20 03:44:48.640 -0400'
+    })
+    const payload = serialize({
+      start_date: '2027-02-02 03:44:48.640 -0400',
+      end_date: '2027-02-21 03:44:48.640 -0400',
+      employee: { id: faker.datatype.uuid() },
+      role: { id: faker.datatype.uuid() }
+    })
+    const response = await post(payload)
+    expect(response.statusCode).toBe(403)
+    expect(response.body).toBe('Employee already is working on a different assignment')
   })
 
   function post (payload) {

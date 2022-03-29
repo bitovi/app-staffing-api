@@ -164,10 +164,74 @@ function makeQueryStringFields (name) {
 
   return fields
 }
+// Throws 403 if start_date is after end_date in Assignment POST and PATCH
+const checkAssignmentStartDate = (request,reply,next) =>{
+  const start = new Date(request.body.start_date)
+  const end = new Date(request.body.end_date)
+
+  if (request.body.end_date !== null && start > end) {
+    return reply.status(403).send(
+      'start_date is after end_date'
+  )
+  }
+}
+// Queries DB to make sure that start_date and end_date do not overlap with employee's other assignments in POST and PATCH
+// If conflict throw 403
+const checkAssignmentOverlap = async (request,reply,next) => {
+  const Assignment = require("./models/assignment");
+  let assignments = ''
+  const body = request.body
+  if (body.end_date){
+    assignments = await Assignment.query()
+        .where('employee_id', '=', body.employee.id)
+        // Starts at end Date
+        .andWhere('end_date', '=', body.start_date)
+        // Ends at start date
+        .orWhere('start_date', '=', body.end_date)
+        // Inside of range
+        .orWhere('start_date', '<=', body.start_date)
+        .andWhere('end_date', '>=', body.end_date)
+        // Outside of range
+        .orWhere('start_date', '>=', body.start_date)
+        .andWhere('end_date', '<=', body.end_date)
+        // starts before start date, ends after start date, ends before end date
+        .orWhere('start_date', '>=', body.start_date)
+        .andWhere('start_date', '<=', body.end_date)
+        .andWhere('end_date', '>=', body.end_date)
+        // starts after start date, ends after end
+        .orWhere('start_date', '<=', body.start_date)
+        .andWhere('end_date', '>=', body.start_date)
+        .andWhere('end_date', '<=', body.end_date)
+
+      }
+  // If end_date is entered is blank or null
+  else{
+    assignments = await Assignment.query()
+      .where('employee_id', '=', body.employee.id)
+      .andWhere('start_date', '<=', body.start_date)
+      .andWhere('end_date', '>=', body.start_date)
+      .orWhere('end_date', '=', body.start_date)
+    if (request.method==='PATCH'){
+      assignments = assignments.filter(e => e.id != request.params.id)
+    }
+      }
+  if (request.method==='PATCH'){
+    assignments = assignments.filter(e => e.id === request.params.id)
+  }
+  if (assignments.length > 0) {
+    return reply.status(403).send(
+      'Employee already is working on a different assignment'
+    )
+  }
+}
+
 module.exports = {
   getRelationExpression,
   createUUID,
   parseJsonApiParams,
   makeQueryStringFilters,
-  makeQueryStringFields
-}
+  makeQueryStringFields,
+  checkAssignmentOverlap,
+  checkAssignmentStartDate
+  }
+

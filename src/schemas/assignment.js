@@ -122,6 +122,11 @@ const create = {
     additionalProperties: false
   },
   response: {
+    403: {
+      description: 'Conflict: Date error',
+      type: 'object',
+      properties: {}
+    },
     default: {
       description: 'Success: Object created and returned',
       type: 'object',
@@ -143,6 +148,11 @@ const patch = {
   response: {
     default: {
       description: 'Default response',
+      type: 'object',
+      properties: {}
+    },
+    403: {
+      description: 'Conflict: Date error',
       type: 'object',
       properties: {}
     },

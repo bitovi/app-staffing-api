@@ -181,9 +181,7 @@ const checkAssignmentOverlap = async (request, reply, next) => {
   const Assignment = require('./models/assignment')
   let assignments = ''
   const body = request.body
-  if (body.id) {
-    next()
-  }
+
   console.log(body)
   if (body.start_date) {
     if (body.end_date) {
@@ -217,6 +215,8 @@ const checkAssignmentOverlap = async (request, reply, next) => {
 
     if (request.method === 'PATCH') {
       assignments = assignments.filter(e => e.id !== request.params.id)
+    } else if (body.id) {
+      next()
     }
     if (assignments.length > 0) {
       return reply.status(403).send(

@@ -175,55 +175,51 @@ const checkAssignmentStartDate = async (request, reply, next) => {
     )
   }
 }
-// Queries DB to make sure that start_date and end_date do not overlap with employee's other assignments in POST and PATCH
+// Queries DB to make sure that start_date and end_date do not overlap with table's other records in POST and PATCH
 // If conflict throw 403
-const checkAssignmentOverlap = async (request, reply, next) => {
+const checkOverlap = async (request) => {
   const Assignment = require('./models/assignment')
-  let assignments = ''
+
   const body = request.body
 
-  console.log(body)
+  let records = ''
+  let model = ''
+  let matchingCriteria = ''
+  let bodyMatchingCriteria
+
+  if (request.url.includes('/assignments')) {
+    model = Assignment
+    matchingCriteria = 'employee_id'
+    bodyMatchingCriteria = body.employee.id
+  } else {
+    // return 0 to continue method function in handler
+    return 0
+  }
   if (body.start_date) {
     if (body.end_date) {
-      assignments = await Assignment.query()
-        .where('employee_id', '=', body.employee.id)
-        // Starts at end Date
-        .andWhere('end_date', '=', body.start_date)
-        // Ends at start date
-        .orWhere('start_date', '=', body.end_date)
-        // Inside of range
-        .orWhere('start_date', '<=', body.start_date)
-        .andWhere('end_date', '>=', body.end_date)
-        // Outside of range
-        .orWhere('start_date', '>=', body.start_date)
-        .andWhere('end_date', '<=', body.end_date)
-        // starts before start date, ends after start date, ends before end date
-        .orWhere('start_date', '>=', body.start_date)
-        .andWhere('start_date', '<=', body.end_date)
-        .andWhere('end_date', '>=', body.end_date)
-        // starts after start date, ends after end
-        .orWhere('start_date', '<=', body.start_date)
-        .andWhere('end_date', '>=', body.start_date)
-        .andWhere('end_date', '<=', body.end_date)
+      records = await model.query()
+        .where(matchingCriteria, '=', bodyMatchingCriteria)
+        .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")', [body.start_date, body.end_date])
+      // If OVERLAPS is not supported by DB
+      // .where('start_date', '>=', body.start_date).where('end_date', '<', body.end_date)
+      // .orWhere('end_date', '>', body.start_date).where('start_date', '<=', body.end_date)
     } else { // If end_date is entered is blank or null
-      assignments = await Assignment.query()
-        .where('employee_id', '=', body.employee.id)
+      records = await model.query()
+        .where(matchingCriteria, '=', bodyMatchingCriteria)
         .andWhere('start_date', '<=', body.start_date)
         .andWhere('end_date', '>=', body.start_date)
-        .orWhere('end_date', '=', body.start_date)
     }
-
+    // Remove current record if method is PATCH
     if (request.method === 'PATCH') {
-      assignments = assignments.filter(e => e.id !== request.params.id)
-    } else if (body.id) {
-      next()
+      records = records.filter(e => e.id !== request.params.id)
     }
-    if (assignments.length > 0) {
-      return reply.status(403).send(
-        'Employee already is working on a different assignment'
-      )
+    // Returns error message if variable records contains a record
+    if (records.length > 0) {
+      return 'Employee already is working on a different assignment'
     }
   }
+  // return 0 to continue method function in handler
+  return 0
 }
 
 module.exports = {
@@ -232,6 +228,6 @@ module.exports = {
   parseJsonApiParams,
   makeQueryStringFilters,
   makeQueryStringFields,
-  checkAssignmentOverlap,
+  checkOverlap,
   checkAssignmentStartDate
 }

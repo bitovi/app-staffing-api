@@ -191,7 +191,7 @@ describe('PATCH /assignments/:id', function () {
     const responseBody = deserialize(JSON.parse(response.body))
     expect(responseBody.employee.id).toEqual(newAssociatedEmployee.id)
   })
-  test('should return 403 if start_date is after end_date', async function () {
+  test('should return 403 if payload\'s start_date is after end_date', async function () {
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -230,7 +230,7 @@ describe('PATCH /assignments/:id', function () {
     expect(response.statusCode).toBe(403)
     expect(response.body).toBe('start_date is after end_date')
   })
-  test('should return 403 if start_date falls in between another assignment', async function () {
+  test('should return 403 if payload\'s start_date falls in between another assignment belonging to associated employee', async function () {
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -280,7 +280,7 @@ describe('PATCH /assignments/:id', function () {
     expect(response.statusCode).toBe(403)
     expect(response.body).toBe('Employee already is working on a different assignment')
   })
-  test('should return 403 if end_date falls in between another assignment', async function () {
+  test('should return 403 if payload\'s end_date falls in between another assignment belonging to associated employee', async function () {
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -301,8 +301,8 @@ describe('PATCH /assignments/:id', function () {
     })
 
     const newAssignment = {
-      start_date: faker.date.future(),
-      end_date: faker.date.future(),
+      start_date: '2023-02-15 03:44:48.640 -0400',
+      end_date: '2023-02-16 03:44:48.640 -0400',
       employee: { id: employee.id },
       role: { id: role.id }
     }
@@ -324,13 +324,13 @@ describe('PATCH /assignments/:id', function () {
     const payload = serialize({
       ...newAssignment,
       start_date: '2027-02-12 03:44:48.640 -0400',
-      end_date: '2027-02-15 03:44:48.640 -0400'
+      end_date: '2027-02-16 03:44:48.640 -0400'
     })
     const response = await patch(assignment.id, payload)
     expect(response.statusCode).toBe(403)
     expect(response.body).toBe('Employee already is working on a different assignment')
   })
-  test('should return 403 if assignment dates falls inside another assignment', async function () {
+  test('should return 403 if payload\'s dates occur inside other assignments belonging to associated employee', async function () {
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -380,7 +380,7 @@ describe('PATCH /assignments/:id', function () {
     expect(response.statusCode).toBe(403)
     expect(response.body).toBe('Employee already is working on a different assignment')
   })
-  test('should return 403 if another assignment is inside current assignment date range', async function () {
+  test('should return 403 if payload\'s dates start before and end after other assignments belonging to associated employee', async function () {
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()

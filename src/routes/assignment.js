@@ -1,7 +1,7 @@
 const Assignment = require('../models/assignment')
 const { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
 const schema = require('../schemas/assignment')
-const { checkAssignmentOverlap, checkAssignmentStartDate } = require('../utils')
+const { checkAssignmentStartDate } = require('../utils')
 
 const routes = {
   list: {
@@ -22,7 +22,7 @@ const routes = {
     url: '/assignments',
     method: 'POST',
     handler: getPostHandler(Assignment),
-    preHandler: [checkAssignmentStartDate, checkAssignmentOverlap],
+    preHandler: [checkAssignmentStartDate],
     schema: schema.create
   },
 
@@ -30,7 +30,7 @@ const routes = {
     url: '/assignments/:id',
     method: 'PATCH',
     handler: getUpdateHandler(Assignment),
-    preHandler: [checkAssignmentStartDate, checkAssignmentOverlap],
+    preHandler: [checkAssignmentStartDate],
     schema: schema.patch
   },
   delete: {

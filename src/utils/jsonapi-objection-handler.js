@@ -1,6 +1,6 @@
 const pluralize = require('pluralize')
 const { Serializer } = require('../json-api-serializer')
-const { getRelationExpression, parseJsonApiParams } = require('../utils')
+const { getRelationExpression, parseJsonApiParams, checkOverlap } = require('../utils')
 const modelHasColumn = require('../schemas/all-properties')
 
 const normalizeColumn = (tableName, column) => column.includes('.') ? column : `${tableName}.${column}`
@@ -182,16 +182,23 @@ const getDeleteHandler = (Model) => {
 const getUpdateHandler = (Model) => {
   return async (request, reply) => {
     try {
-      const updatedGraph = await Model.query().upsertGraphAndFetch(request.body, {
-        update: false,
-        relate: true,
-        unrelate: true
-      })
-      const serialized = Serializer.serialize(
-        pluralize(Model.name.toLowerCase()),
-        updatedGraph
-      )
-      reply.code(200).send(serialized)
+      // eslint-disable-next-line no-unused-vars
+      const lock = Model.query().forUpdate('*')
+      const dateValidationError = await checkOverlap(request)
+      if (!dateValidationError) {
+        const updatedGraph = await Model.query().upsertGraphAndFetch(request.body, {
+          update: false,
+          relate: true,
+          unrelate: true
+        })
+        const serialized = Serializer.serialize(
+          pluralize(Model.name.toLowerCase()),
+          updatedGraph
+        )
+        reply.code(200).send(serialized)
+      } else {
+        return reply.status(403).send(dateValidationError)
+      }
     } catch (e) {
       reply.status(404).send()
     }
@@ -205,12 +212,20 @@ const getPostHandler = (Model) => {
     if (body.id) {
       return reply.status(403).send()
     }
-
-    const newModel = await Model.query().insertGraph(body, { relate: true })
-    const modelName = pluralize(Model.name.toLowerCase())
-    const data = Serializer.serialize(modelName, newModel, { url: `/${modelName}/${newModel.id}` })
-    const location = `${url}/${newModel.id}`
-    return reply.status(201).header('Location', location).send(data)
+    // Locks the db table
+    // eslint-disable-next-line no-unused-vars
+    const lock = Model.query().forUpdate('*')
+    // Checks for overlap errors, returns error
+    const overlapValidationError = await checkOverlap(request)
+    if (!overlapValidationError) {
+      const newModel = await Model.query().insertGraph(body, { relate: true })
+      const modelName = pluralize(Model.name.toLowerCase())
+      const data = Serializer.serialize(modelName, newModel, { url: `/${modelName}/${newModel.id}` })
+      const location = `${url}/${newModel.id}`
+      return reply.status(201).header('Location', location).send(data)
+    } else {
+      return reply.status(403).send(overlapValidationError)
+    }
   }
 }
 

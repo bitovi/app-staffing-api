@@ -1,7 +1,7 @@
 const Assignment = require('../models/assignment')
 const { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
 const schema = require('../schemas/assignment')
-const { checkStartDate } = require('../utils')
+const { checkStartDate } = require('../utils/validation')
 
 const routes = {
   list: {

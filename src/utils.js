@@ -1,4 +1,3 @@
-const Assignment = require("./models/assignment");
 /**
  * Transforms the jsonapi request parameter ("include") into an Objection.js RelationExpression
  * @see https://jsonapi.org/format/#fetching-includes

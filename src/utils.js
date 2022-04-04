@@ -1,3 +1,4 @@
+const Assignment = require("./models/assignment");
 /**
  * Transforms the jsonapi request parameter ("include") into an Objection.js RelationExpression
  * @see https://jsonapi.org/format/#fetching-includes
@@ -165,69 +166,52 @@ function makeQueryStringFields (name) {
   return fields
 }
 // Throws 403 if start_date is after end_date in Assignment POST and PATCH
-const checkAssignmentStartDate = async (request, reply, next) => {
-  const start = new Date(request.body.start_date)
-  const end = new Date(request.body.end_date)
-
-  if (request.body.end_date !== null && start > end) {
-    return reply.status(403).send(
-      'start_date is after end_date'
-    )
+const checkStartDate = async (request, reply, done) => {
+  if (request.body.end_date !== null && request.body.start_date > request.body.end_date) {
+    return reply.status(403).send('Start date is after end date')
   }
 }
-// Queries DB to make sure that start_date and end_date do not overlap with table's other records in POST and PATCH
-// If conflict throw 403
-const checkOverlap = async (request) => {
+
+class ValidateError extends Error {
+  constructor (message, code) {
+    super(message)
+    this.statusCode = code
+  }
+}
+
+const validateDateOverlap = async (request, trx) => {
   const Assignment = require('./models/assignment')
-
   const body = request.body
+  let data
 
-  let records = ''
-  let model = ''
-  let matchingCriteria = ''
-  let bodyMatchingCriteria
-
-  if (request.url.includes('/assignments')) {
-    model = Assignment
-    matchingCriteria = 'employee_id'
-    bodyMatchingCriteria = body.employee.id
-  } else {
-    // return 0 to continue method function in handler
-    return 0
+  if (body.end_date) {
+    data = await Assignment.query(trx)
+      .where('employee_id', '=', body.employee.id)
+      .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")', [body.start_date, body.end_date])
+      .forUpdate()
+  } else { // If end_date is entered is blank or null
+    data = await Assignment.query(trx)
+      .where('employee_id', '=', body.employee.id)
+      .andWhereRaw('(?, INTERVAL \'10 hour\') OVERLAPS ("start_date", "end_date")', body.start_date)
+      .forUpdate()
   }
-  if (body.start_date) {
-    if (body.end_date) {
-      records = await model.query()
-        .where(matchingCriteria, '=', bodyMatchingCriteria)
-        .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")', [body.start_date, body.end_date])
-      // If OVERLAPS is not supported by DB
-      // .where('start_date', '>=', body.start_date).where('end_date', '<', body.end_date)
-      // .orWhere('end_date', '>', body.start_date).where('start_date', '<=', body.end_date)
-    } else { // If end_date is entered is blank or null
-      records = await model.query()
-        .where(matchingCriteria, '=', bodyMatchingCriteria)
-        .andWhere('start_date', '<=', body.start_date)
-        .andWhere('end_date', '>=', body.start_date)
-    }
-    // Remove current record if method is PATCH
-    if (request.method === 'PATCH') {
-      records = records.filter(e => e.id !== request.params.id)
-    }
-    // Returns error message if variable records contains a record
-    if (records.length > 0) {
-      return 'Employee already is working on a different assignment'
-    }
+  // Remove current record from 'data'
+  if (request.method === 'PATCH') {
+    data = data.filter(e => e.id !== request.params.id)
   }
-  // return 0 to continue method function in handler
-  return 0
+  // If data is not empty throw 403 ValidateError
+  if (data.length > 0) {
+    throw new ValidateError('Employee already assigned', 403)
+  }
 }
-
 module.exports = {
   getRelationExpression,
   createUUID,
   parseJsonApiParams,
   makeQueryStringFilters,
   makeQueryStringFields,
-  checkOverlap,
-  checkAssignmentStartDate
+  checkStartDate,
+  test,
+  validateDateOverlap,
+  ValidateError
 }

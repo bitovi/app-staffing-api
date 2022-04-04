@@ -182,15 +182,26 @@ const validateDateOverlap = async (request, trx) => {
   const Assignment = require('./models/assignment')
   const body = request.body
   let data
+  let model
+  let matchingCriteria
+  let bodyMatchingCriteria
 
+  if (request.url.includes('/assignments')) {
+    model = Assignment
+    matchingCriteria = 'employee_id'
+    bodyMatchingCriteria = body.employee.id
+  } else {
+    // return empty object to continue method function in handler
+    return Object
+  }
   if (body.end_date) {
-    data = await Assignment.query(trx)
-      .where('employee_id', '=', body.employee.id)
+    data = await model.query(trx)
+      .where(matchingCriteria, '=', bodyMatchingCriteria)
       .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")', [body.start_date, body.end_date])
       .forUpdate()
   } else { // If end_date is entered is blank or null
-    data = await Assignment.query(trx)
-      .where('employee_id', '=', body.employee.id)
+    data = await model.query(trx)
+      .where(matchingCriteria, '=', bodyMatchingCriteria)
       .andWhereRaw('(?, INTERVAL \'10 hour\') OVERLAPS ("start_date", "end_date")', body.start_date)
       .forUpdate()
   }

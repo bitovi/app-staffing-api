@@ -147,7 +147,6 @@ describe('POST /assignments', function () {
     })
     const response = await post(payload)
     expect(response.statusCode).toBe(403)
-    expect(response.body).toBe('Start date is after end date')
   })
   test('should return 403 if payload does not have end_date and start_date falls in between another assignment belonging to associated employee', async function () {
     const project = await Project.query().insert({
@@ -179,7 +178,6 @@ describe('POST /assignments', function () {
     })
     const response = await post(payload)
     expect(response.statusCode).toBe(403)
-    expect(response.body).toBe('Employee already assigned')
   })
   test('should return 403 if payload\'s start_date falls in between another assignment belonging to associated employee', async function () {
     const project = await Project.query().insert({
@@ -212,7 +210,6 @@ describe('POST /assignments', function () {
     })
     const response = await post(payload)
     expect(response.statusCode).toBe(403)
-    expect(response.body).toBe('Employee already assigned')
   })
   test('should return 403 if payload\'s end_date falls in between another assignment belonging to associated employee', async function () {
     const project = await Project.query().insert({
@@ -245,7 +242,6 @@ describe('POST /assignments', function () {
     })
     const response = await post(payload)
     expect(response.statusCode).toBe(403)
-    expect(response.body).toBe('Employee already assigned')
   })
   test('should return 403 if payload\'s dates occur inside other assignments belonging to associated employee', async function () {
     const project = await Project.query().insert({
@@ -278,7 +274,6 @@ describe('POST /assignments', function () {
     })
     const response = await post(payload)
     expect(response.statusCode).toBe(403)
-    expect(response.body).toBe('Employee already assigned')
   })
   test('should return 403 if payload\'s dates start before and end after other assignments belonging to associated employee', async function () {
     const project = await Project.query().insert({
@@ -311,9 +306,7 @@ describe('POST /assignments', function () {
     })
     const response = await post(payload)
     expect(response.statusCode).toBe(403)
-    expect(response.body).toBe('Employee already assigned')
   })
-
   function post (payload) {
     return global.app.inject({
       method: 'POST',

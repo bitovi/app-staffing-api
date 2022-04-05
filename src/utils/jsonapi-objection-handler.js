@@ -2,7 +2,6 @@ const pluralize = require('pluralize')
 const { Serializer } = require('../json-api-serializer')
 const { getRelationExpression, parseJsonApiParams } = require('../utils')
 const modelHasColumn = require('../schemas/all-properties')
-const { ValidateError, validateDateOverlap } = require('./validation')
 const normalizeColumn = (tableName, column) => column.includes('.') ? column : `${tableName}.${column}`
 
 let databaseName
@@ -179,11 +178,11 @@ const getDeleteHandler = (Model) => {
   }
 }
 
-const getUpdateHandler = (Model) => {
+const getUpdateHandler = (Model, validation = () => {}) => {
   return async (request, reply) => {
     try {
       await Model.transaction(async trx => {
-        await validateDateOverlap(request, trx)
+        await validation(request.body, trx)
         const updatedGraph = await Model.query().upsertGraphAndFetch(request.body, {
           update: false,
           relate: true,
@@ -196,7 +195,7 @@ const getUpdateHandler = (Model) => {
         reply.code(200).send(serialized)
       })
     } catch (e) {
-      if (e instanceof ValidateError) {
+      if (e.type === 'ModelValidation') {
         reply.status(e.statusCode).send(e.message)
       }
       reply.status(404).send(e.message)
@@ -204,7 +203,7 @@ const getUpdateHandler = (Model) => {
   }
 }
 
-const getPostHandler = (Model) => {
+const getPostHandler = (Model, validation = () => {}) => {
   return async (request, reply) => {
     const { body, url } = request
     let data
@@ -214,7 +213,7 @@ const getPostHandler = (Model) => {
     }
     try {
       await Model.transaction(async trx => {
-        await validateDateOverlap(request, trx)
+        await validation(body, trx)
         const newModel = await Model.query(trx).insertGraph(body, { relate: true })
         const modelName = pluralize(Model.name.toLowerCase())
         data = Serializer.serialize(modelName, newModel, { url: `/${modelName}/${newModel.id}` })
@@ -222,10 +221,7 @@ const getPostHandler = (Model) => {
         return reply.status(201).header('Location', location).send(data)
       })
     } catch (e) {
-      if (e instanceof ValidateError) {
-        return reply.status(e.statusCode).send(e.message)
-      }
-      return reply.status(500).send(e.message)
+      return reply.status(e.statusCode).send(e.message)
     }
   }
 }

@@ -1,53 +1,67 @@
-class ValidateError extends Error {
-  constructor (message, code) {
-    super(message)
-    this.statusCode = code
-  }
-}
+const { ValidationError } = require('objection')
+
 // Throws 403 if start_date is after end_date
-const checkStartDate = async (request, reply, done) => {
+const validateStartDate = async (request, reply, done) => {
   if (request.body.end_date !== null && request.body.start_date > request.body.end_date) {
     return reply.status(403).send('Start date is after end date')
   }
 }
-const validateDateOverlap = async (request, trx) => {
-  const Assignment = require('../models/assignment')
-  const body = request.body
-  let data
-  let model
-  let matchingCriteria
-  let bodyMatchingCriteria
 
-  if (request.url.includes('/assignments')) {
-    model = Assignment
-    matchingCriteria = 'employee_id'
-    bodyMatchingCriteria = body.employee.id
-  } else {
-    // return empty object to continue method function in handler
-    return Object
-  }
+const validateAssignmentPost = async (body, trx) => {
+  const Assignment = require('../models/assignment')
+  let data
   if (body.end_date) {
-    data = await model.query(trx)
-      .where(matchingCriteria, '=', bodyMatchingCriteria)
+    data = await Assignment.query(trx)
+      .where('employee_id', '=', body.employee.id)
       .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")', [body.start_date, body.end_date])
       .forUpdate()
   } else { // If end_date is entered is blank or null
-    data = await model.query(trx)
-      .where(matchingCriteria, '=', bodyMatchingCriteria)
-      .andWhereRaw('(?, INTERVAL \'10 hour\') OVERLAPS ("start_date", "end_date")', body.start_date)
+    data = await Assignment.query(trx)
+      .where('employee_id', '=', body.employee.id)
+      // add infinity instead of interval INF
+      .andWhereRaw('(?, \'infinity\') OVERLAPS ("start_date", "end_date")', body.start_date)
       .forUpdate()
   }
-  // Remove current record from 'data'
-  if (request.method === 'PATCH') {
-    data = data.filter(e => e.id !== request.params.id)
-  }
-  // If data is not empty throw 403 ValidateError
+  // If returned data is not empty throw 403
   if (data.length > 0) {
-    throw new ValidateError('Employee already assigned', 403)
+    throw new ValidationError({
+      message: 'Employee already assigned',
+      type: 'ModelValidation',
+      statusCode: 403,
+      data: ''
+    })
   }
 }
+
+const validateAssignmentPatch = async (body, trx) => {
+  const Assignment = require('../models/assignment')
+  let data
+  if (body.end_date) {
+    data = await Assignment.query(trx)
+      .where('employee_id', '=', body.employee.id)
+      .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")', [body.start_date, body.end_date])
+      .forUpdate()
+    console.log(data)
+  } else { // If end_date is entered is blank or null
+    data = await Assignment.query(trx)
+      .where('employee_id', '=', body.employee.id)
+      .andWhereRaw('(?, \'infinity\') OVERLAPS ("start_date", "end_date")', body.start_date)
+      .forUpdate()
+  }
+  data = data.filter(e => e.id !== body.id)
+  // If data is not empty throw 403 ValidateError
+  if (data.length > 0) {
+    throw new ValidationError({
+      message: 'Employee already assigned',
+      type: 'ModelValidation',
+      statusCode: 403,
+      data: ''
+    })
+  }
+}
+
 module.exports = {
-  validateDateOverlap,
-  checkStartDate,
-  ValidateError
+  validateStartDate,
+  validateAssignmentPost,
+  validateAssignmentPatch
 }

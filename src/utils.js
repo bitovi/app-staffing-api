@@ -170,5 +170,5 @@ module.exports = {
   createUUID,
   parseJsonApiParams,
   makeQueryStringFilters,
-  makeQueryStringFields,
+  makeQueryStringFields
 }

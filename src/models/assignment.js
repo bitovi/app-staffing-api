@@ -89,7 +89,6 @@ module.exports = class Assignment extends Model {
         // add infinity instead of interval INF
         .andWhereRaw('(?, \'infinity\') OVERLAPS ("start_date", "end_date")', this.start_date)
     }
-    // if (this.employee) { console.log(this.employee) }
     if (data.length > 0) {
       throw new ValidationError({
         message: 'Employee already assigned',

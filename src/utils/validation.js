@@ -1,5 +1,4 @@
 const { ValidationError } = require('objection')
-const Assignment = require("../models/assignment");
 
 // Throws 403 if start_date is after end_date
 const validateStartDate = (body) => {

@@ -124,8 +124,8 @@ describe('PATCH /assignments/:id', function () {
     })
 
     const newAssignment = {
-      start_date: faker.date.future(),
-      end_date: faker.date.future(),
+      start_date: faker.date.past(1000),
+      end_date: faker.date.past(100),
       employee: { id: employee.id },
       role: { id: role.id }
     }
@@ -134,7 +134,12 @@ describe('PATCH /assignments/:id', function () {
       { relate: true }
     )
 
-    const payload = serialize({ ...newAssignment, end_date: null })
+    const payload = serialize({
+      ...newAssignment,
+      end_date: null,
+      start_date: faker.date.future(100)
+    }
+    )
     const response = await patch(assignment.id, payload)
 
     expect(response.statusCode).toBe(200)
@@ -163,8 +168,8 @@ describe('PATCH /assignments/:id', function () {
     })
 
     const newAssignment = {
-      start_date: '2024-02-25 03:44:48.640 -0400',
-      end_date: '2025-02-25 03:44:48.640 -0400',
+      start_date: '2024-02-25 00:00:01.000 -0400',
+      end_date: '2025-02-25 00:00:01.000 -0400',
       employee: { id: employee.id },
       role: { id: role.id }
     }
@@ -181,8 +186,8 @@ describe('PATCH /assignments/:id', function () {
     const payload = serialize({
       ...newAssignment,
       employee: { id: newAssociatedEmployee.id },
-      start_date: '2024-03-25 03:44:48.640 -0400',
-      end_date: '2024-05-25 03:44:48.640 -0400'
+      start_date: '2024-03-25 00:00:01.000 -0400',
+      end_date: '2024-05-25 00:00:01.000 -0400'
     })
     const response = await patch(assignment.id, payload)
 
@@ -190,240 +195,6 @@ describe('PATCH /assignments/:id', function () {
     const responseBody = deserialize(JSON.parse(response.body))
     expect(responseBody.employee.id).toEqual(newAssociatedEmployee.id)
   })
-  test('should return 403 if payload\'s start_date is after end_date', async function () {
-    const project = await Project.query().insert({
-      name: faker.company.companyName(),
-      description: faker.lorem.sentences()
-    })
-
-    const employee = await Employee.query().insert({
-      name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
-    })
-
-    const role = await Role.query().insert({
-      start_date: faker.date.recent(),
-      start_confidence: faker.datatype.number(10),
-      end_date: faker.date.future(),
-      end_confidence: faker.datatype.number(10),
-      project_id: project.id
-    })
-
-    const newAssignment = {
-      start_date: faker.date.future(),
-      end_date: faker.date.future(),
-      employee: { id: employee.id },
-      role: { id: role.id }
-    }
-    const assignment = await Assignment.query().insertGraph(
-      newAssignment,
-      { relate: true }
-    )
-    const payload = serialize({
-      ...newAssignment,
-      start_date: '2028-02-15 03:44:48.640 -0400',
-      end_date: '2027-02-15 03:44:48.640 -0400'
-    })
-    const response = await patch(assignment.id, payload)
-    expect(response.statusCode).toBe(403)
-  })
-  test('should return 403 if payload\'s start_date falls in between another assignment belonging to associated employee', async function () {
-    const project = await Project.query().insert({
-      name: faker.company.companyName(),
-      description: faker.lorem.sentences()
-    })
-
-    const employee = await Employee.query().insert({
-      name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
-    })
-
-    const role = await Role.query().insert({
-      start_date: faker.date.recent(),
-      start_confidence: faker.datatype.number(10),
-      end_date: faker.date.future(),
-      end_confidence: faker.datatype.number(10),
-      project_id: project.id
-    })
-
-    const newAssignment = {
-      start_date: faker.date.future(),
-      end_date: faker.date.future(),
-      employee: { id: employee.id },
-      role: { id: role.id }
-    }
-    const oldAssignment = {
-      start_date: '2027-02-15 03:44:48.640 -0400',
-      end_date: '2027-02-20 03:44:48.640 -0400',
-      employee: { id: employee.id },
-      role: { id: role.id }
-    }
-    const assignment = await Assignment.query().insertGraph(
-      newAssignment,
-      { relate: true }
-    )
-    // eslint-disable-next-line no-unused-vars
-    const assignment2 = await Assignment.query().insertGraph(
-      oldAssignment,
-      { relate: true }
-    )
-    const payload = serialize({
-      ...newAssignment,
-      start_date: '2027-02-15 03:44:48.640 -0400',
-      end_date: '2027-03-15 03:44:48.640 -0400'
-    })
-    const response = await patch(assignment.id, payload)
-    expect(response.statusCode).toBe(403)
-  })
-  test('should return 403 if payload\'s end_date falls in between another assignment belonging to associated employee', async function () {
-    const project = await Project.query().insert({
-      name: faker.company.companyName(),
-      description: faker.lorem.sentences()
-    })
-
-    const employee = await Employee.query().insert({
-      name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
-    })
-
-    const role = await Role.query().insert({
-      start_date: faker.date.recent(),
-      start_confidence: faker.datatype.number(10),
-      end_date: faker.date.future(),
-      end_confidence: faker.datatype.number(10),
-      project_id: project.id
-    })
-
-    const newAssignment = {
-      start_date: '2023-02-15 03:44:48.640 -0400',
-      end_date: '2023-02-16 03:44:48.640 -0400',
-      employee: { id: employee.id },
-      role: { id: role.id }
-    }
-    const oldAssignment = {
-      start_date: '2027-02-15 03:44:48.640 -0400',
-      end_date: '2027-02-20 03:44:48.640 -0400',
-      employee: { id: employee.id },
-      role: { id: role.id }
-    }
-    const assignment = await Assignment.query().insertGraph(
-      newAssignment,
-      { relate: true }
-    )
-    // eslint-disable-next-line no-unused-vars
-    const assignment2 = await Assignment.query().insertGraph(
-      oldAssignment,
-      { relate: true }
-    )
-    const payload = serialize({
-      ...newAssignment,
-      start_date: '2027-02-12 03:44:48.640 -0400',
-      end_date: '2027-02-16 03:44:48.640 -0400'
-    })
-    const response = await patch(assignment.id, payload)
-    expect(response.statusCode).toBe(403)
-  })
-  test('should return 403 if payload\'s dates occur inside other assignments belonging to associated employee', async function () {
-    const project = await Project.query().insert({
-      name: faker.company.companyName(),
-      description: faker.lorem.sentences()
-    })
-
-    const employee = await Employee.query().insert({
-      name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
-    })
-
-    const role = await Role.query().insert({
-      start_date: faker.date.recent(),
-      start_confidence: faker.datatype.number(10),
-      end_date: faker.date.future(),
-      end_confidence: faker.datatype.number(10),
-      project_id: project.id
-    })
-
-    const newAssignment = {
-      start_date: faker.date.future(),
-      end_date: faker.date.future(),
-      employee: { id: employee.id },
-      role: { id: role.id }
-    }
-    const oldAssignment = {
-      start_date: '2027-02-15 03:44:48.640 -0400',
-      end_date: '2027-02-20 03:44:48.640 -0400',
-      employee: { id: employee.id },
-      role: { id: role.id }
-    }
-    const assignment = await Assignment.query().insertGraph(
-      newAssignment,
-      { relate: true }
-    )
-    // eslint-disable-next-line no-unused-vars
-    const assignment2 = await Assignment.query().insertGraph(
-      oldAssignment,
-      { relate: true }
-    )
-    const payload = serialize({
-      ...newAssignment,
-      start_date: '2027-02-16 03:44:48.640 -0400',
-      end_date: '2027-02-17 03:44:48.640 -0400'
-    })
-    const response = await patch(assignment.id, payload)
-    expect(response.statusCode).toBe(403)
-  })
-  test('should return 403 if payload\'s dates start before and end after other assignments belonging to associated employee', async function () {
-    const project = await Project.query().insert({
-      name: faker.company.companyName(),
-      description: faker.lorem.sentences()
-    })
-
-    const employee = await Employee.query().insert({
-      name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
-    })
-
-    const role = await Role.query().insert({
-      start_date: faker.date.recent(),
-      start_confidence: faker.datatype.number(10),
-      end_date: faker.date.future(),
-      end_confidence: faker.datatype.number(10),
-      project_id: project.id
-    })
-    const newAssignment = {
-      start_date: faker.date.future(),
-      end_date: faker.date.future(),
-      employee: { id: employee.id },
-      role: { id: role.id }
-    }
-    const oldAssignment = {
-      start_date: '2027-02-15 03:44:48.640 -0400',
-      end_date: '2027-02-20 03:44:48.640 -0400',
-      employee: { id: employee.id },
-      role: { id: role.id }
-    }
-    const assignment = await Assignment.query().insertGraph(
-      newAssignment,
-      { relate: true }
-    )
-    // eslint-disable-next-line no-unused-vars
-    const assignment2 = await Assignment.query().insertGraph(
-      oldAssignment,
-      { relate: true }
-    )
-    const payload = serialize({
-      ...newAssignment,
-      start_date: '2027-02-13 03:44:48.640 -0400',
-      end_date: '2027-02-24 03:44:48.640 -0400'
-    })
-    const response = await patch(assignment.id, payload)
-    expect(response.statusCode).toBe(403)
-  })
-
   function patch (id, payload) {
     return global.app.inject({
       method: 'PATCH',

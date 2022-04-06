@@ -499,8 +499,7 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
   // @TODO: fix after fixing swagger schema
   test.each(props.filter(el => properties[el]?.format !== 'uuid'))(`FILTER ${objname}?filter[%s]=`, async (prop) => {
     const isString = properties[prop].type === 'string'
-    const unixTime = Date.parse(createdObjects[0][prop])
-
+    const unixTime = Date.parse(createdObjects[0][prop]) || new Date()
     const filterby = (isString && unixTime) ? (new Date(unixTime)).toISOString().slice(0, 10) || createdObjects[0][prop] : createdObjects[0][prop]
     const url = `${objname}?filter[${prop}]=${filterby}`
     const response = await global.app.inject({
@@ -508,6 +507,7 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
       method: 'GET',
       headers: { 'Content-Type': 'application/vnd.api+json' }
     })
+    // console.log(prop, ' ', unixTime)
     const json = JSON.parse(response.body)
     const results = json.data
     expect(response.statusCode).toBe(200)
@@ -663,6 +663,7 @@ async function deleteCreatedIDs (createdIDs) {
 // @TODO: add strings based on format, add fakerFormat key to schema properties
 function createFakeData (key, value) {
   if (value.type === 'string') {
+    if (value.faker) return (value.faker)
     if (value?.format === 'datetime' || key.indexOf('date') > -1) {
       return faker.date.past()
     } else {

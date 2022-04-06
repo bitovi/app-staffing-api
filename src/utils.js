@@ -164,12 +164,6 @@ function makeQueryStringFields (name) {
 
   return fields
 }
-// Throws 403 if start_date is after end_date in Assignment POST and PATCH
-const checkStartDate = async (request, reply, done) => {
-  if (request.body.end_date !== null && request.body.start_date > request.body.end_date) {
-    return reply.status(403).send('Start date is after end date')
-  }
-}
 
 module.exports = {
   getRelationExpression,
@@ -177,5 +171,4 @@ module.exports = {
   parseJsonApiParams,
   makeQueryStringFilters,
   makeQueryStringFields,
-  checkStartDate
 }

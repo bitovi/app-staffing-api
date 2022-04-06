@@ -140,10 +140,15 @@ module.exports = {
           format: 'uuid'
         },
         start_date: {
-          type: 'string'
+          type: 'string',
+          format: 'date'
         },
         end_date: {
-          type: 'string'
+          type: 'string',
+          format: 'date',
+          faker () {
+            return new Date(9999, 12, 30)
+          }
         },
         employee: {
           type: 'object',

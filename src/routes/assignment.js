@@ -1,7 +1,6 @@
 const Assignment = require('../models/assignment')
 const { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
 const schema = require('../schemas/assignment')
-const { validateStartDate, validateAssignmentPost, validateAssignmentPatch } = require('../utils/validation')
 
 const routes = {
   list: {
@@ -21,16 +20,14 @@ const routes = {
   post: {
     url: '/assignments',
     method: 'POST',
-    handler: getPostHandler(Assignment, validateAssignmentPost),
-    preHandler: [validateStartDate],
+    handler: getPostHandler(Assignment),
     schema: schema.create
   },
 
   patch: {
     url: '/assignments/:id',
     method: 'PATCH',
-    handler: getUpdateHandler(Assignment, validateAssignmentPatch),
-    preHandler: [validateStartDate],
+    handler: getUpdateHandler(Assignment),
     schema: schema.patch
   },
   delete: {

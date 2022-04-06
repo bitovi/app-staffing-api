@@ -178,11 +178,10 @@ const getDeleteHandler = (Model) => {
   }
 }
 
-const getUpdateHandler = (Model, validation = () => {}) => {
+const getUpdateHandler = (Model) => {
   return async (request, reply) => {
     try {
       await Model.transaction(async trx => {
-        await validation(request.body, trx)
         const updatedGraph = await Model.query().upsertGraphAndFetch(request.body, {
           update: false,
           relate: true,
@@ -202,27 +201,18 @@ const getUpdateHandler = (Model, validation = () => {}) => {
     }
   }
 }
-
-const getPostHandler = (Model, validation = () => {}) => {
+const getPostHandler = (Model) => {
   return async (request, reply) => {
     const { body, url } = request
-    let data
-    let location
     if (body.id) {
       return reply.status(403).send()
     }
-    try {
-      await Model.transaction(async trx => {
-        await validation(body, trx)
-        const newModel = await Model.query(trx).insertGraph(body, { relate: true })
-        const modelName = pluralize(Model.name.toLowerCase())
-        data = Serializer.serialize(modelName, newModel, { url: `/${modelName}/${newModel.id}` })
-        location = `${url}/${newModel.id}`
-        return reply.status(201).header('Location', location).send(data)
-      })
-    } catch (e) {
-      return reply.status(e.statusCode).send(e.message)
-    }
+
+    const newModel = await Model.query().insertGraph(body, { relate: true })
+    const modelName = pluralize(Model.name.toLowerCase())
+    const data = Serializer.serialize(modelName, newModel, { url: `/${modelName}/${newModel.id}` })
+    const location = `${url}/${newModel.id}`
+    return reply.status(201).header('Location', location).send(data)
   }
 }
 

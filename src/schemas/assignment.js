@@ -122,7 +122,7 @@ const create = {
     additionalProperties: false
   },
   response: {
-    403: {
+    409: {
       description: 'Conflict: Date error',
       type: 'object',
       properties: {}
@@ -151,7 +151,7 @@ const patch = {
       type: 'object',
       properties: {}
     },
-    403: {
+    409: {
       description: 'Conflict: Date error',
       type: 'object',
       properties: {}

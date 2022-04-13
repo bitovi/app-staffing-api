@@ -169,7 +169,6 @@ describe.each(testCases)('PATCH validate overlap /assignments', (title, start, e
   })
 
   test(`${title}`, async () => {
-
     const payload = serialize({
       ...newAssignment,
       start_date: start,

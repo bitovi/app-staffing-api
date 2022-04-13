@@ -14,20 +14,20 @@ const properties = {
     description: 'The date the role starts'
   },
   start_confidence: {
-    type: 'number',
-    description: 'A floating point number representing percentage likelihood of the start date',
+    type: 'integer',
+    description: 'A number representing percentage likelihood of the start date',
     minimum: 0,
-    maximum: 1
+    maximum: 100
   },
   end_date: {
     type: ['string', 'null'],
     description: 'The date the role ends'
   },
   end_confidence: {
-    type: ['number', 'null'],
-    description: 'A floating point number representing percentage likelihood of the end date',
+    type: ['integer', 'null'],
+    description: 'A number representing percentage likelihood of the end date',
     minimum: 0,
-    maximum: 1
+    maximum: 100
   },
   project_id: {
     type: 'string',
@@ -77,9 +77,9 @@ const exampleGetResponse = {
     id: 'c0d1f6ad-1c39-4ebd-bdb8-38723886def2',
     attributes: {
       start_date: '2021-11-24T04:22:04.193Z',
-      start_confidence: 1,
+      start_confidence: 10,
       end_date: '2022-05-31T20:56:23.731Z',
-      end_confidence: 0.9,
+      end_confidence: 90,
       project_id: '0b3aabce-b783-4169-bdeb-b342fc4fc70a'
     }
   }
@@ -96,7 +96,7 @@ const exampleCreateResponse = {
     id: '0af180b4-f331-4d49-a99e-44b7e90ae5a6',
     attributes: {
       start_date: '2022-04-27T01:19:33.939Z',
-      start_confidence: 0.5,
+      start_confidence: 50,
       project_id: '24e10d11-edd9-4879-9533-c1578a30e8fe'
     },
     relationships: {

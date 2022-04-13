@@ -96,17 +96,17 @@ module.exports = {
           type: 'string'
         },
         start_confidence: {
-          type: 'number',
+          type: 'integer',
           minimum: 0,
-          maximum: 1
+          maximum: 100
         },
         end_date: {
           type: 'string'
         },
         end_confidence: {
-          type: 'number',
+          type: 'integer',
           minimum: 0,
-          maximum: 1
+          maximum: 100
         },
         project: {
           type: 'object',

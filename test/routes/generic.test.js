@@ -670,12 +670,6 @@ function createFakeData (key, value) {
     }
   } else if (value.type === 'integer') {
     return randomIntFromInterval(value?.minimum, value?.maximum)
-  } else if (value.type === 'number') {
-    return faker.datatype.float({
-      min: value.minimum,
-      max: value.maximum,
-      precision: 0.1
-    })
   }
 }
 

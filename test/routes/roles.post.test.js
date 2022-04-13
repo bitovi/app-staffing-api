@@ -10,7 +10,6 @@ const { Serializer } = require('../../src/json-api-serializer')
 describe('POST /roles', function () {
   let trx
   const knex = Model.knex()
-  const precision = 0.1
 
   beforeEach(async () => {
     trx = await transaction.start(knex)
@@ -27,7 +26,7 @@ describe('POST /roles', function () {
       id: faker.datatype.uuid(),
       project: { id: faker.datatype.uuid() },
       start_date: faker.date.future(),
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision })
+      start_confidence: faker.datatype.number({ min: 10, max: 100 })
     })
     const response = await post(payload)
     expect(response.statusCode).toBe(403)
@@ -35,7 +34,7 @@ describe('POST /roles', function () {
 
   test('should return 422 if payload is missing start_date', async function () {
     const payload = serialize({
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      start_confidence: faker.datatype.number({ min: 10, max: 100 }),
       project: { id: faker.datatype.uuid() }
     })
     const response = await post(payload)
@@ -63,7 +62,7 @@ describe('POST /roles', function () {
     const payload = serialize({
       start_date: faker.date.future(),
       project: { id: faker.datatype.uuid() },
-      start_confidence: -1
+      start_confidence: -10
     })
     const response = await post(payload)
     expect(response.statusCode).toBe(422)
@@ -76,19 +75,19 @@ describe('POST /roles', function () {
     const payload = serialize({
       start_date: faker.date.future(),
       project: { id: faker.datatype.uuid() },
-      start_confidence: 1.1
+      start_confidence: 101
     })
     const response = await post(payload)
     expect(response.statusCode).toBe(422)
 
     const body = JSON.parse(response.body)
-    expect(body.title).toEqual('body.start_confidence should be <= 1')
+    expect(body.title).toEqual('body.start_confidence should be <= 100')
   })
 
   test('should return 422 if payload has unknown fields', async function () {
     const payload = serialize({
       start_date: faker.date.future(),
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      start_confidence: faker.datatype.number({ min: 10, max: 100 }),
       project: { id: faker.datatype.uuid() },
       anUnknownField: 'foo bar baz'
     })
@@ -99,7 +98,7 @@ describe('POST /roles', function () {
   test('should fail if associated project does not exist', async function () {
     const payload = serialize({
       start_date: faker.date.future(),
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      start_confidence: faker.datatype.number({ min: 10, max: 100 }),
       project: { id: faker.datatype.uuid() }
     })
     const response = await post(payload)
@@ -114,7 +113,7 @@ describe('POST /roles', function () {
 
     const newRole = {
       start_date: faker.date.future(),
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      start_confidence: faker.datatype.number({ min: 10, max: 100 }),
       project: { id: project.id },
       skills: [{ id: faker.datatype.uuid() }]
     }
@@ -131,7 +130,7 @@ describe('POST /roles', function () {
 
     const newRole = {
       start_date: faker.date.future(),
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      start_confidence: faker.datatype.number({ min: 10, max: 100 }),
       project: { id: project.id }
     }
     const payload = serialize(newRole)
@@ -159,7 +158,7 @@ describe('POST /roles', function () {
 
     const newRole = {
       start_date: faker.date.future(),
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      start_confidence: faker.datatype.number({ min: 10, max: 100 }),
       project: { id: project.id },
       skills: [skill]
     }

@@ -10,7 +10,6 @@ const { Serializer } = require('../../src/json-api-serializer')
 describe('GET /roles', function () {
   let trx
   const knex = Model.knex()
-  const precision = 0.1
 
   beforeEach(async () => {
     trx = await transaction.start(knex)
@@ -39,9 +38,9 @@ describe('GET /roles', function () {
     await Promise.all(range(projectARolesTotal).map(() => {
       return Role.query().insert({
         start_date: faker.date.recent(),
-        start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+        start_confidence: faker.datatype.number({ min: 10, max: 100 }),
         end_date: faker.date.future(),
-        end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+        end_confidence: faker.datatype.number({ min: 10, max: 100 }),
         project_id: projectA.id
       })
     }))
@@ -49,9 +48,9 @@ describe('GET /roles', function () {
     await Promise.all(range(projectBRolesTotal).map(() => {
       return Role.query().insert({
         start_date: faker.date.recent(),
-        start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+        start_confidence: faker.datatype.number({ min: 10, max: 100 }),
         end_date: faker.date.future(),
-        end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+        end_confidence: faker.datatype.number({ min: 10, max: 100 }),
         project_id: projectB.id
       })
     }))

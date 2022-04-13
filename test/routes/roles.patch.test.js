@@ -10,7 +10,6 @@ const { Serializer } = require('../../src/json-api-serializer')
 describe('PATCH /roles/:id', function () {
   let trx
   const knex = Model.knex()
-  const precision = 0.1
 
   beforeEach(async () => {
     trx = await transaction.start(knex)
@@ -27,7 +26,7 @@ describe('PATCH /roles/:id', function () {
     const payload = serialize({
       id: notFoundId,
       start_date: faker.date.future(),
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      start_confidence: faker.datatype.number({ min: 10, max: 100 }),
       project: { id: faker.datatype.uuid() }
     })
     const response = await patch(notFoundId, payload)
@@ -42,9 +41,9 @@ describe('PATCH /roles/:id', function () {
 
     const role = await Role.query().insert({
       start_date: faker.date.recent(),
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      start_confidence: faker.datatype.number({ min: 10, max: 100 }),
       end_date: faker.date.future(),
-      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      end_confidence: faker.datatype.number({ min: 10, max: 100 }),
       project_id: project.id
     })
 
@@ -63,9 +62,9 @@ describe('PATCH /roles/:id', function () {
 
     const role = await Role.query().insert({
       start_date: faker.date.recent(),
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      start_confidence: faker.datatype.number({ min: 10, max: 100 }),
       end_date: faker.date.future(),
-      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      end_confidence: faker.datatype.number({ min: 10, max: 100 }),
       project_id: project.id
     })
 
@@ -86,9 +85,9 @@ describe('PATCH /roles/:id', function () {
 
     const role = await Role.query().insert({
       start_date: faker.date.recent(),
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      start_confidence: faker.datatype.number({ min: 10, max: 100 }),
       end_date: faker.date.future(),
-      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      end_confidence: faker.datatype.number({ min: 10, max: 100 }),
       project_id: project.id
     })
 
@@ -100,7 +99,7 @@ describe('PATCH /roles/:id', function () {
     expect(response.statusCode).toEqual(422)
   })
 
-  test('should return 422 if start_confidence is greater than 1', async function () {
+  test('should return 422 if start_confidence is greater than 100', async function () {
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -108,15 +107,15 @@ describe('PATCH /roles/:id', function () {
 
     const role = await Role.query().insert({
       start_date: faker.date.recent(),
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      start_confidence: faker.datatype.number({ min: 10, max: 100 }),
       end_date: faker.date.future(),
-      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      end_confidence: faker.datatype.number({ min: 10, max: 100 }),
       project_id: project.id
     })
 
     const payload = serialize({
       ...omit(role, ['project_id']),
-      start_confidence: 1.01
+      start_confidence: 101
     })
     const response = await patch(role.id, payload)
     expect(response.statusCode).toEqual(422)
@@ -135,9 +134,9 @@ describe('PATCH /roles/:id', function () {
 
     const roleData = {
       start_date: faker.date.recent(),
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      start_confidence: faker.datatype.number({ min: 10, max: 100 }),
       end_date: faker.date.future(),
-      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      end_confidence: faker.datatype.number({ min: 10, max: 100 }),
       project_id: oldProject.id
     }
     const role = await Role.query().insert(roleData)
@@ -169,9 +168,9 @@ describe('PATCH /roles/:id', function () {
 
     const roleData = {
       start_date: faker.date.recent(),
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      start_confidence: faker.datatype.number({ min: 10, max: 100 }),
       end_date: faker.date.future(),
-      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      end_confidence: faker.datatype.number({ min: 10, max: 100 }),
       project: { id: project.id },
       skills: [{ id: oldSkill.id }]
     }
@@ -198,9 +197,9 @@ describe('PATCH /roles/:id', function () {
 
     const roleData = {
       start_date: faker.date.recent(),
-      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      start_confidence: faker.datatype.number({ min: 10, max: 100 }),
       end_date: faker.date.future(),
-      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      end_confidence: faker.datatype.number({ min: 10, max: 100 }),
       project_id: project.id
     }
     const role = await Role.query().insert(roleData)

@@ -22,6 +22,7 @@ services:
     volumes:
       - ./src:/usr/src/app/src
       - ./db:/usr/src/app/db
+      - ./test:/usr/src/app/test
       - /usr/src/app/node_modules
     build:
       context: .

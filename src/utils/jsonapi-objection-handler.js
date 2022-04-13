@@ -181,23 +181,21 @@ const getDeleteHandler = (Model) => {
 const getUpdateHandler = (Model) => {
   return async (request, reply) => {
     try {
-      await Model.transaction(async trx => {
-        const updatedGraph = await Model.query().upsertGraphAndFetch(request.body, {
-          update: false,
-          relate: true,
-          unrelate: true
-        })
-        const serialized = Serializer.serialize(
-          pluralize(Model.name.toLowerCase()),
-          updatedGraph
-        )
-        reply.code(200).send(serialized)
+      const updatedGraph = await Model.query().upsertGraphAndFetch(request.body, {
+        update: false,
+        relate: true,
+        unrelate: true
       })
+      const serialized = Serializer.serialize(
+        pluralize(Model.name.toLowerCase()),
+        updatedGraph
+      )
+      reply.code(200).send(serialized)
     } catch (e) {
       if (e.type === 'ModelValidation') {
         reply.status(e.statusCode).send(e.message)
       }
-      reply.status(404).send(e.message)
+      reply.status(404).send()
     }
   }
 }
@@ -209,6 +207,7 @@ const getPostHandler = (Model) => {
     }
 
     const newModel = await Model.query().insertGraph(body, { relate: true })
+      .catch(e => reply.status(e.statusCode).send(e.message))
     const modelName = pluralize(Model.name.toLowerCase())
     const data = Serializer.serialize(modelName, newModel, { url: `/${modelName}/${newModel.id}` })
     const location = `${url}/${newModel.id}`

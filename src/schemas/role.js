@@ -2,36 +2,46 @@ const omit = require('lodash/omit')
 const { makeQueryStringFilters, makeQueryStringFields } = require('../utils')
 const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
+const role = require('./examples/role')
+const error = require('./error')
 
 const properties = {
   id: {
     type: 'string',
     format: 'uuid',
-    description: "The role's unique identifier"
+    description: "The role's unique identifier",
+    example: '5d8e8a7e-e8e3-4d8e-b3d7-8e4b50e36b1c'
   },
   start_date: {
     type: 'string',
-    description: 'The date the role starts'
+    description: 'The date the role starts',
+    example: '2022-01-01T05:00:00.000Z'
   },
   start_confidence: {
     type: 'number',
-    description: 'A floating point number representing percentage likelihood of the start date',
+    description:
+      'A floating point number representing percentage likelihood of the start date',
     minimum: 0,
-    maximum: 1
+    maximum: 1,
+    example: 0.5
   },
   end_date: {
     type: ['string', 'null'],
-    description: 'The date the role ends'
+    description: 'The date the role ends',
+    example: '2022-04-01T05:00:00.000Z'
   },
   end_confidence: {
     type: ['number', 'null'],
-    description: 'A floating point number representing percentage likelihood of the end date',
+    description:
+      'A floating point number representing percentage likelihood of the end date',
     minimum: 0,
-    maximum: 1
+    maximum: 1,
+    example: 0.5
   },
   project_id: {
     type: 'string',
-    format: 'uuid'
+    format: 'uuid',
+    example: '5d8e8a7e-e8e3-4d8e-b3d7-8e4b50e36b1c'
   },
   project: {
     type: 'object',
@@ -39,7 +49,8 @@ const properties = {
     properties: {
       id: {
         type: 'string',
-        format: 'uuid'
+        format: 'uuid',
+        example: '5d8e8a7e-e8e3-4d8e-b3d7-8e4b50e36b1c'
       }
     },
     description: 'the assigned project'
@@ -48,65 +59,21 @@ const properties = {
     type: 'array',
     items: {
       type: 'object',
-      required: [
-        'id'
-      ],
+      required: ['id'],
       properties: {
         id: {
           type: 'string',
-          format: 'uuid'
+          format: 'uuid',
+          example: '5d8e8a7e-e8e3-4d8e-b3d7-8e4b50e36b1c'
         },
         name: {
-          type: 'string'
+          type: 'string',
+          example: 'JavaScript'
         }
       },
       additionalProperties: false
     },
     uniqueItems: true
-  }
-}
-const exampleGetResponse = {
-  jsonapi: {
-    version: '1.0'
-  },
-  links: {
-    self: '/roles/c0d1f6ad-1c39-4ebd-bdb8-38723886def2'
-  },
-  data: {
-    type: 'roles',
-    id: 'c0d1f6ad-1c39-4ebd-bdb8-38723886def2',
-    attributes: {
-      start_date: '2021-11-24T04:22:04.193Z',
-      start_confidence: 1,
-      end_date: '2022-05-31T20:56:23.731Z',
-      end_confidence: 0.9,
-      project_id: '0b3aabce-b783-4169-bdeb-b342fc4fc70a'
-    }
-  }
-}
-const exampleCreateResponse = {
-  jsonapi: {
-    version: '1.0'
-  },
-  links: {
-    self: '/roles/0af180b4-f331-4d49-a99e-44b7e90ae5a6'
-  },
-  data: {
-    type: 'roles',
-    id: '0af180b4-f331-4d49-a99e-44b7e90ae5a6',
-    attributes: {
-      start_date: '2022-04-27T01:19:33.939Z',
-      start_confidence: 0.5,
-      project_id: '24e10d11-edd9-4879-9533-c1578a30e8fe'
-    },
-    relationships: {
-      project: {
-        data: {
-          type: 'projects',
-          id: '24e10d11-edd9-4879-9533-c1578a30e8fe'
-        }
-      }
-    }
   }
 }
 const name = 'role'
@@ -123,6 +90,13 @@ const list = {
       ...makeQueryStringFilters(omit(properties, ['project', 'skills'])),
       ...makeQueryStringFields(name)
     }
+  },
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      example: role.response.list[200]
+    }
   }
 }
 const get = {
@@ -135,12 +109,11 @@ const get = {
       description: 'Default response',
       type: 'object',
       properties: {},
-      example: exampleGetResponse
+      example: role.response.get[200]
     },
     404: {
-      description: 'Not Found',
-      type: 'object',
-      properties: {}
+      description: 'Error: Not Found',
+      type: 'object'
     }
   }
 }
@@ -152,14 +125,24 @@ const create = {
     type: 'object',
     required: ['start_date', 'start_confidence', 'project'],
     properties: omit(properties, ['project_id']),
-    additionalProperties: false
+    additionalProperties: false,
+    example: role.request.create
   },
   response: {
     default: {
       description: 'Default response',
       type: 'object',
-      properties: {},
-      example: exampleCreateResponse
+      example: role.response.create[201]
+    },
+    403: {
+      description: 'Error: Forbidden',
+      type: 'object'
+    },
+    422: {
+      description: 'Error: Unprocessable Entity',
+      type: 'object',
+      properties: error,
+      example: role.response.create[422]
     }
   }
 }
@@ -170,7 +153,30 @@ const patch = {
   body: {
     type: 'object',
     properties: omit(properties, ['project_id']),
-    additionalProperties: false
+    additionalProperties: false,
+    example: role.request.patch
+  },
+  params: makeIdParams(name),
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      example: role.response.patch[200]
+    },
+    403: {
+      description: 'Error: Forbidden',
+      type: 'object'
+    },
+    404: {
+      description: 'Not Found',
+      type: 'object'
+    },
+    422: {
+      description: 'Error: Unprocessable Entity',
+      type: 'object',
+      properties: error,
+      example: role.response.patch[422]
+    }
   }
 }
 const remove = {
@@ -181,8 +187,11 @@ const remove = {
   response: {
     default: {
       description: 'Default response',
-      type: 'object',
-      properties: {}
+      type: 'object'
+    },
+    404: {
+      description: 'Error: Not Found',
+      type: 'object'
     }
   }
 }

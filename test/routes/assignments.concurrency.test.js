@@ -27,7 +27,7 @@ describe('POST /assignments', function () {
       end_date: faker.date.future()
     })
     role = await Role.query().insert({
-      start_date: faker.date.recent(),
+      start_date: faker.date.past(),
       start_confidence: faker.datatype.number(10),
       end_date: faker.date.future(),
       end_confidence: faker.datatype.number(10),
@@ -98,7 +98,7 @@ describe('PATCH /assignments', function () {
       end_date: faker.date.future()
     })
     role = await Role.query().insert({
-      start_date: faker.date.recent(),
+      start_date: faker.date.past(),
       start_confidence: faker.datatype.number(10),
       end_date: faker.date.future(),
       end_confidence: faker.datatype.number(10),
@@ -116,7 +116,7 @@ describe('PATCH /assignments', function () {
     )
     newAssociatedEmployee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.future(),
+      start_date: faker.date.past(),
       end_date: faker.date.future()
     })
   })

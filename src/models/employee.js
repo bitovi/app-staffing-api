@@ -1,4 +1,5 @@
 const { Model } = require('objection')
+const { validateStartDate } = require('../utils/validation')
 
 module.exports = class Employee extends Model {
   static get tableName () {
@@ -35,5 +36,13 @@ module.exports = class Employee extends Model {
         }
       }
     }
+  }
+
+  async $beforeInsert (queryContext) {
+    validateStartDate(this)
+  }
+
+  async $beforeUpdate (opt, queryContext) {
+    validateStartDate(this)
   }
 }

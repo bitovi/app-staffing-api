@@ -2,6 +2,7 @@
 const { Model } = require('objection')
 const Project = require('../../src/models/project')
 const faker = require('faker')
+const _ = require('lodash')
 
 const NUMBER_OF_RECORDS_TO_INSERT = 15
 
@@ -30,10 +31,13 @@ function generateAndCacheFake (keyPrefix, key, generator) {
 }
 
 function fakeSkill (key) {
+  const skillList = [
+    'Product Design', 'Project Management', 'React', 'Angular', 'Backend', 'DevOps'
+  ]
   return generateAndCacheFake(
     'skill',
     key,
-    () => `${faker.random.word().toLowerCase()}.js`
+    () => _.sample(skillList)
   )
 }
 

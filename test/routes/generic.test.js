@@ -503,7 +503,6 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
       method: 'GET',
       headers: { 'Content-Type': 'application/vnd.api+json' }
     })
-    // console.log(prop, ' ', unixTime)
     const json = JSON.parse(response.body)
     const results = json.data
     expect(response.statusCode).toBe(200)

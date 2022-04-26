@@ -6,7 +6,6 @@ const Project = require('../../src/models/project')
 const Employee = require('../../src/models/employee')
 const Assignment = require('../../src/models/assignment')
 const { Serializer } = require('../../src/json-api-serializer')
-const { fa } = require('faker/lib/locales')
 
 describe('PATCH /assignments/:id', function () {
   let trx

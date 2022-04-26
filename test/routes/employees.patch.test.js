@@ -168,6 +168,22 @@ describe('PATCH /employees/:id', function () {
     expect(dbEmployee.start_date).toBeNull()
     expect(dbEmployee.end_date).toBeNull()
   })
+  test('should return 422 for payload with startDate after endDate', async function () {
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+
+    const updatedEmployee = cloneDeep(employee)
+    updatedEmployee.start_date = faker.date.future()
+    updatedEmployee.end_date = faker.date.past()
+
+    const payload = Serializer.serialize('employees', updatedEmployee)
+    const response = await patch(employee.id, payload)
+
+    expect(response.statusCode).toBe(422)
+  })
 
   function patch (id, payload) {
     return global.app.inject({

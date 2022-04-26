@@ -272,10 +272,6 @@ describe.each(schemasForGenericTests)('PATCH /%s', (myroute) => {
     expect(response.statusCode).toEqual(422)
     const { title } = JSON.parse(response.body)
     expect(title).toBe('body should NOT have additional properties')
-
-    // make sure the DB record was not mutated
-    const result = await myroute.model.query().findById(pkeyValue)
-    expect(result).toStrictEqual(dbRecord)
   })
 })
 
@@ -499,8 +495,7 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
   // @TODO: fix after fixing swagger schema
   test.each(props.filter(el => properties[el]?.format !== 'uuid'))(`FILTER ${objname}?filter[%s]=`, async (prop) => {
     const isString = properties[prop].type === 'string'
-    const unixTime = Date.parse(createdObjects[0][prop])
-
+    const unixTime = Date.parse(createdObjects[0][prop]) || new Date()
     const filterby = (isString && unixTime) ? (new Date(unixTime)).toISOString().slice(0, 10) || createdObjects[0][prop] : createdObjects[0][prop]
     const url = `${objname}?filter[${prop}]=${filterby}`
     const response = await global.app.inject({
@@ -663,6 +658,7 @@ async function deleteCreatedIDs (createdIDs) {
 // @TODO: add strings based on format, add fakerFormat key to schema properties
 function createFakeData (key, value) {
   if (value.type === 'string') {
+    if (typeof value.faker === 'function') return (value.faker)
     if (value?.format === 'datetime' || key.indexOf('date') > -1) {
       return faker.date.past()
     } else {

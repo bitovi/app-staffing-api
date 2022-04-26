@@ -193,6 +193,9 @@ const getUpdateHandler = (Model) => {
       )
       reply.code(200).send(serialized)
     } catch (e) {
+      if (e.type === 'ModelValidation') {
+        reply.status(e.statusCode).send(e.message)
+      }
       reply.status(404).send()
     }
   }

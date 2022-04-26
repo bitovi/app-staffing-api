@@ -53,7 +53,16 @@ describe('POST /assignments', function () {
     const response = await post(payload)
     expect(response.statusCode).toBe(422)
   })
-
+  test('should return 422 for payload with startDate after endDate', async function () {
+    const payload = serialize({
+      start_date: faker.date.future(),
+      employee: { id: faker.datatype.uuid() },
+      role: { id: faker.datatype.uuid() },
+      end_date: faker.date.past()
+    })
+    const response = await post(payload)
+    expect(response.statusCode).toBe(422)
+  })
   test('should fail if associated employee id does not exist', async function () {
     const payload = serialize({
       start_date: faker.date.future(),

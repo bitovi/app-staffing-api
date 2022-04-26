@@ -33,11 +33,14 @@ module.exports = {
         },
         start_date: {
           type: 'string',
-          format: 'date'
+          faker: 'date.past'
+
         },
         end_date: {
           type: 'string',
-          format: 'date'
+          faker () {
+            return new Date(9999, 12, 30)
+          }
         },
         skills: {
           type: 'array',
@@ -101,7 +104,10 @@ module.exports = {
           maximum: 1
         },
         end_date: {
-          type: 'string'
+          type: 'string',
+          faker () {
+            return new Date(9999, 12, 30)
+          }
         },
         end_confidence: {
           type: 'number',
@@ -140,10 +146,15 @@ module.exports = {
           format: 'uuid'
         },
         start_date: {
-          type: 'string'
+          type: 'string',
+          format: 'date'
         },
         end_date: {
-          type: 'string'
+          type: 'string',
+          format: 'date',
+          faker () {
+            return new Date(9999, 12, 30)
+          }
         },
         employee: {
           type: 'object',
@@ -183,3 +194,5 @@ module.exports = {
   ]
 
 }
+
+

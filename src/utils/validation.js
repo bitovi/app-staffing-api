@@ -1,4 +1,4 @@
-import { ValidationError } from 'objection'
+const { ValidationError } = require('objection')
 
 const validateStartDate = (body) => {
   if ((body.start_date !== null && body.end_date !== null) && body.start_date > body.end_date) {
@@ -11,6 +11,6 @@ const validateStartDate = (body) => {
   }
 }
 
-exports.module = {
+module.exports = {
   validateStartDate
 }

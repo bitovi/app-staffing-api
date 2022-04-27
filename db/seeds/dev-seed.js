@@ -1,8 +1,8 @@
-/* eslint-disable no-unused-vars */
 const { Model } = require('objection')
 const Project = require('../../src/models/project')
 const faker = require('faker')
 const _ = require('lodash')
+const Skill = require('../../src/models/skill')
 
 const NUMBER_OF_RECORDS_TO_INSERT = 15
 
@@ -29,18 +29,26 @@ function generateAndCacheFake (keyPrefix, key, generator) {
 
   return value
 }
-
-function fakeSkill (key) {
+async function createSkills () {
   const skillList = [
-    'Product Design', 'Project Management', 'React', 'Angular', 'Backend', 'DevOps'
+    { name: 'Product Design' },
+    { name: 'Project Management' },
+    { name: 'React' },
+    { name: 'Angular' },
+    { name: 'Backend' },
+    { name: 'DevOps' }
   ]
-  return generateAndCacheFake(
-    'skill',
-    key,
-    () => _.sample(skillList)
-  )
+  const skills = await Skill.query().insert(skillList)
+  const idList = []
+  skills.forEach((e) => {
+    idList.push(e.id)
+  })
+  return idList
 }
-
+function getSkill (skills) {
+  const rnd = _.random(5)
+  return skills[rnd]
+}
 function fakeEmployee (key) {
   return generateAndCacheFake('employee', key, () =>
     faker.fake('{{name.firstName}} {{name.lastName}}')
@@ -76,9 +84,10 @@ const seed = async (knex) => {
   await knex('skill').del()
 
   // Generate skills
-
+  const skillList = await createSkills()
   for (let i = 0; i < NUMBER_OF_RECORDS_TO_INSERT; i++) {
     // insert seed data
+    const skill = getSkill(skillList)
     await Project.query().insertGraph([
       {
         name: fakeProject(i + 1),
@@ -92,8 +101,7 @@ const seed = async (knex) => {
             end_confidence: faker.datatype.float({ min: 0, max: 1, precision: 0.1 }),
 
             skills: [{
-              '#id': fakeSkill(i + 1),
-              name: fakeSkill(i + 1)
+              id: skill
             }],
 
             assignments: [{
@@ -107,7 +115,7 @@ const seed = async (knex) => {
 
                 skills: [
                   {
-                    '#ref': fakeSkill(i + 1)
+                    id: skill
                   }
                 ]
               }
@@ -123,7 +131,6 @@ const seed = async (knex) => {
 }
 
 module.exports = {
-  fakeSkill,
   fakeEmployee,
   fakeProject,
   fakeRole,

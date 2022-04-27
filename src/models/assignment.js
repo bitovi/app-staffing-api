@@ -46,37 +46,52 @@ module.exports = class Assignment extends Model {
   async $beforeInsert (queryContext) {
     await super.$beforeInsert(queryContext)
     validateStartDate(this)
-    await Assignment.transaction(async trx => {
-      await this.validateAssignmentOverlap(this, trx)
-    })
+    const trx = await Assignment.startTransaction()
+    await this.validateAssignmentOverlap(this, trx)
+    queryContext._resoloveTransaction = trx
   }
 
-  async $beforeUpdate (op, queryContext) {
-    await super.$beforeUpdate(op, queryContext)
+  async $afterInsert (queryContext) {
+    await super.$afterInsert(queryContext)
+    await queryContext._resoloveTransaction.commit()
+  }
+
+  async $beforeUpdate (opt, queryContext) {
+    await super.$beforeUpdate(opt, queryContext)
     validateStartDate(this)
-    await Assignment.transaction(async trx => {
-      await this.validateAssignment(this, trx)
-    })
+    const trx = await Assignment.startTransaction()
+    await this.validateAssignmentOverlap(this, trx)
+    queryContext._resoloveTransaction = trx
+  }
+
+  async $afterUpdate (opt, queryContext) {
+    await super.$afterUpdate(opt, queryContext)
+    await queryContext._resoloveTransaction.commit()
   }
 
   async validateAssignmentOverlap (body, trx) {
-    const Assignment = require('../models/assignment')
     let data
-    if (body.end_date) {
-      data = await Assignment.query(trx)
-        .where('employee_id', '=', body.employee_id)
-        .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")', [body.start_date, body.end_date])
-        .forUpdate()
-    } else { // If end_date is entered is blank or null
-      data = await Assignment.query(trx)
-        .where('employee_id', '=', body.employee_id)
-        .andWhereRaw('(?, \'infinity\') OVERLAPS ("start_date", "end_date")', body.start_date)
-        .forUpdate()
+    try {
+      if (body.end_date) {
+        data = await Assignment.query(trx)
+          .where('employee_id', '=', body.employee_id)
+          .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")',
+            [body.start_date, body.end_date])
+          .forUpdate()
+      } else { // If end_date is entered is blank or null
+        data = await Assignment.query(trx)
+          .where('employee_id', '=', body.employee_id)
+          .andWhereRaw('(?, \'infinity\') OVERLAPS ("start_date", "end_date")', body.start_date)
+          .forUpdate()
+      }
+    } catch (e) {
+      trx.rollback()
     }
     if (body.id) {
       data = data.filter(e => e.id !== body.id)
     }
     if (data.length > 0) {
+      trx.rollback()
       throw new ValidationError({
         message: 'Employee already assigned',
         type: 'ModelValidation',

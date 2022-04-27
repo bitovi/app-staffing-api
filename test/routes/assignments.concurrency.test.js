@@ -1,5 +1,4 @@
 const faker = require('faker')
-const { transaction, Model } = require('objection')
 
 const Role = require('../../src/models/role')
 const Project = require('../../src/models/project')
@@ -7,16 +6,11 @@ const Employee = require('../../src/models/employee')
 const Assignment = require('../../src/models/assignment')
 const { Serializer } = require('../../src/json-api-serializer')
 
-describe('POST /assignments', function () {
-  let trx
-  const knex = Model.knex()
+describe('Overlapping assignments are prevented while multiple records are inserted at the same time', function () {
   let project
   let role
   let employee
   beforeAll(async () => {
-    trx = await transaction.start(knex)
-    Model.knex(trx)
-
     project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -36,18 +30,19 @@ describe('POST /assignments', function () {
   })
 
   afterAll(async () => {
-    await trx.rollback()
-    Model.knex(knex)
+    Project.query().findById(project.id).delete()
+    Employee.query().findById(employee.id).delete()
+    Role.query().findById(role.id).delete()
   })
+
   test.concurrent.each(
     [
-      ['0001-01-15 00:00:01.000 -0000', '0001-03-20 00:00:01.000 -0000', 201],
-      ['0001-02-15 00:00:01.000 -0000', '0001-03-20 00:00:01.000 -0000', 409],
-      ['0002-02-15 00:00:01.000 -0000', '0002-03-20 00:00:01.000 -0000', 201],
-      ['0002-02-15 00:00:01.000 -0000', '0002-03-20 00:00:01.000 -0000', 409],
-      ['0003-03-15 00:00:01.000 -0000', '0002-03-20 00:00:01.000 -0000', 422]
-    ]
-  )('Test POST concurrency', async (start, end, expected) => {
+      ['insert is successful, should return 201', '0001-01-15 00:00:01.000 -0000', '0001-03-20 00:00:01.000 -0000', 201],
+      ['overlap detected, should return 409', '0001-02-15 00:00:01.000 -0000', '0001-03-20 00:00:01.000 -0000', 409],
+      ['overlap detected, should return 409', '0001-01-01 00:00:01.000 -0000', '0002-03-01 00:00:01.000 -0000', 409],
+      ['insert is successful, should return 201', '0002-02-15 00:00:01.000 -0000', '0002-03-20 00:00:01.000 -0000', 201],
+      ['overlap detected, should return 409', '0002-02-15 00:00:01.000 -0000', '0002-03-20 00:00:01.000 -0000', 409]
+    ])('%s', async (title, start, end, expected) => {
     const newAssignment = {
       start_date: start,
       end_date: end,
@@ -56,8 +51,9 @@ describe('POST /assignments', function () {
     }
     const payload = serialize(newAssignment)
     const response = await post(payload)
+
     expect(response.statusCode).toEqual(expected)
-  })
+  }, 0)
 
   function post (payload) {
     return global.app.inject({
@@ -75,19 +71,13 @@ describe('POST /assignments', function () {
     return Serializer.serialize('assignments', obj)
   }
 })
-describe('PATCH /assignments', function () {
-  let trx
-  const knex = Model.knex()
+describe('Overlapping assignments are prevented while multiple records are updated concurrently', function () {
   let project
   let role
   let employee
   let assignment
   let newAssignment
-  let newAssociatedEmployee
   beforeAll(async () => {
-    trx = await transaction.start(knex)
-    Model.knex(trx)
-
     project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -114,34 +104,32 @@ describe('PATCH /assignments', function () {
       newAssignment,
       { relate: true }
     )
-    newAssociatedEmployee = await Employee.query().insert({
-      name: faker.name.findName(),
-      start_date: faker.date.future(),
-      end_date: faker.date.future()
-    })
+  })
+  afterAll(async () => {
+    Project.query().findById(project.id).delete()
+    Employee.query().findById(employee.id).delete()
+    Role.query().findById(role.id).delete()
+    Assignment.query().findById(assignment.id).delete()
   })
 
-  afterAll(async () => {
-    await trx.rollback()
-    Model.knex(knex)
-  })
   test.concurrent.each(
     [
-      ['0001-01-15 00:00:01.000 -0000', '0001-03-20 00:00:01.000 -0000', 200],
-      ['0001-02-15 00:00:01.000 -0000', '0001-03-20 00:00:01.000 -0000', 409],
-      ['0002-02-15 00:00:01.000 -0000', '0002-03-20 00:00:01.000 -0000', 200],
-      ['0002-02-15 00:00:01.000 -0000', '0002-03-20 00:00:01.000 -0000', 409],
-      ['0003-03-15 00:00:01.000 -0000', '0002-03-20 00:00:01.000 -0000', 422]
-    ])('Test PATCH concurrency', async (start, end, expected) => {
+      ['patch is successful, should return 200', '0001-01-15 00:00:01.000 -0000', '0001-03-20 00:00:01.000 -0000', 200],
+      ['overlap detected, should return 409', '0001-02-15 00:00:01.000 -0000', '0001-03-20 00:00:01.000 -0000', 409],
+      ['overlap detected, should return 409', '0001-01-01 00:00:01.000 -0000', '0001-02-20 00:00:01.000 -0000', 409],
+      ['overlap detected, should return 409', '0001-02-15 00:00:01.000 -0000', null, 409],
+      ['patch is successful, should return 200', '0002-02-15 00:00:01.000 -0000', '0002-03-20 00:00:01.000 -0000', 200],
+      ['overlap detected, should return 409', '0001-02-15 00:00:01.000 -0000', '0001-03-20 00:00:01.000 -0000', 409]
+
+    ])('%s', async (title, start, end, expected) => {
     const payload = serialize({
       ...newAssignment,
-      employee: { id: newAssociatedEmployee.id },
       start_date: start,
       end_date: end
     })
     const response = await patch(assignment.id, payload)
     expect(response.statusCode).toEqual(expected)
-  })
+  }, 0)
 
   function patch (id, payload) {
     return global.app.inject({

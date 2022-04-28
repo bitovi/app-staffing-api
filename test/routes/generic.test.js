@@ -448,7 +448,7 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
     const index1 = results.findIndex(el => el[pkey] === createdObjects[0][pkey])
     const index2 = results.findIndex(el => el[pkey] === createdObjects[1][pkey])
     // console.log(prop, 'index1', index1, 'index2', index2)
-    // console.log(prop, 'createdObject1[prop]', createdObject1[prop], 'createdObjects[1][prop]', createdObjects[1][prop])
+    // console.log(prop, 'createdObject1[prop]', createdObjects[0][prop], 'createdObjects[1][prop]', createdObjects[1][prop])
     if (createdObjects[1][prop] !== createdObjects[0][prop]) {
       expect(index2 > index1).toBe(createdObjects[1][prop] > createdObjects[0][prop])
     }
@@ -659,6 +659,10 @@ async function deleteCreatedIDs (createdIDs) {
 function createFakeData (key, value) {
   if (value.type === 'string') {
     if (typeof value.faker === 'function') return (value.faker)
+    // if (value.data) return (value.data)
+    if (key === 'start_date') return '2022-01-01 00:00:01.000 -0000'
+    if (key === 'end_date') return '2023-01-01 00:00:01.000 -0000'
+
     if (value?.format === 'datetime' || key.indexOf('date') > -1) {
       return faker.date.past()
     } else {

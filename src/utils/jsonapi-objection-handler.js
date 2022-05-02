@@ -204,12 +204,12 @@ const getUpdateHandler = (Model) => {
 const getPostHandler = (Model) => {
   return async (request, reply) => {
     const { body, url } = request
-
     if (body.id) {
       return reply.status(403).send()
     }
 
     const newModel = await Model.query().insertGraph(body, { relate: true })
+      .catch(e => reply.status(e.statusCode).send(e.message))
     const modelName = pluralize(Model.name.toLowerCase())
     const data = Serializer.serialize(modelName, newModel, { url: `/${modelName}/${newModel.id}` })
     const location = `${url}/${newModel.id}`

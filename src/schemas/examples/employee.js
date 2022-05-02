@@ -196,11 +196,11 @@ module.exports = {
       },
       422: {
         status: 422,
-        title: 'body should NOT have additional properties'
+        message: 'body should NOT have additional properties'
       },
       500: {
         status: 500,
-        title:
+        message:
           'insert into "employee__skill" ("employee_id", "skill_id") values ($1, $2) returning "skill_id" - insert or update on table "employee__skill" violates foreign key constraint "employee__skill_skill_id_foreign"'
       }
     },
@@ -243,7 +243,7 @@ module.exports = {
       },
       422: {
         status: 422,
-        title: 'body should NOT have additional properties'
+        message: 'body should NOT have additional properties'
       }
     }
   },

@@ -183,7 +183,7 @@ module.exports = {
       },
       422: {
         status: 422,
-        title: 'body should NOT have additional properties'
+        message: 'body should NOT have additional properties'
       }
     },
     patch: {
@@ -205,7 +205,7 @@ module.exports = {
       },
       422: {
         status: '422',
-        title: 'body should NOT have additional properties'
+        message: 'body should NOT have additional properties'
       }
     }
   },

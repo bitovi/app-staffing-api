@@ -2,6 +2,7 @@ const { Model, ValidationError } = require('objection')
 const Project = require('./project')
 const { validateStartDate } = require('../utils/validation')
 const Role = require('./role')
+const { statusCodes } = require('../managers/error-handler/constants')
 
 module.exports = class Assignment extends Model {
   static get tableName () {
@@ -55,16 +56,21 @@ module.exports = class Assignment extends Model {
   }
 
   async validateRoleOverlap (body) {
-    const role = await Role.query().findById(body.role_id).select('start_date', 'end_date')
+    const role = await Role.query()
+      .findById(body.role_id)
+      .select('start_date', 'end_date')
     const assignmentStart = new Date(body.start_date)
     const assignmentEnd = new Date(body.end_date)
-    if ((assignmentStart < role.start_date || assignmentEnd > role.end_date) ||
-      (body.end_date === null && (assignmentStart < role.start_date || assignmentStart > role.end_date))) {
+    if (
+      assignmentStart < role.start_date ||
+      assignmentEnd > role.end_date ||
+      (body.end_date === null &&
+        (assignmentStart < role.start_date || assignmentStart > role.end_date))
+    ) {
       throw new ValidationError({
         message: 'Assignment not in date range of role',
         type: 'ModelValidation',
-        statusCode: 409,
-        data: ''
+        statusCode: statusCodes.CONFLICT
       })
     }
   }

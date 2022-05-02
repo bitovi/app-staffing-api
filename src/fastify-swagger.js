@@ -1,3 +1,4 @@
+const errorSchema = require('./schemas/error')
 const assignmentSchema = require('./schemas/assignment')
 const employeeSchema = require('./schemas/employee')
 const projectSchema = require('./schemas/project')
@@ -27,6 +28,13 @@ module.exports = function setupFastifySwagger (fastify) {
         { name: 'skill', description: 'Skill-related endpoints' }
       ],
       definitions: {
+        Error: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: errorSchema
+          }
+        },
         Assignment: { type: 'object', properties: assignmentSchema.properties },
         Employee: { type: 'object', properties: employeeSchema.properties },
         Project: { type: 'object', properties: projectSchema.properties },

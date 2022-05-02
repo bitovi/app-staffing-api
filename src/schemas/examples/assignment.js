@@ -180,6 +180,18 @@ module.exports = {
             end_date: '2022-09-28T23:02:06.942Z'
           }
         }
+      },
+      404: {
+        errors: [
+          {
+            status: '404',
+            code: 'not-found',
+            message: 'Not found',
+            source: {
+              parameter: 'id'
+            }
+          }
+        ]
       }
     },
     create: {
@@ -216,12 +228,21 @@ module.exports = {
         }
       },
       422: {
-        status: 422,
-        title: "body should have required property 'employee'"
+        errors: [
+          {
+            status: '422',
+            code: 'parameter-required',
+            message: "should have required property 'employee'",
+            detail: "body should have required property 'employee'",
+            source: {
+              pointer: '/data/attributes/employee'
+            }
+          }
+        ]
       },
       500: {
         status: 500,
-        title:
+        message:
           'insert into "assignment" ("employee_id", "end_date", "role_id", "start_date") values ($1, $2, $3, $4) returning "id" - insert or update on table "assignment" violates foreign key constraint "assignment_role_id_foreign"'
       }
     },
@@ -282,7 +303,7 @@ module.exports = {
       },
       422: {
         status: 422,
-        title: 'body should NOT have additional properties'
+        message: 'body should NOT have additional properties'
       }
     }
   },

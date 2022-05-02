@@ -33,7 +33,7 @@ describe('PATCH /assignments/:id', function () {
     expect(response.statusCode).toBe(404)
   })
 
-  test('should return 404 if associated employee does not exist', async function () {
+  test('should return 409 if associated employee does not exist', async function () {
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -63,10 +63,17 @@ describe('PATCH /assignments/:id', function () {
     )
 
     const payload = serialize({
-      employee: { id: faker.datatype.uuid() }
+      employee: { id: faker.datatype.uuid() },
+      role: {
+        id: role.id
+      },
+      start_date: '2021-08-07T13:34:29.613Z',
+      end_date: null
     })
+
     const response = await patch(assignment.id, payload)
-    expect(response.statusCode).toBe(404)
+
+    expect(response.statusCode).toBe(409)
   })
 
   test('should return 422 if payload has unknown fields', async function () {
@@ -102,9 +109,10 @@ describe('PATCH /assignments/:id', function () {
     const response = await patch(assignment.id, payload)
     expect(response.statusCode).toBe(422)
 
-    const { title } = JSON.parse(response.body)
-    expect(title).toBe('body should NOT have additional properties')
+    const { detail } = JSON.parse(response.body).errors[0]
+    expect(detail).toBe('body should NOT have additional properties')
   })
+
   test('should return 422 for payload with startDate after endDate', async function () {
     const startDate = faker.date.past()
     const endDate = faker.date.future()
@@ -134,10 +142,9 @@ describe('PATCH /assignments/:id', function () {
       employee: { id: employee.id },
       role: { id: role.id }
     }
-    const assignment = await Assignment.query().insertGraph(
-      newAssignment,
-      { relate: true }
-    )
+    const assignment = await Assignment.query().insertGraph(newAssignment, {
+      relate: true
+    })
 
     const payload = serialize({
       ...newAssignment,
@@ -176,10 +183,9 @@ describe('PATCH /assignments/:id', function () {
       employee: { id: employee.id },
       role: { id: role.id }
     }
-    const assignment = await Assignment.query().insertGraph(
-      newAssignment,
-      { relate: true }
-    )
+    const assignment = await Assignment.query().insertGraph(newAssignment, {
+      relate: true
+    })
 
     const payload = serialize({ ...newAssignment, end_date: null })
     const response = await patch(assignment.id, payload)
@@ -218,10 +224,9 @@ describe('PATCH /assignments/:id', function () {
       employee: { id: employee.id },
       role: { id: role.id }
     }
-    const assignment = await Assignment.query().insertGraph(
-      newAssignment,
-      { relate: true }
-    )
+    const assignment = await Assignment.query().insertGraph(newAssignment, {
+      relate: true
+    })
 
     const newAssociatedEmployee = await Employee.query().insert({
       name: faker.name.findName(),
@@ -266,10 +271,9 @@ describe('PATCH /assignments/:id', function () {
       employee: { id: employee.id },
       role: { id: role.id }
     }
-    const assignment = await Assignment.query().insertGraph(
-      newAssignment,
-      { relate: true }
-    )
+    const assignment = await Assignment.query().insertGraph(newAssignment, {
+      relate: true
+    })
 
     const payload = serialize({
       ...newAssignment,
@@ -306,10 +310,9 @@ describe('PATCH /assignments/:id', function () {
       employee: { id: employee.id },
       role: { id: role.id }
     }
-    const assignment = await Assignment.query().insertGraph(
-      newAssignment,
-      { relate: true }
-    )
+    const assignment = await Assignment.query().insertGraph(newAssignment, {
+      relate: true
+    })
 
     const payload = serialize({
       ...newAssignment,
@@ -346,10 +349,9 @@ describe('PATCH /assignments/:id', function () {
       employee: { id: employee.id },
       role: { id: role.id }
     }
-    const assignment = await Assignment.query().insertGraph(
-      newAssignment,
-      { relate: true }
-    )
+    const assignment = await Assignment.query().insertGraph(newAssignment, {
+      relate: true
+    })
 
     const payload = serialize({
       ...newAssignment,

@@ -1,8 +1,7 @@
-const { makeQueryStringFilters, makeQueryStringFields } = require('../utils')
+const { makeQueryStringFilters, makeQueryStringFields, parseErrorExamples } = require('../utils')
 const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
 const assignment = require('./examples/assignment')
-const error = require('./error')
 
 const properties = {
   id: {
@@ -83,10 +82,7 @@ const get = {
       type: 'object',
       example: assignment.response.get[200]
     },
-    404: {
-      description: 'Error: Not Found',
-      type: 'object'
-    }
+    404: parseErrorExamples({ description: 'Error: Not Found' })
   }
 }
 const create = {
@@ -106,22 +102,9 @@ const create = {
       type: 'object',
       example: assignment.response.create[201]
     },
-    403: {
-      description: 'Error: Forbidden',
-      type: 'object'
-    },
-    422: {
-      description: 'Error: Unprocessable Entity',
-      type: 'object',
-      properties: error,
-      example: assignment.response.create[422]
-    },
-    500: {
-      description: 'Error: Unprocessable Entity',
-      type: 'object',
-      properties: error,
-      example: assignment.response.create[500]
-    }
+    403: parseErrorExamples({ description: 'Error: Forbidden' }),
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity' }),
+    500: parseErrorExamples({ description: 'Error: Internal Server Error' })
   }
 }
 const patch = {
@@ -141,16 +124,8 @@ const patch = {
       type: 'object',
       example: assignment.response.patch[200]
     },
-    404: {
-      description: 'Not Found',
-      type: 'object'
-    },
-    422: {
-      description: 'Error: Unprocessable Entity',
-      type: 'object',
-      properties: error,
-      example: assignment.response.patch[422]
-    }
+    404: parseErrorExamples({ description: 'Error: Not Found' }),
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity' })
   }
 }
 const remove = {
@@ -163,10 +138,7 @@ const remove = {
       description: 'Default response',
       type: 'object'
     },
-    404: {
-      description: 'Not Found',
-      type: 'object'
-    }
+    404: parseErrorExamples({ description: 'Error: Not Found' })
   }
 }
 

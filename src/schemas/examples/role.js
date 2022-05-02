@@ -236,11 +236,11 @@ module.exports = {
       },
       422: {
         status: 422,
-        title: 'body.project should be object'
+        message: 'body.project should be object'
       },
       500: {
         status: 500,
-        title:
+        message:
           'insert into "role__skill" ("role_id", "skill_id") values ($1, $2) returning "skill_id" - insert or update on table "role__skill" violates foreign key constraint "role__skill_skill_id_foreign"'
       }
     },
@@ -300,7 +300,7 @@ module.exports = {
       },
       422: {
         status: 422,
-        title: 'body.project should be object'
+        message: 'body.project should be object'
       }
     }
   },

@@ -1,20 +1,25 @@
 const { makeQueryStringFilters, makeQueryStringFields } = require('../utils')
 const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
+const assignment = require('./examples/assignment')
+const error = require('./error')
 
 const properties = {
   id: {
     type: 'string',
     format: 'uuid',
-    description: 'the id of the assignment'
+    description: 'the id of the assignment',
+    example: 'e7c6d8f0-c8e0-4b3b-b8b1-f8b9b8f8d8b9'
   },
   start_date: {
     type: 'string',
-    description: 'the date-time the employee will begin this assignment'
+    description: 'the date-time the employee will begin this assignment',
+    example: '2020-01-01T00:00:00.000Z'
   },
   end_date: {
     type: ['string', 'null'],
-    description: 'the expected date-time the employee will end this assignment'
+    description: 'the expected date-time the employee will end this assignment',
+    example: '2020-03-01T00:00:00.000Z'
   },
   employee: {
     type: 'object',
@@ -22,7 +27,8 @@ const properties = {
     properties: {
       id: {
         type: 'string',
-        format: 'uuid'
+        format: 'uuid',
+        example: '1a23c10a-6df4-4f69-9518-e1e124e7fe1d'
       }
     },
     description: 'the assigned employee'
@@ -33,7 +39,8 @@ const properties = {
     properties: {
       id: {
         type: 'string',
-        format: 'uuid'
+        format: 'uuid',
+        example: 'eebe4834-9a2c-429a-83ee-a86e8ee3077d'
       }
     },
     description: 'the associated role'
@@ -41,33 +48,6 @@ const properties = {
 }
 const propertiesWithId = {
   id: { type: 'string', format: 'uuid' }
-}
-const exampleResponse = {
-  jsonapi: { version: '1.0' },
-  links: { self: '/assignments/df72f187-70f4-4f3d-a59d-b049353ecafa' },
-  data: {
-    type: 'assignments',
-    id: 'df72f187-70f4-4f3d-a59d-b049353ecafa',
-    attributes: {
-      start_date: '2022-03-13T20:06:42.426Z',
-      employee: {
-        id: '12bd4444-1d14-46eb-b94e-2b024b4922f7',
-        name: 'Dalton Powlowski',
-        start_date: '2022-01-09T18:36:26.197Z',
-        end_date: null
-      },
-      role: {
-        id: '77328e0e-5d71-4b3e-924b-2b1f7915309d',
-        start_date: '2022-02-09T03:35:53.557Z',
-        start_confidence: 10,
-        end_date: '2022-04-27T11:14:53.704Z',
-        end_confidence: 4,
-        project_id: 'df1a26bb-7154-4f3d-a838-b6dd3e196d90'
-      },
-      role_id: '77328e0e-5d71-4b3e-924b-2b1f7915309d',
-      employee_id: '12bd4444-1d14-46eb-b94e-2b024b4922f7'
-    }
-  }
 }
 const name = 'assignment'
 const tags = [name]
@@ -88,7 +68,7 @@ const list = {
     default: {
       description: 'Default response',
       type: 'object',
-      properties: {}
+      example: assignment.response.list[200]
     }
   }
 }
@@ -101,13 +81,11 @@ const get = {
     default: {
       description: 'Default response',
       type: 'object',
-      properties: {},
-      example: exampleResponse
+      example: assignment.response.get[200]
     },
     404: {
-      description: 'Not Found',
-      type: 'object',
-      properties: {}
+      description: 'Error: Not Found',
+      type: 'object'
     }
   }
 }
@@ -119,14 +97,30 @@ const create = {
     type: 'object',
     required: ['employee', 'role', 'start_date'],
     properties,
-    additionalProperties: false
+    additionalProperties: false,
+    example: assignment.request.create
   },
   response: {
     default: {
       description: 'Success: Object created and returned',
       type: 'object',
-      properties: {},
-      example: exampleResponse
+      example: assignment.response.create[201]
+    },
+    403: {
+      description: 'Error: Forbidden',
+      type: 'object'
+    },
+    422: {
+      description: 'Error: Unprocessable Entity',
+      type: 'object',
+      properties: error,
+      example: assignment.response.create[422]
+    },
+    500: {
+      description: 'Error: Unprocessable Entity',
+      type: 'object',
+      properties: error,
+      example: assignment.response.create[500]
     }
   }
 }
@@ -137,19 +131,25 @@ const patch = {
   body: {
     type: 'object',
     properties,
-    additionalProperties: false
+    additionalProperties: false,
+    example: assignment.request.patch
   },
   params: makeIdParams(name),
   response: {
     default: {
       description: 'Default response',
       type: 'object',
-      properties: {}
+      example: assignment.response.patch[200]
     },
     404: {
       description: 'Not Found',
+      type: 'object'
+    },
+    422: {
+      description: 'Error: Unprocessable Entity',
       type: 'object',
-      properties: {}
+      properties: error,
+      example: assignment.response.patch[422]
     }
   }
 }
@@ -161,8 +161,11 @@ const remove = {
   response: {
     default: {
       description: 'Default response',
-      type: 'object',
-      properties: {}
+      type: 'object'
+    },
+    404: {
+      description: 'Not Found',
+      type: 'object'
     }
   }
 }

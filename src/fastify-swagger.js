@@ -17,8 +17,6 @@ module.exports = function setupFastifySwagger (fastify) {
         url: 'https://swagger.io',
         description: 'Find more info here'
       },
-      host: 'localhost:3000',
-      schemes: ['http'],
       consumes: ['application/vnd.api+json'],
       produces: ['application/vnd.api+json'],
       tags: [
@@ -45,11 +43,16 @@ module.exports = function setupFastifySwagger (fastify) {
     },
     uiConfig: {
       // docExpansion: 'full',
-      deepLinking: false
+      deepLinking: false,
+      operationsSorter: 'method'
     },
     uiHooks: {
-      onRequest: function (request, reply, next) { next() },
-      preHandler: function (request, reply, next) { next() }
+      onRequest: function (request, reply, next) {
+        next()
+      },
+      preHandler: function (request, reply, next) {
+        next()
+      }
     },
     staticCSP: true,
     transformStaticCSP: (header) => header,

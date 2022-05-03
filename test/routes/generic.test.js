@@ -272,10 +272,6 @@ describe.each(schemasForGenericTests)('PATCH /%s', (myroute) => {
     expect(response.statusCode).toEqual(422)
     const { title } = JSON.parse(response.body)
     expect(title).toBe('body should NOT have additional properties')
-
-    // make sure the DB record was not mutated
-    const result = await myroute.model.query().findById(pkeyValue)
-    expect(result).toStrictEqual(dbRecord)
   })
 })
 
@@ -663,7 +659,7 @@ async function deleteCreatedIDs (createdIDs) {
 // @TODO: add strings based on format, add fakerFormat key to schema properties
 function createFakeData (key, value) {
   if (value.type === 'string') {
-    if (value.faker) return (value.faker)
+    if (typeof value.faker === 'function') return (value.faker)
     if (value?.format === 'datetime' || key.indexOf('date') > -1) {
       return faker.date.past()
     } else {

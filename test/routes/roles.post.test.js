@@ -179,7 +179,28 @@ describe('POST /roles', function () {
     expect(savedRoleSkills.length).toEqual(1)
     expect(savedRoleSkills[0].id).toEqual(skill.id)
   })
+  test('should return 422 for payload with startDate after endDate', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
 
+    const skill = await Skill.query().insert({
+      name: faker.lorem.word()
+    })
+
+    const newRole = {
+      start_date: faker.date.future(),
+      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      end_date: faker.date.past(),
+      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      project: { id: project.id },
+      skills: [skill]
+    }
+    const payload = serialize(newRole)
+    const response = await post(payload)
+    expect(response.statusCode).toBe(422)
+  })
   function post (payload) {
     return global.app.inject({
       method: 'POST',

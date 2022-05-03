@@ -218,7 +218,31 @@ describe('PATCH /roles/:id', function () {
     expect(responseBody.end_date).toBeNull()
     expect(responseBody.end_confidence).toBeNull()
   })
+  test('should return 422 for payload with startDate after endDate', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
 
+    const roleData = {
+      start_date: faker.date.recent(),
+      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      end_date: faker.date.future(),
+      end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      project_id: project.id
+    }
+    const role = await Role.query().insert(roleData)
+
+    const payload = serialize({
+      ...omit(roleData, ['project_id']),
+      project: { id: project.id },
+      start_date: faker.date.future(),
+      end_date: faker.date.past()
+
+    })
+    const response = await patch(role.id, payload)
+    expect(response.statusCode).toEqual(422)
+  })
   function patch (id, payload) {
     return global.app.inject({
       method: 'PATCH',

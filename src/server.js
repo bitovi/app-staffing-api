@@ -12,6 +12,7 @@ const build = () => {
     logger: false,
     ajv: {
       customOptions: {
+        schemaId: 'auto',
         removeAdditional: false
       }
     }
@@ -23,16 +24,20 @@ const build = () => {
   setupFastifySwagger(fastify)
 
   // Custom Content-Type parser for JSON-API spec
-  fastify.addContentTypeParser('application/vnd.api+json', { parseAs: 'string' }, (request, payload, done) => {
-    try {
-      const body = JSON.parse(payload)
-      const result = Serializer.deserialize(body.data?.type, body)
-      done(null, result)
-    } catch (error) {
-      error.status = 422
-      done(error)
+  fastify.addContentTypeParser(
+    'application/vnd.api+json',
+    { parseAs: 'string' },
+    (request, payload, done) => {
+      try {
+        const body = JSON.parse(payload)
+        const result = Serializer.deserialize(body.data?.type, body)
+        done(null, result)
+      } catch (error) {
+        error.status = 422
+        done(error)
+      }
     }
-  })
+  )
 
   // Custom Error handler for JSON-API spec
   fastify.setErrorHandler(function (error, request, reply) {
@@ -52,7 +57,8 @@ const build = () => {
     done()
   })
 
-  const registerService = (def) => Object.values(def).forEach(route => fastify.route(route))
+  const registerService = (def) =>
+    Object.values(def).forEach((route) => fastify.route(route))
 
   registerService(require('./routes/role.js'))
   registerService(require('./routes/skill.js'))

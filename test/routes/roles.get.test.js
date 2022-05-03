@@ -36,25 +36,29 @@ describe('GET /roles', function () {
     const projectARolesTotal = 5
     const projectBRolesTotal = 3
 
-    await Promise.all(range(projectARolesTotal).map(() => {
-      return Role.query().insert({
-        start_date: faker.date.recent(),
-        start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-        end_date: faker.date.future(),
-        end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-        project_id: projectA.id
+    await Promise.all(
+      range(projectARolesTotal).map(() => {
+        return Role.query().insert({
+          start_date: faker.date.recent(),
+          start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+          end_date: faker.date.future(),
+          end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+          project_id: projectA.id
+        })
       })
-    }))
+    )
 
-    await Promise.all(range(projectBRolesTotal).map(() => {
-      return Role.query().insert({
-        start_date: faker.date.recent(),
-        start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-        end_date: faker.date.future(),
-        end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-        project_id: projectB.id
+    await Promise.all(
+      range(projectBRolesTotal).map(() => {
+        return Role.query().insert({
+          start_date: faker.date.recent(),
+          start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+          end_date: faker.date.future(),
+          end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+          project_id: projectB.id
+        })
       })
-    }))
+    )
 
     const responseA = await get({
       qs: param({

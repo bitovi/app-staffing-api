@@ -1,6 +1,8 @@
 const { makeQueryStringFilters, makeQueryStringFields } = require('../utils')
 const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
+const skill = require('./examples/skill')
+const error = require('./error')
 
 const properties = {
   id: { type: 'string', format: 'uuid' },
@@ -55,6 +57,13 @@ const list = {
       ...makeQueryStringFilters(properties),
       ...makeQueryStringFields(name)
     }
+  },
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      example: skill.response.list[200]
+    }
   }
 }
 const get = {
@@ -66,13 +75,11 @@ const get = {
     default: {
       description: 'Default response',
       type: 'object',
-      properties: {},
       example: exampleGetResponse
     },
     404: {
-      description: 'Not Found',
-      type: 'object',
-      properties: {}
+      description: 'Error: Not Found',
+      type: 'object'
     }
   }
 }
@@ -85,14 +92,7 @@ const create = {
     required: ['name'],
     properties,
     additionalProperties: false,
-    example: {
-      data: {
-        type: 'skills',
-        attributes: {
-          name: 'example skill'
-        }
-      }
-    }
+    example: skill.request.create
   },
   response: {
     default: {
@@ -100,6 +100,12 @@ const create = {
       type: 'object',
       properties: {},
       example: exampleCreateResponse
+    },
+    422: {
+      description: 'Error: Unprocessable Entity',
+      type: 'object',
+      properties: error,
+      example: skill.response.patch[422]
     }
   }
 }
@@ -110,7 +116,26 @@ const patch = {
   body: {
     type: 'object',
     properties,
-    additionalProperties: false
+    additionalProperties: false,
+    example: skill.request.patch
+  },
+  params: makeIdParams(name),
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      example: skill.response.patch[200]
+    },
+    404: {
+      description: 'Not Found',
+      type: 'object'
+    },
+    422: {
+      description: 'Error: Unprocessable Entity',
+      type: 'object',
+      properties: error,
+      example: skill.response.patch[422]
+    }
   }
 }
 const remove = {
@@ -121,8 +146,11 @@ const remove = {
   response: {
     default: {
       description: 'Default response',
-      type: 'object',
-      properties: {}
+      type: 'object'
+    },
+    404: {
+      description: 'Error: Not Found',
+      type: 'object'
     }
   }
 }

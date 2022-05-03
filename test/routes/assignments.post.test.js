@@ -53,7 +53,16 @@ describe('POST /assignments', function () {
     const response = await post(payload)
     expect(response.statusCode).toBe(422)
   })
-
+  test('should return 422 for payload with startDate after endDate', async function () {
+    const payload = serialize({
+      start_date: faker.date.future(),
+      employee: { id: faker.datatype.uuid() },
+      role: { id: faker.datatype.uuid() },
+      end_date: faker.date.past()
+    })
+    const response = await post(payload)
+    expect(response.statusCode).toBe(422)
+  })
   test('should fail if associated employee id does not exist', async function () {
     const payload = serialize({
       start_date: faker.date.future(),
@@ -138,6 +147,99 @@ describe('POST /assignments', function () {
     expect(savedAssignment.employee_id).toEqual(employee.id)
     expect(savedAssignment.role_id).toEqual(role.id)
   })
+
+  // These following tests will be moved to dedicated validation test page in assignment overlap validation branch
+  test('should return 409 for payload dates out of range of role, assignment dates before roles', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+
+    const role = await Role.query().insert({
+      start_date: '2022-04-27 06:16:32.657 -0400',
+      start_confidence: faker.datatype.number(10),
+      end_date: '2022-04-28 06:16:32.657 -0400',
+      end_confidence: faker.datatype.number(10),
+      project_id: project.id
+    })
+
+    const newAssignment = {
+      start_date: '2022-01-27 06:16:32.657 -0400',
+      end_date: '2022-02-27 06:16:32.657 -0400',
+      employee: { id: employee.id },
+      role: { id: role.id }
+    }
+    const payload = serialize(newAssignment)
+    const response = await post(payload)
+    expect(response.statusCode).toEqual(409)
+  })
+  test('should return 409 for payload dates out of range of role, assignment dates after roles', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+
+    const role = await Role.query().insert({
+      start_date: '2022-04-27 06:16:32.657 -0400',
+      start_confidence: faker.datatype.number(10),
+      end_date: '2022-04-28 06:16:32.657 -0400',
+      end_confidence: faker.datatype.number(10),
+      project_id: project.id
+    })
+
+    const newAssignment = {
+      start_date: '2022-06-27 06:16:32.657 -0400',
+      end_date: '2022-07-27 06:16:32.657 -0400',
+      employee: { id: employee.id },
+      role: { id: role.id }
+    }
+    const payload = serialize(newAssignment)
+    const response = await post(payload)
+    expect(response.statusCode).toEqual(409)
+  })
+  test('should return 409 for payload dates out of range of role, assignment start during role-ends after role', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+
+    const role = await Role.query().insert({
+      start_date: '2022-04-27 06:16:32.657 -0400',
+      start_confidence: faker.datatype.number(10),
+      end_date: '2022-04-28 06:16:32.657 -0400',
+      end_confidence: faker.datatype.number(10),
+      project_id: project.id
+    })
+
+    const newAssignment = {
+      start_date: '2022-04-28 06:16:32.657 -0400',
+      end_date: '2022-07-27 06:16:32.657 -0400',
+      employee: { id: employee.id },
+      role: { id: role.id }
+    }
+    const payload = serialize(newAssignment)
+    const response = await post(payload)
+    expect(response.statusCode).toEqual(409)
+  })
+
   function post (payload) {
     return global.app.inject({
       method: 'POST',

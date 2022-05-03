@@ -1,39 +1,46 @@
 const { makeQueryStringFilters, makeQueryStringFields } = require('../utils')
 const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
+const employee = require('./examples/employee')
+const error = require('./error')
 
 const properties = {
   id: {
     type: 'string',
     format: 'uuid',
-    description: "The employee's unique identifier"
+    description: "The employee's unique identifier",
+    example: 'eebe4834-9a2c-429a-83ee-a86e8ee3077d'
   },
   name: {
     type: 'string',
-    description: 'The name of the employee'
+    description: 'The name of the employee',
+    example: 'John Doe'
   },
   start_date: {
     type: ['string', 'null'],
-    description: 'The date the employee started their employment'
+    description: 'The date the employee started their employment',
+    example: '2022-01-01T05:00:00.000Z'
   },
   end_date: {
     type: ['string', 'null'],
-    description: 'The date the employee will or did end their employment'
+    description: 'The date the employee will or did end their employment',
+    example: '2022-03-01T05:00:00.000Z'
   },
   skills: {
     type: 'array',
     items: {
       type: 'object',
-      required: [
-        'id'
-      ],
+      required: ['id'],
       properties: {
         id: {
           type: 'string',
-          format: 'uuid'
+          format: 'uuid',
+          example: 'febe4834-9a2c-429a-83ee-a86e8ee3077e'
         },
         name: {
-          type: 'string'
+          type: 'string',
+          description: 'name of the skill',
+          example: 'JavaScript'
         }
       },
       additionalProperties: false
@@ -41,32 +48,7 @@ const properties = {
     uniqueItems: true
   }
 }
-const exampleGetResponse = {
-  jsonapi: {
-    version: '1.0'
-  },
-  links: {
-    self: '/employees/03598cfb-6857-4c3e-99ec-9ee8f9e129d1'
-  },
-  data: {
-    type: 'employees',
-    id: '03598cfb-6857-4c3e-99ec-9ee8f9e129d1',
-    attributes: {
-      name: 'Carlee Luettgen',
-      start_date: '2020-12-11T00:35:41.276Z',
-      end_date: null
-    }
-  }
-}
-const exampleCreateResponse = {
-  jsonapi: { version: '1.0' },
-  links: { self: '/employees/6c0d8a4c-e8e2-4ce9-96b2-04a81a91c1cd' },
-  data: {
-    type: 'employees',
-    id: '6c0d8a4c-e8e2-4ce9-96b2-04a81a91c1cd',
-    attributes: { name: 'Donnie Larson' }
-  }
-}
+
 const name = 'employee'
 const tags = [name]
 
@@ -81,6 +63,13 @@ const list = {
       ...makeQueryStringFilters(properties),
       ...makeQueryStringFields(name)
     }
+  },
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      example: employee.response.list[200]
+    }
   }
 }
 const get = {
@@ -92,13 +81,11 @@ const get = {
     default: {
       description: 'Default response',
       type: 'object',
-      properties: {},
-      example: exampleGetResponse
+      example: employee.response.get[200]
     },
     404: {
-      description: 'Not Found',
-      type: 'object',
-      properties: {}
+      description: 'Error: Not Found',
+      type: 'object'
     }
   }
 }
@@ -111,14 +98,23 @@ const create = {
     required: ['name'],
     properties,
     additionalProperties: false,
-    example: { data: { type: 'employees', attributes: { name: 'Donnie Larson' } } }
+    example: employee.request.create
   },
   response: {
     default: {
       description: 'Success: Object created and returned',
       type: 'object',
-      properties: {},
-      example: exampleCreateResponse
+      example: employee.response.create[201]
+    },
+    403: {
+      description: 'Error: Forbidden',
+      type: 'object'
+    },
+    422: {
+      description: 'Error: Unprocessable Entity',
+      type: 'object',
+      properties: error,
+      example: employee.response.create[422]
     }
   }
 }
@@ -129,7 +125,26 @@ const patch = {
   body: {
     type: 'object',
     properties,
-    additionalProperties: false
+    additionalProperties: false,
+    example: employee.request.patch
+  },
+  params: makeIdParams(name),
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      example: employee.response.patch[200]
+    },
+    404: {
+      description: 'Not Found',
+      type: 'object'
+    },
+    422: {
+      description: 'Error: Unprocessable Entity',
+      type: 'object',
+      properties: error,
+      example: employee.response.patch[422]
+    }
   }
 }
 const remove = {
@@ -140,8 +155,11 @@ const remove = {
   response: {
     default: {
       description: 'Default response',
-      type: 'object',
-      properties: {}
+      type: 'object'
+    },
+    404: {
+      description: 'Error: Not Found',
+      type: 'object'
     }
   }
 }

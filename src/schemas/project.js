@@ -1,47 +1,27 @@
 const { makeQueryStringFilters, makeQueryStringFields } = require('../utils')
 const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
+const project = require('./examples/project')
+const error = require('./error')
 
 const properties = {
   id: {
     type: 'string',
-    format: 'uuid'
+    format: 'uuid',
+    example: '5d8e8a7e-e8e3-4d8e-b3d7-8e4b50e36b1c'
   },
   name: {
     type: 'string',
-    description: 'The name of the project'
+    description: 'The name of the project',
+    example: 'Staffing App'
   },
   description: {
     type: 'string',
-    description: 'The project description'
+    description: 'The project description',
+    example: 'A project to manage the staffing of a company'
   }
 }
 
-const exampleGetResponse = {
-  jsonapi: {
-    version: '1.0'
-  },
-  links: {
-    self: '/projects/0b3aabce-b783-4169-bdeb-b342fc4fc70a'
-  },
-  data: {
-    type: 'projects',
-    id: '0b3aabce-b783-4169-bdeb-b342fc4fc70a',
-    attributes: {
-      name: 'Yum Project X',
-      description: 'Yum super special project'
-    }
-  }
-}
-const exampleCreateResponse = {
-  jsonapi: { version: '1.0' },
-  links: { self: '/projects/1ff5d9a0-b814-4790-b3ee-43aaf2d753f3' },
-  data: {
-    type: 'projects',
-    id: '1ff5d9a0-b814-4790-b3ee-43aaf2d753f3',
-    attributes: { name: 'Yum Project X' }
-  }
-}
 const name = 'project'
 const tags = [name]
 
@@ -56,6 +36,13 @@ const list = {
       ...makeQueryStringFilters(properties),
       ...makeQueryStringFields(name)
     }
+  },
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      example: project.response.list[200]
+    }
   }
 }
 const get = {
@@ -68,12 +55,11 @@ const get = {
       description: 'Default response',
       type: 'object',
       properties: {},
-      example: exampleGetResponse
+      example: project.response.get[200]
     },
     404: {
       description: 'Not Found',
-      type: 'object',
-      properties: {}
+      type: 'object'
     }
   }
 }
@@ -86,12 +72,7 @@ const create = {
     required: ['name'],
     properties,
     additionalProperties: false,
-    example: {
-      data: {
-        type: 'projects',
-        attributes: { name: 'Kathleen Lehner' }
-      }
-    }
+    example: project.request.create
   },
   errorMessage: {
     required: {
@@ -103,7 +84,13 @@ const create = {
       description: 'Success: Object created and returned',
       type: 'object',
       properties: {},
-      example: exampleCreateResponse
+      example: project.response.create[201]
+    },
+    422: {
+      description: 'Error: Unprocessable Entity',
+      type: 'object',
+      properties: error,
+      example: project.response.create[422]
     }
   }
 }
@@ -114,7 +101,26 @@ const patch = {
   body: {
     type: 'object',
     properties,
-    additionalProperties: false
+    additionalProperties: false,
+    example: project.request.patch
+  },
+  params: makeIdParams(name),
+  response: {
+    default: {
+      description: 'Default response',
+      type: 'object',
+      example: project.response.patch[200]
+    },
+    404: {
+      description: 'Not Found',
+      type: 'object'
+    },
+    422: {
+      description: 'Error: Unprocessable Entity',
+      type: 'object',
+      properties: error,
+      example: project.response.patch[422]
+    }
   }
 }
 const remove = {
@@ -125,8 +131,11 @@ const remove = {
   response: {
     default: {
       description: 'Default response',
-      type: 'object',
-      properties: {}
+      type: 'object'
+    },
+    404: {
+      description: 'Error: Not Found',
+      type: 'object'
     }
   }
 }

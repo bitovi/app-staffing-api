@@ -232,7 +232,6 @@ describe('PATCH /roles/:id', function () {
       project_id: project.id
     }
     const role = await Role.query().insert(roleData)
-
     const payload = serialize({
       ...omit(roleData, ['project_id']),
       project: { id: project.id },

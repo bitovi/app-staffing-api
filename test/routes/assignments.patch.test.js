@@ -124,8 +124,8 @@ describe('PATCH /assignments/:id', function () {
     })
 
     const newAssignment = {
-      start_date: faker.date.past(1000),
-      end_date: faker.date.past(100),
+      start_date: faker.date.past(),
+      end_date: faker.date.recent(),
       employee: { id: employee.id },
       role: { id: role.id }
     }

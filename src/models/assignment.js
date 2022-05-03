@@ -99,5 +99,10 @@ module.exports = class Assignment extends Model {
         data: ''
       })
     }
+    // Check for DB lock
+    // else {
+    //   await Assignment.query(trx).where('employee_id', '=', body.employee_id)
+    //     .timeout(999999999999999)
+    // }
   }
 }

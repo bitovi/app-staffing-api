@@ -3,7 +3,6 @@ const Project = require('./project')
 const { validateStartDate } = require('../utils/validation')
 const Role = require('./role')
 
-
 module.exports = class Assignment extends Model {
   static get tableName () {
     return 'assignment'

@@ -46,9 +46,9 @@ describe('PATCH /assignments/:id', function () {
     })
 
     const role = await Role.query().insert({
-      start_date: faker.date.recent(),
+      start_date: '1000-01-01 00:00:01.000 -0000',
       start_confidence: faker.datatype.number(10),
-      end_date: faker.date.future(),
+      end_date: '3000-01-01 00:00:01.000 -0000',
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })
@@ -82,9 +82,9 @@ describe('PATCH /assignments/:id', function () {
     })
 
     const role = await Role.query().insert({
-      start_date: faker.date.recent(),
+      start_date: '1000-01-01 00:00:01.000 -0000',
       start_confidence: faker.datatype.number(10),
-      end_date: faker.date.future(),
+      end_date: '3000-01-01 00:00:01.000 -0000',
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })
@@ -116,9 +116,9 @@ describe('PATCH /assignments/:id', function () {
       end_date: faker.date.future()
     })
     const role = await Role.query().insert({
-      start_date: faker.date.recent(),
+      start_date: '1000-01-01 00:00:01.000 -0000',
       start_confidence: faker.datatype.number(10),
-      end_date: faker.date.future(),
+      end_date: '3000-01-01 00:00:01.000 -0000',
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })
@@ -160,9 +160,9 @@ describe('PATCH /assignments/:id', function () {
     })
 
     const role = await Role.query().insert({
-      start_date: faker.date.past(),
+      start_date: '1000-01-01 00:00:01.000 -0400',
       start_confidence: faker.datatype.number(10),
-      end_date: faker.date.future(),
+      end_date: '3000-01-01 00:00:01.000 -0400',
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })

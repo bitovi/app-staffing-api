@@ -101,16 +101,6 @@ describe('POST /employees', function () {
     const response = await post(payload)
     expect(response.statusCode).toBe(422)
   })
-
-    const payload = Serializer.serialize('employees', {
-      name: faker.name.findName(),
-      start_date: faker.date.future(),
-      end_date: faker.date.past(),
-      skills: [skillId]
-    })
-    const response = await post(payload)
-    expect(response.statusCode).toBe(422)
-  })
   function post (payload) {
     return global.app.inject({
       method: 'POST',

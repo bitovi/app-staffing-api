@@ -185,7 +185,6 @@ describe('POST /roles', function () {
       description: faker.lorem.sentences()
     })
 
-
     const skill = await Skill.query().insert({
       name: faker.lorem.word()
     })

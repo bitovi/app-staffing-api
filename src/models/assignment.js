@@ -76,11 +76,13 @@ module.exports = class Assignment extends Model {
     let data
     try {
       if (body.end_date) {
+        Assignment.query(trx)
+          .where('employee_id', '=', body.employee_id)
+          .forUpdate()
         data = await Assignment.query(trx)
           .where('employee_id', '=', body.employee_id)
           .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")',
             [body.start_date, body.end_date])
-          .forUpdate()
       } else { // If end_date is entered is blank or null
         data = await Assignment.query(trx)
           .where('employee_id', '=', body.employee_id)
@@ -102,7 +104,7 @@ module.exports = class Assignment extends Model {
         data: ''
       })
     }
-    // Check for DB lock
+    // Check for DB deadlock
     // else {
     //   await Assignment.query(trx).where('employee_id', '=', body.employee_id)
     //     .timeout(999999999999999)

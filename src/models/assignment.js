@@ -58,8 +58,11 @@ module.exports = class Assignment extends Model {
     const role = await Role.query().findById(body.role_id).select('start_date', 'end_date')
     const assignmentStart = new Date(body.start_date)
     const assignmentEnd = new Date(body.end_date)
-    if ((assignmentStart < role.start_date || assignmentEnd > role.end_date) ||
-      (body.end_date === null && (assignmentStart < role.start_date || assignmentStart > role.end_date))) {
+    if (
+      (body.end_date === null && (assignmentStart < role.start_date || assignmentStart > role.end_date)) ||
+      (role.end_date === null && (assignmentStart < role.start_date || assignmentEnd < role.start_date)) ||
+      ((body.end_date !== null && role.end_date !== null) &&
+        (assignmentStart < role.start_date || assignmentEnd > role.end_date))) {
       throw new ValidationError({
         message: 'Assignment not in date range of role',
         type: 'ModelValidation',

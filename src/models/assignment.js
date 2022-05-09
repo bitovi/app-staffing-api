@@ -75,10 +75,10 @@ module.exports = class Assignment extends Model {
   async validateAssignmentOverlap (body, trx) {
     let data
     try {
+      Assignment.query(trx)
+        .where('employee_id', '=', body.employee_id)
+        .forUpdate()
       if (body.end_date) {
-        Assignment.query(trx)
-          .where('employee_id', '=', body.employee_id)
-          .forUpdate()
         data = await Assignment.query(trx)
           .where('employee_id', '=', body.employee_id)
           .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")',
@@ -90,13 +90,13 @@ module.exports = class Assignment extends Model {
           .forUpdate()
       }
     } catch (e) {
-      trx.rollback()
+      await trx.rollback()
     }
     if (body.id) {
       data = data.filter(e => e.id !== body.id)
     }
     if (data.length > 0) {
-      trx.rollback()
+      await trx.rollback()
       throw new ValidationError({
         message: 'Employee already assigned',
         type: 'ModelValidation',

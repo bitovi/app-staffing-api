@@ -6,6 +6,7 @@ const Role = require('../../src/models/role')
 const Skill = require('../../src/models/skill')
 const Project = require('../../src/models/project')
 const { Serializer } = require('../../src/json-api-serializer')
+const { dateGenerator } = require('../../src/utils/utils')
 
 describe('PATCH /roles/:id', function () {
   let trx
@@ -23,10 +24,11 @@ describe('PATCH /roles/:id', function () {
   })
 
   test('should return 404 if role id does not exist', async function () {
+    const dates = dateGenerator()
     const notFoundId = faker.datatype.uuid()
     const payload = serialize({
       id: notFoundId,
-      start_date: faker.date.future(),
+      start_date: dates.startDate,
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project: { id: faker.datatype.uuid() }
     })
@@ -35,15 +37,16 @@ describe('PATCH /roles/:id', function () {
   })
 
   test('should return 404 if associated project does not exist', async function () {
+    const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
     })
 
     const role = await Role.query().insert({
-      start_date: faker.date.recent(),
+      start_date: dates.startDate,
+      end_date: dates.endDate,
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-      end_date: faker.date.future(),
       end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project_id: project.id
     })
@@ -56,15 +59,16 @@ describe('PATCH /roles/:id', function () {
   })
 
   test('should return 404 if associated skill does not exist', async function () {
+    const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
     })
 
     const role = await Role.query().insert({
-      start_date: faker.date.recent(),
+      start_date: dates.startDate,
+      end_date: dates.endDate,
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-      end_date: faker.date.future(),
       end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project_id: project.id
     })
@@ -79,15 +83,16 @@ describe('PATCH /roles/:id', function () {
   })
 
   test('should return 422 if start_confidence is negative', async function () {
+    const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
     })
 
     const role = await Role.query().insert({
-      start_date: faker.date.recent(),
+      start_date: dates.startDate,
+      end_date: dates.endDate,
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-      end_date: faker.date.future(),
       end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project_id: project.id
     })
@@ -101,15 +106,16 @@ describe('PATCH /roles/:id', function () {
   })
 
   test('should return 422 if start_confidence is greater than 1', async function () {
+    const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
     })
 
     const role = await Role.query().insert({
-      start_date: faker.date.recent(),
+      start_date: dates.startDate,
+      end_date: dates.endDate,
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-      end_date: faker.date.future(),
       end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project_id: project.id
     })
@@ -123,6 +129,7 @@ describe('PATCH /roles/:id', function () {
   })
 
   test('should return 200 if update is successful', async function () {
+    const dates = dateGenerator()
     const oldProject = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -134,9 +141,9 @@ describe('PATCH /roles/:id', function () {
     })
 
     const roleData = {
-      start_date: faker.date.recent(),
+      start_date: dates.startDate,
+      end_date: dates.endDate,
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-      end_date: faker.date.future(),
       end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project_id: oldProject.id
     }
@@ -154,6 +161,7 @@ describe('PATCH /roles/:id', function () {
   })
 
   test('should return 200 if skills update is successful', async function () {
+    const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -168,9 +176,9 @@ describe('PATCH /roles/:id', function () {
     })
 
     const roleData = {
-      start_date: faker.date.recent(),
+      start_date: dates.startDate,
+      end_date: dates.endDate,
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-      end_date: faker.date.future(),
       end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project: { id: project.id },
       skills: [{ id: oldSkill.id }]
@@ -191,15 +199,16 @@ describe('PATCH /roles/:id', function () {
   })
 
   test('should allow end_date / end_confidence updates to null', async function () {
+    const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
     })
 
     const roleData = {
-      start_date: faker.date.recent(),
+      start_date: dates.startDate,
+      end_date: dates.endDate,
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-      end_date: faker.date.future(),
       end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project_id: project.id
     }
@@ -219,15 +228,16 @@ describe('PATCH /roles/:id', function () {
     expect(responseBody.end_confidence).toBeNull()
   })
   test('should return 422 for payload with startDate after endDate', async function () {
+    const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
     })
 
     const roleData = {
-      start_date: faker.date.recent(),
+      start_date: dates.startDate,
+      end_date: dates.endDate,
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-      end_date: faker.date.future(),
       end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project_id: project.id
     }
@@ -236,8 +246,8 @@ describe('PATCH /roles/:id', function () {
     const payload = serialize({
       ...omit(roleData, ['project_id']),
       project: { id: project.id },
-      start_date: faker.date.future(),
-      end_date: faker.date.past()
+      start_date: dates.endDate,
+      end_date: dates.startDate
 
     })
     const response = await patch(role.id, payload)

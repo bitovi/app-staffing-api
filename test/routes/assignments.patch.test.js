@@ -6,6 +6,7 @@ const Project = require('../../src/models/project')
 const Employee = require('../../src/models/employee')
 const Assignment = require('../../src/models/assignment')
 const { Serializer } = require('../../src/json-api-serializer')
+const { dateGenerator } = require('../../src/utils/utils')
 
 describe('PATCH /assignments/:id', function () {
   let trx
@@ -22,10 +23,11 @@ describe('PATCH /assignments/:id', function () {
   })
 
   test('should return 404 if assignment id does not exist', async function () {
+    const dates = dateGenerator()
     const notFoundId = faker.datatype.uuid()
     const payload = serialize({
       id: notFoundId,
-      start_date: faker.date.future(),
+      start_date: dates.startDate,
       employee: { id: faker.datatype.uuid() },
       role: { id: faker.datatype.uuid() }
     })
@@ -34,6 +36,7 @@ describe('PATCH /assignments/:id', function () {
   })
 
   test('should return 404 if associated employee does not exist', async function () {
+    const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -41,14 +44,14 @@ describe('PATCH /assignments/:id', function () {
 
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
+      start_date: dates.startDate,
+      end_date: dates.endDate
     })
 
     const role = await Role.query().insert({
-      start_date: faker.date.recent(),
+      start_date: dates.startDate,
       start_confidence: faker.datatype.number(10),
-      end_date: faker.date.future(),
+      end_date: dates.endDate,
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })
@@ -70,6 +73,7 @@ describe('PATCH /assignments/:id', function () {
   })
 
   test('should return 422 if payload has unknown fields', async function () {
+    const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -77,21 +81,21 @@ describe('PATCH /assignments/:id', function () {
 
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
+      start_date: dates.startDate,
+      end_date: dates.endDate
     })
 
     const role = await Role.query().insert({
-      start_date: faker.date.recent(),
+      start_date: dates.startDate,
       start_confidence: faker.datatype.number(10),
-      end_date: faker.date.future(),
+      end_date: dates.endDate,
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })
 
     const assignment = await Assignment.query().insertGraph(
       {
-        start_date: faker.date.future(),
+        start_date: dates.startAssignmentDate,
         employee: { id: employee.id },
         role: { id: role.id }
       },
@@ -106,9 +110,7 @@ describe('PATCH /assignments/:id', function () {
     expect(title).toBe('body should NOT have additional properties')
   })
   test('should return 422 for payload with startDate after endDate', async function () {
-    const startDate = new Date('2022-03-25T04:00:00.000Z')
-    const endDate = new Date('9999-03-25T04:00:00.000Z')
-
+    const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -116,21 +118,21 @@ describe('PATCH /assignments/:id', function () {
 
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
+      start_date: dates.startDate,
+      end_date: dates.endDate
     })
 
     const role = await Role.query().insert({
-      start_date: startDate,
+      start_date: dates.startDate,
       start_confidence: faker.datatype.number(10),
-      end_date: endDate,
+      end_date: dates.endDate,
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })
 
     const newAssignment = {
-      start_date: startDate,
-      end_date: faker.date.future(),
+      start_date: dates.startAssignmentDate,
+      end_date: dates.endAssignmentDate,
       employee: { id: employee.id },
       role: { id: role.id }
     }
@@ -141,17 +143,15 @@ describe('PATCH /assignments/:id', function () {
 
     const payload = serialize({
       ...newAssignment,
-      start_date: faker.date.future(),
-      end_date: faker.date.past()
+      start_date: dates.endAssignmentDate,
+      end_date: dates.startAssignmentDate
     })
     const response = await patch(assignment.id, payload)
 
     expect(response.statusCode).toBe(422)
   })
   test('should update optional end_date to null', async function () {
-    const startDate = faker.date.past()
-    const endDate = faker.date.future()
-
+    const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -159,20 +159,20 @@ describe('PATCH /assignments/:id', function () {
 
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
+      start_date: dates.startDate,
+      end_date: dates.endDate
     })
 
     const role = await Role.query().insert({
-      start_date: startDate,
+      start_date: dates.startDate,
       start_confidence: faker.datatype.number(10),
-      end_date: endDate,
+      end_date: dates.endDate,
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })
 
     const newAssignment = {
-      start_date: startDate,
+      start_date: dates.startAssignmentDate,
       employee: { id: employee.id },
       role: { id: role.id }
     }
@@ -190,8 +190,7 @@ describe('PATCH /assignments/:id', function () {
   })
 
   test('should return 200 when update is successful', async function () {
-    const startDate = '2022-03-25 '
-    const endDate = '9999-03-25 '
+    const dates = dateGenerator()
 
     const project = await Project.query().insert({
       name: faker.company.companyName(),
@@ -200,21 +199,21 @@ describe('PATCH /assignments/:id', function () {
 
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
+      start_date: dates.startDate,
       end_date: faker.date.future()
     })
 
     const role = await Role.query().insert({
-      start_date: startDate,
+      start_date: dates.startDate,
       start_confidence: faker.datatype.number(10),
-      end_date: endDate,
+      end_date: dates.endDate,
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })
 
     const newAssignment = {
-      start_date: startDate,
-      end_date: '2025-03-25 16:54:07.112 -0400',
+      start_date: dates.startAssignmentDate,
+      end_date: dates.endAssignmentDate,
       employee: { id: employee.id },
       role: { id: role.id }
     }
@@ -225,8 +224,8 @@ describe('PATCH /assignments/:id', function () {
 
     const newAssociatedEmployee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: startDate,
-      end_date: endDate
+      start_date: dates.startAssignmentDate,
+      end_date: dates.endAssignmentDate
     })
 
     const payload = serialize({
@@ -241,6 +240,7 @@ describe('PATCH /assignments/:id', function () {
   })
   // These following tests will be moved to dedicated validation test page in assignment overlap validation branch
   test('should return 409 for payload dates out of range of role, assignment dates before roles', async function () {
+    const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -248,21 +248,21 @@ describe('PATCH /assignments/:id', function () {
 
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
+      start_date: dates.startDate,
       end_date: faker.date.future()
     })
 
     const role = await Role.query().insert({
-      start_date: '2022-04-27 06:16:32.657 -0400',
+      start_date: dates.startDate,
       start_confidence: faker.datatype.number(10),
-      end_date: '2022-04-29 06:16:32.657 -0400',
+      end_date: dates.endDate,
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })
 
     const newAssignment = {
-      start_date: '2022-04-27 06:16:32.657 -0400',
-      end_date: '2022-04-28 06:16:32.657 -0400',
+      start_date: dates.startAssignmentDate,
+      end_date: dates.endAssignmentDate,
       employee: { id: employee.id },
       role: { id: role.id }
     }
@@ -273,14 +273,15 @@ describe('PATCH /assignments/:id', function () {
 
     const payload = serialize({
       ...newAssignment,
-      start_date: '2022-02-27 06:16:32.657 -0400',
-      end_date: '2022-02-28 06:16:32.657 -0400'
+      start_date: dates.beforeRoleStartDate,
+      end_date: dates.endAssignmentDate
     })
     const response = await patch(assignment.id, payload)
 
     expect(response.statusCode).toBe(409)
   })
   test('should return 409 for payload dates out of range of role, assignment dates after roles', async function () {
+    const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -288,21 +289,21 @@ describe('PATCH /assignments/:id', function () {
 
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
+      start_date: dates.startDate,
+      end_date: dates.endDate
     })
 
     const role = await Role.query().insert({
-      start_date: '2022-04-27 06:16:32.657 -0400',
+      start_date: dates.startDate,
       start_confidence: faker.datatype.number(10),
-      end_date: '2022-04-29 06:16:32.657 -0400',
+      end_date: dates.endDate,
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })
 
     const newAssignment = {
-      start_date: '2022-04-27 06:16:32.657 -0400',
-      end_date: '2022-04-28 06:16:32.657 -0400',
+      start_date: dates.startAssignmentDate,
+      end_date: dates.endAssignmentDate,
       employee: { id: employee.id },
       role: { id: role.id }
     }
@@ -313,14 +314,15 @@ describe('PATCH /assignments/:id', function () {
 
     const payload = serialize({
       ...newAssignment,
-      start_date: '2023-02-27 06:16:32.657 -0400',
-      end_date: '2023-02-28 06:16:32.657 -0400'
+      start_date: dates.startAssignmentDate,
+      end_date: dates.afterRoleEndDate
     })
     const response = await patch(assignment.id, payload)
 
     expect(response.statusCode).toBe(409)
   })
   test('should return 409 for payload dates out of range of role, assignment start during role-ends after role', async function () {
+    const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -328,21 +330,21 @@ describe('PATCH /assignments/:id', function () {
 
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
+      start_date: dates.startDate,
+      end_date: dates.endDate
     })
 
     const role = await Role.query().insert({
-      start_date: '2022-04-27 06:16:32.657 -0400',
+      start_date: dates.startDate,
       start_confidence: faker.datatype.number(10),
-      end_date: '2022-04-29 06:16:32.657 -0400',
+      end_date: dates.endDate,
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })
 
     const newAssignment = {
-      start_date: '2022-04-27 06:16:32.657 -0400',
-      end_date: '2022-04-28 06:16:32.657 -0400',
+      start_date: dates.startAssignmentDate,
+      end_date: dates.endAssignmentDate,
       employee: { id: employee.id },
       role: { id: role.id }
     }
@@ -353,8 +355,8 @@ describe('PATCH /assignments/:id', function () {
 
     const payload = serialize({
       ...newAssignment,
-      start_date: '2022-04-28 06:16:32.657 -0400',
-      end_date: '2024-02-28 06:16:32.657 -0400'
+      start_date: dates.beforeRoleStartDate,
+      end_date: dates.afterRoleEndDate
     })
     const response = await patch(assignment.id, payload)
 

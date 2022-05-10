@@ -29,7 +29,7 @@ module.exports = {
         id: { type: 'string', format: 'uuid' },
         name: {
           type: 'string',
-          faker: 'name.findName'
+          // faker: 'name.findName'
         },
         start_date: {
           type: 'string',
@@ -38,9 +38,7 @@ module.exports = {
         },
         end_date: {
           type: 'string',
-          faker () {
-            return new Date(9999, 12, 30)
-          }
+          faker: 'date.future'
         },
         skills: {
           type: 'array',
@@ -97,7 +95,7 @@ module.exports = {
         },
         start_date: {
           type: 'string',
-          faker: 'date-role-start'
+          faker: 'date.past'
         },
         start_confidence: {
           type: 'number',
@@ -106,10 +104,7 @@ module.exports = {
         },
         end_date: {
           type: 'string',
-          // faker () {
-          //   return new Date(9999, 12, 30)
-          // }
-          faker: 'date-role-end'
+          faker: 'date.future'
         },
         end_confidence: {
           type: 'number',
@@ -149,12 +144,11 @@ module.exports = {
         },
         start_date: {
           type: 'string',
-          faker: 'date-start'
+          faker: 'date.assignment.start'
         },
         end_date: {
           type: 'string',
-          faker: 'date-end'
-          // faker: 'faker.date.'
+          faker: 'date.assignment.end'
         },
         employee: {
           type: 'object',

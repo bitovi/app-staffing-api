@@ -15,7 +15,7 @@ const validateStartDate = (body) => {
 }
 
 const validateDateFormat = (body) => {
-  if (body.start_date.length > 10 || body.end_date.length > 10) {
+  if ((body.start_date != null && body.start_date.length > 10) || (body.end_date != null && body.end_date.length > 10)) {
     throw new ValidationError({
       message: 'date format includes time',
       type: 'ModelValidation',

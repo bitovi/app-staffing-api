@@ -106,8 +106,8 @@ describe('PATCH /assignments/:id', function () {
     expect(title).toBe('body should NOT have additional properties')
   })
   test('should return 422 for payload with startDate after endDate', async function () {
-    const startDate = faker.date.past()
-    const endDate = faker.date.future()
+    const startDate = new Date('2022-03-25T04:00:00.000Z')
+    const endDate = new Date('9999-03-25T04:00:00.000Z')
 
     const project = await Project.query().insert({
       name: faker.company.companyName(),
@@ -130,7 +130,7 @@ describe('PATCH /assignments/:id', function () {
 
     const newAssignment = {
       start_date: startDate,
-      end_date: endDate,
+      end_date: faker.date.future(),
       employee: { id: employee.id },
       role: { id: role.id }
     }
@@ -190,8 +190,8 @@ describe('PATCH /assignments/:id', function () {
   })
 
   test('should return 200 when update is successful', async function () {
-    const startDate = faker.date.past()
-    const endDate = faker.date.future()
+    const startDate = '2022-03-25 '
+    const endDate = '9999-03-25 '
 
     const project = await Project.query().insert({
       name: faker.company.companyName(),
@@ -214,7 +214,7 @@ describe('PATCH /assignments/:id', function () {
 
     const newAssignment = {
       start_date: startDate,
-      end_date: endDate,
+      end_date: '2025-03-25 16:54:07.112 -0400',
       employee: { id: employee.id },
       role: { id: role.id }
     }
@@ -225,8 +225,8 @@ describe('PATCH /assignments/:id', function () {
 
     const newAssociatedEmployee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
+      start_date: startDate,
+      end_date: endDate
     })
 
     const payload = serialize({

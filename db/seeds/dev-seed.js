@@ -88,8 +88,8 @@ const seed = async (knex) => {
   for (let i = 0; i < NUMBER_OF_RECORDS_TO_INSERT; i++) {
     // insert seed data
     const skill = getSkill(skillList)
-    const startDate = new Date(faker.date.past()).toISOString()
-    const endDate = new Date(faker.date.future()).toISOString()
+    const startDate = new Date(faker.date.past()).toDateString()
+    const endDate = new Date(faker.date.future()).toDateString()
     await Project.query().insertGraph([
       {
         name: fakeProject(i + 1),

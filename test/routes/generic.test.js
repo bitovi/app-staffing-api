@@ -517,7 +517,9 @@ describe.each(routesSchemas)('%s: GET include relations', (myroute) => {
   beforeAll(async () => {
     // create 2 of objname
     createdObjects[0] = await createDbObject(objname, createdIDs)
+    console.log('1: ', createdObjects)
     createdObjects[1] = await createDbObject(objname, createdIDs)
+    console.log('2: ', createdObjects)
   })
 
   afterAll(async () => {
@@ -655,6 +657,8 @@ async function deleteCreatedIDs (createdIDs) {
 function createFakeData (key, value) {
   if (value.type === 'string') {
     if (typeof value.faker === 'function') return (value.faker)
+    if (value.faker === 'date-start') return '2022-04-01 00:00:01.000 -0000'
+    if (value.faker === 'date-end') return '2022-06-01 00:00:01.000 -0000'
     if (key === 'start_date') return '2022-01-01 00:00:01.000 -0000'
     if (key === 'end_date') return '2023-01-01 00:00:01.000 -0000'
 

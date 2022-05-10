@@ -96,7 +96,8 @@ module.exports = {
           format: 'uuid'
         },
         start_date: {
-          type: 'string'
+          type: 'string',
+          faker: 'date-role-start'
         },
         start_confidence: {
           type: 'number',
@@ -105,9 +106,10 @@ module.exports = {
         },
         end_date: {
           type: 'string',
-          faker () {
-            return new Date(9999, 12, 30)
-          }
+          // faker () {
+          //   return new Date(9999, 12, 30)
+          // }
+          faker: 'date-role-end'
         },
         end_confidence: {
           type: 'number',
@@ -147,14 +149,12 @@ module.exports = {
         },
         start_date: {
           type: 'string',
-          format: 'date'
+          faker: 'date-start'
         },
         end_date: {
           type: 'string',
-          format: 'date',
-          faker () {
-            return new Date(9999, 12, 30)
-          }
+          faker: 'date-end'
+          // faker: 'faker.date.'
         },
         employee: {
           type: 'object',

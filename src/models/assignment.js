@@ -1,6 +1,6 @@
 const { Model, ValidationError } = require('objection')
 const Project = require('./project')
-const { validateStartDate } = require('../utils/validation')
+const { validateStartDate, validateDateFormat } = require('../utils/validation')
 const Role = require('./role')
 
 module.exports = class Assignment extends Model {
@@ -46,11 +46,13 @@ module.exports = class Assignment extends Model {
 
   async $beforeInsert (queryContext) {
     validateStartDate(this)
+    validateDateFormat(this)
     await this.validateRoleOverlap(this)
   }
 
   async $beforeUpdate (opt, queryContext) {
     validateStartDate(this)
+    validateDateFormat(this)
     await this.validateRoleOverlap(this)
   }
 

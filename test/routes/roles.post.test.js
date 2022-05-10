@@ -124,13 +124,14 @@ describe('POST /roles', function () {
   })
 
   test('should return 201 for valid payload', async function () {
+    const startDate = new Date('2022-03-25T04:00:00.000Z')
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
     })
 
     const newRole = {
-      start_date: faker.date.future(),
+      start_date: startDate,
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project: { id: project.id }
     }
@@ -148,6 +149,7 @@ describe('POST /roles', function () {
   })
 
   test('should return 201 for valid payload with skills', async function () {
+    const startDate = new Date('2022-03-25T04:00:00.000Z')
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -158,7 +160,7 @@ describe('POST /roles', function () {
     })
 
     const newRole = {
-      start_date: faker.date.future(),
+      start_date: startDate,
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project: { id: project.id },
       skills: [skill]

@@ -110,7 +110,7 @@ const get = {
       properties: {},
       example: role.response.get[200]
     },
-    404: parseErrorExamples({ description: 'Error: Not Found' })
+    404: parseErrorExamples({ description: 'Error: Not Found', example: role.response.get[404] })
   }
 }
 const create = {
@@ -130,8 +130,8 @@ const create = {
       type: 'object',
       example: role.response.create[201]
     },
-    403: parseErrorExamples({ description: 'Error: Forbidden' }),
-    422: parseErrorExamples({ description: 'Error: Unprocessable Entity' })
+    409: parseErrorExamples({ description: 'Error: Conflict', example: role.response.create[409] }),
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity', example: role.response.create[422] })
   }
 }
 const patch = {
@@ -151,9 +151,8 @@ const patch = {
       type: 'object',
       example: role.response.patch[200]
     },
-    403: parseErrorExamples({ description: 'Error: Forbidden' }),
-    404: parseErrorExamples({ description: 'Error: Not Found' }),
-    422: parseErrorExamples({ description: 'Error: Unprocessable Entity' })
+    409: parseErrorExamples({ description: 'Error: Conflict', example: role.response.patch[409] }),
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity', example: role.response.patch[422] })
   }
 }
 const remove = {
@@ -166,7 +165,7 @@ const remove = {
       description: 'Default response',
       type: 'object'
     },
-    404: parseErrorExamples({ description: 'Error: Not Found' })
+    404: parseErrorExamples({ description: 'Error: Not Found', example: role.response.remove[404] })
   }
 }
 

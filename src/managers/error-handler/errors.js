@@ -54,6 +54,7 @@ class UniqueConstraintError extends GeneralError {
 class ConflictError extends GeneralError {
   constructor ({ message, detail, pointer, parameter }) {
     super({ message, detail, pointer, parameter })
+    this.message = message || 'Conflict'
     this.code = codes.ERR_CONFLICT
     this.status = statusCodes.CONFLICT
   }

@@ -82,7 +82,7 @@ const get = {
       type: 'object',
       example: assignment.response.get[200]
     },
-    404: parseErrorExamples({ description: 'Error: Not Found' })
+    404: parseErrorExamples({ description: 'Error: Not Found', example: assignment.response.get[404] })
   }
 }
 const create = {
@@ -102,9 +102,8 @@ const create = {
       type: 'object',
       example: assignment.response.create[201]
     },
-    403: parseErrorExamples({ description: 'Error: Forbidden' }),
-    422: parseErrorExamples({ description: 'Error: Unprocessable Entity' }),
-    500: parseErrorExamples({ description: 'Error: Internal Server Error' })
+    409: parseErrorExamples({ description: 'Error: Conflict', example: assignment.response.create[409] }),
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity', example: assignment.response.create[422] })
   }
 }
 const patch = {
@@ -124,7 +123,7 @@ const patch = {
       type: 'object',
       example: assignment.response.patch[200]
     },
-    404: parseErrorExamples({ description: 'Error: Not Found' }),
+    409: parseErrorExamples({ description: 'Error: Conflict', example: assignment.response.patch[409] }),
     422: parseErrorExamples({ description: 'Error: Unprocessable Entity' })
   }
 }
@@ -138,7 +137,7 @@ const remove = {
       description: 'Default response',
       type: 'object'
     },
-    404: parseErrorExamples({ description: 'Error: Not Found' })
+    404: parseErrorExamples({ description: 'Error: Not Found', example: assignment.response.remove[404] })
   }
 }
 

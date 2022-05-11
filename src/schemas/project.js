@@ -56,7 +56,7 @@ const get = {
       properties: {},
       example: project.response.get[200]
     },
-    404: parseErrorExamples({ description: 'Error: Not Found' })
+    404: parseErrorExamples({ description: 'Error: Not Found', example: project.response.get[404] })
   }
 }
 const create = {
@@ -82,7 +82,7 @@ const create = {
       properties: {},
       example: project.response.create[201]
     },
-    422: parseErrorExamples({ description: 'Error: Unprocessable Entity' })
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity', example: project.response.create[422] })
   }
 }
 const patch = {
@@ -102,8 +102,7 @@ const patch = {
       type: 'object',
       example: project.response.patch[200]
     },
-    404: parseErrorExamples({ description: 'Error: Not Found' }),
-    422: parseErrorExamples({ description: 'Error: Unprocessable Entity' })
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity', example: project.response.patch[422] })
   }
 }
 const remove = {
@@ -116,7 +115,7 @@ const remove = {
       description: 'Default response',
       type: 'object'
     },
-    404: parseErrorExamples({ description: 'Error: Not Found' })
+    404: parseErrorExamples({ description: 'Error: Not Found', example: project.response.remove[404] })
   }
 }
 

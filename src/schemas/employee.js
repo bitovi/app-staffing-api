@@ -82,7 +82,7 @@ const get = {
       type: 'object',
       example: employee.response.get[200]
     },
-    404: parseErrorExamples({ description: 'Error: Not Found' })
+    404: parseErrorExamples({ description: 'Error: Not Found', example: employee.response.get[404] })
   }
 }
 const create = {
@@ -102,8 +102,8 @@ const create = {
       type: 'object',
       example: employee.response.create[201]
     },
-    403: parseErrorExamples({ description: 'Error: Forbidden' }),
-    422: parseErrorExamples({ description: 'Error: Unprocessable Entity' })
+    409: parseErrorExamples({ description: 'Error: Conflict', example: employee.response.create[409] }),
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity', example: employee.response.create[422] })
   }
 }
 const patch = {
@@ -123,8 +123,8 @@ const patch = {
       type: 'object',
       example: employee.response.patch[200]
     },
-    404: parseErrorExamples({ description: 'Error: Not Found' }),
-    422: parseErrorExamples({ description: 'Error: Unprocessable Entity' })
+    409: parseErrorExamples({ description: 'Error: Conflict', example: employee.response.patch[409] }),
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity', example: employee.response.patch[422] })
   }
 }
 const remove = {
@@ -137,7 +137,7 @@ const remove = {
       description: 'Default response',
       type: 'object'
     },
-    404: parseErrorExamples({ description: 'Error: Not Found' })
+    404: parseErrorExamples({ description: 'Error: Not Found', example: employee.response.remove[404] })
   }
 }
 module.exports = {

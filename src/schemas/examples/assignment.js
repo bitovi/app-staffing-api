@@ -227,6 +227,18 @@ module.exports = {
           }
         }
       },
+      409: {
+        errors: [
+          {
+            status: 409,
+            code: 'resource_conflict-occurred',
+            source: {
+              pointer: '/data/attributes/role/id'
+            },
+            message: 'Conflict'
+          }
+        ]
+      },
       422: {
         errors: [
           {
@@ -239,11 +251,6 @@ module.exports = {
             }
           }
         ]
-      },
-      500: {
-        status: 500,
-        message:
-          'insert into "assignment" ("employee_id", "end_date", "role_id", "start_date") values ($1, $2, $3, $4) returning "id" - insert or update on table "assignment" violates foreign key constraint "assignment_role_id_foreign"'
       }
     },
     patch: {
@@ -301,9 +308,44 @@ module.exports = {
           }
         ]
       },
+      409: {
+        errors: [
+          {
+            status: 409,
+            code: 'resource_conflict-occurred',
+            source: {
+              pointer: '/data/attributes/role/id'
+            },
+            message: 'Conflict'
+          }
+        ]
+      },
       422: {
-        status: 422,
-        message: 'body should NOT have additional properties'
+        errors: [
+          {
+            status: '422',
+            code: 'invalid-parameter',
+            message: 'employe is an invalid parameter',
+            detail: 'body should NOT have additional properties',
+            source: {
+              pointer: '/data/attributes/employe'
+            }
+          }
+        ]
+      }
+    },
+    remove: {
+      404: {
+        errors: [
+          {
+            status: '404',
+            code: 'not-found',
+            message: 'Not found',
+            source: {
+              parameter: 'id'
+            }
+          }
+        ]
       }
     }
   },

@@ -1,5 +1,5 @@
-const { ValidationError } = require('objection')
 const { statusCodes } = require('../managers/error-handler/constants')
+const { ValidationError } = require('../managers/error-handler/errors')
 
 const validateStartDate = (body) => {
   if (
@@ -9,8 +9,8 @@ const validateStartDate = (body) => {
   ) {
     throw new ValidationError({
       message: 'startDate is after endDate',
-      type: 'ModelValidation',
-      statusCode: statusCodes.UNPROCESSABLE_ENTITY
+      status: statusCodes.UNPROCESSABLE_ENTITY,
+      pointer: 'start_date'
     })
   }
 }

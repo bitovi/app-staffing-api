@@ -41,7 +41,7 @@ const databaseErrorHandlers = (error) => {
 
       case UniqueViolationError:
         error = new UniqueConstraintError({
-          message,
+          message: `Record with ${error.columns[0]} already exists`,
           pointer: error.columns[0]
         })
 
@@ -61,7 +61,7 @@ const databaseErrorHandlers = (error) => {
 
       case ForeignKeyViolationError:
         error = new GeneralError({
-          message,
+          message: 'Foreign key constraint violation',
           status: statusCodes.CONFLICT
         })
 

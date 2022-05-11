@@ -72,8 +72,45 @@ describe('POST /assignments', function () {
     const response = await post(payload)
     expect(response.statusCode).toBe(500)
   })
+  test('should return 201 for valid payload with end_date', async function () {
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
 
-  test('should return 201 for valid payload', async function () {
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+
+    const role = await Role.query().insert({
+      start_date: '1022-01-15 00:00:01.000 -0400',
+      start_confidence: faker.datatype.number(10),
+      end_date: '3022-01-15 00:00:01.000 -0400',
+      end_confidence: faker.datatype.number(10),
+      project_id: project.id
+    })
+
+    const newAssignment = {
+      start_date: faker.date.past(),
+      end_date: faker.date.future(10),
+      employee: { id: employee.id },
+      role: { id: role.id }
+    }
+    const payload = serialize(newAssignment)
+    const response = await post(payload)
+    expect(response.statusCode).toEqual(201)
+
+    const body = JSON.parse(response.body)
+    expect(isString(body.data.id)).toEqual(true)
+
+    const savedAssignment = await Assignment.query().findById(body.data.id)
+    expect(isString(savedAssignment.id)).toEqual(true)
+    expect(savedAssignment.employee_id).toEqual(employee.id)
+    expect(savedAssignment.role_id).toEqual(role.id)
+  })
+  test('should return 201 for valid payload without end_date', async function () {
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -110,6 +147,7 @@ describe('POST /assignments', function () {
     expect(savedAssignment.employee_id).toEqual(employee.id)
     expect(savedAssignment.role_id).toEqual(role.id)
   })
+
   // These following tests will be moved to dedicated validation test page in assignment overlap validation branch
   test('should return 409 for payload dates out of range of role, assignment dates before roles', async function () {
     const project = await Project.query().insert({
@@ -201,6 +239,7 @@ describe('POST /assignments', function () {
     const response = await post(payload)
     expect(response.statusCode).toEqual(409)
   })
+
   function post (payload) {
     return global.app.inject({
       method: 'POST',

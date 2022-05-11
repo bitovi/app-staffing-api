@@ -499,6 +499,7 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
       method: 'GET',
       headers: { 'Content-Type': 'application/vnd.api+json' }
     })
+    // console.log(prop, ' ', unixTime)
     const json = JSON.parse(response.body)
     const results = json.data
     expect(response.statusCode).toBe(200)
@@ -657,7 +658,6 @@ function createFakeData (key, value) {
     if (typeof value.faker === 'function') return (value.faker)
     if (key === 'start_date') return '2022-01-01 00:00:01.000 -0000'
     if (key === 'end_date') return '2023-01-01 00:00:01.000 -0000'
-
     if (value?.format === 'datetime' || key.indexOf('date') > -1) {
       return faker.date.past()
     } else {

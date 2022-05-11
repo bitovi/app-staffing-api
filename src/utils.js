@@ -164,6 +164,7 @@ function makeQueryStringFields (name) {
 
   return fields
 }
+
 module.exports = {
   getRelationExpression,
   createUUID,

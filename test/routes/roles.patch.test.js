@@ -232,7 +232,6 @@ describe('PATCH /roles/:id', function () {
       project_id: project.id
     }
     const role = await Role.query().insert(roleData)
-
     const payload = serialize({
       ...omit(roleData, ['project_id']),
       project: { id: project.id },
@@ -243,7 +242,6 @@ describe('PATCH /roles/:id', function () {
     const response = await patch(role.id, payload)
     expect(response.statusCode).toEqual(422)
   })
-
   function patch (id, payload) {
     return global.app.inject({
       method: 'PATCH',

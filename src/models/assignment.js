@@ -45,13 +45,70 @@ module.exports = class Assignment extends Model {
   }
 
   async $beforeInsert (queryContext) {
+    await super.$beforeInsert(queryContext)
     validateStartDate(this)
     await this.validateRoleOverlap(this)
+    const trx = await Assignment.startTransaction()
+    await this.validateAssignmentOverlap(this, trx)
+    queryContext._resoloveTransaction = trx
+  }
+
+  async $afterInsert (queryContext) {
+    await super.$afterInsert(queryContext)
+    await queryContext._resoloveTransaction.commit()
   }
 
   async $beforeUpdate (opt, queryContext) {
+    await super.$beforeUpdate(opt, queryContext)
     validateStartDate(this)
     await this.validateRoleOverlap(this)
+    const trx = await Assignment.startTransaction()
+    await this.validateAssignmentOverlap(this, trx)
+    queryContext._resoloveTransaction = trx
+  }
+
+  async $afterUpdate (opt, queryContext) {
+    await super.$afterUpdate(opt, queryContext)
+    await queryContext._resoloveTransaction.commit()
+  }
+
+  async validateAssignmentOverlap (body, trx) {
+    let data
+    try {
+      Assignment.query(trx)
+        .where('employee_id', '=', body.employee_id)
+        .forUpdate()
+      if (body.end_date) {
+        data = await Assignment.query(trx)
+          .where('employee_id', '=', body.employee_id)
+          .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")',
+            [body.start_date, body.end_date])
+      } else { // If end_date is entered is blank or null
+        data = await Assignment.query(trx)
+          .where('employee_id', '=', body.employee_id)
+          .andWhereRaw('(?, \'infinity\') OVERLAPS ("start_date", "end_date")', body.start_date)
+          .forUpdate()
+      }
+    } catch (e) {
+      await trx.rollback()
+    }
+    if (body.id) {
+      data = data.filter(e => e.id !== body.id)
+    }
+    if (data.length > 0) {
+      await trx.rollback()
+      throw new ValidationError({
+        message: 'Employee already assigned',
+        type: 'ModelValidation',
+        statusCode: 409,
+        data: ''
+      })
+    }
+    // Check for DB deadlock
+    // else {
+    //   await Assignment.query(trx).where('employee_id', '=', body.employee_id)
+    //     .timeout(999999999999999)
+    // }
   }
 
   async validateRoleOverlap (body) {

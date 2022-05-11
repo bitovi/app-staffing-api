@@ -88,6 +88,7 @@ describe('POST /employees', function () {
     const response = await post(payload)
     expect(response.statusCode).toBe(422)
   })
+
   test('should return 422 for payload with startDate after endDate', async function () {
     const skillId = faker.datatype.uuid()
 
@@ -100,7 +101,6 @@ describe('POST /employees', function () {
     const response = await post(payload)
     expect(response.statusCode).toBe(422)
   })
-
   function post (payload) {
     return global.app.inject({
       method: 'POST',

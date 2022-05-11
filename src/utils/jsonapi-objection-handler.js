@@ -2,7 +2,6 @@ const pluralize = require('pluralize')
 const { Serializer } = require('../json-api-serializer')
 const { getRelationExpression, parseJsonApiParams } = require('../utils')
 const modelHasColumn = require('../schemas/all-properties')
-
 const normalizeColumn = (tableName, column) => column.includes('.') ? column : `${tableName}.${column}`
 
 let databaseName
@@ -200,7 +199,6 @@ const getUpdateHandler = (Model) => {
     }
   }
 }
-
 const getPostHandler = (Model) => {
   return async (request, reply) => {
     const { body, url } = request

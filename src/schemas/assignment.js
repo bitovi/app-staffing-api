@@ -101,6 +101,11 @@ const create = {
     example: assignment.request.create
   },
   response: {
+    409: {
+      description: 'Conflict: Date error',
+      type: 'object',
+      properties: {}
+    },
     default: {
       description: 'Success: Object created and returned',
       type: 'object',
@@ -140,6 +145,11 @@ const patch = {
       description: 'Default response',
       type: 'object',
       example: assignment.response.patch[200]
+    },
+    409: {
+      description: 'Conflict: Date error',
+      type: 'object',
+      properties: {}
     },
     404: {
       description: 'Not Found',

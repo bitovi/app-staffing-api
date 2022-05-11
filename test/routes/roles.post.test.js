@@ -201,7 +201,6 @@ describe('POST /roles', function () {
     const response = await post(payload)
     expect(response.statusCode).toBe(422)
   })
-
   function post (payload) {
     return global.app.inject({
       method: 'POST',

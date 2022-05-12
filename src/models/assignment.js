@@ -1,7 +1,9 @@
-const { Model, ValidationError } = require('objection')
+const { Model } = require('objection')
 const Project = require('./project')
 const { validateStartDate } = require('../utils/validation')
 const Role = require('./role')
+const { statusCodes } = require('../managers/error-handler/constants')
+const { ConflictError, ValidationError } = require('../managers/error-handler/errors')
 
 module.exports = class Assignment extends Model {
   static get tableName () {
@@ -99,9 +101,8 @@ module.exports = class Assignment extends Model {
       await trx.rollback()
       throw new ValidationError({
         message: 'Employee already assigned',
-        type: 'ModelValidation',
-        statusCode: 409,
-        data: ''
+        status: 409,
+        pointer: 'employee/id'
       })
     }
     // Check for DB deadlock
@@ -112,9 +113,18 @@ module.exports = class Assignment extends Model {
   }
 
   async validateRoleOverlap (body) {
-    const role = await Role.query().findById(body.role_id).select('start_date', 'end_date')
+    const role = await Role.query()
+      .findById(body.role_id)
+      .select('start_date', 'end_date')
     const assignmentStart = new Date(body.start_date)
     const assignmentEnd = new Date(body.end_date)
+
+    if (!role) {
+      throw new ConflictError({
+        pointer: 'role/id'
+      })
+    }
+
     /*
     This if statement checks for the following scenarios:
     1. If there is no end date in assignment and the assignment start date is outside of the role's start and end date
@@ -132,8 +142,8 @@ module.exports = class Assignment extends Model {
         (assignmentStart < role.start_date || assignmentEnd > role.end_date))) {
       throw new ValidationError({
         message: 'Assignment not in date range of role',
-        type: 'ModelValidation',
-        statusCode: 409
+        status: statusCodes.CONFLICT,
+        pointer: 'start_date'
       })
     }
   }

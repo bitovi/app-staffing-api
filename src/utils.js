@@ -1,3 +1,5 @@
+const errorSchema = require('./schemas/error')
+
 /**
  * Transforms the jsonapi request parameter ("include") into an Objection.js RelationExpression
  * @see https://jsonapi.org/format/#fetching-includes
@@ -165,10 +167,27 @@ function makeQueryStringFields (name) {
   return fields
 }
 
+const parseErrorExamples = ({ description, example }) => {
+  return {
+    description,
+    type: 'object',
+    properties: {
+      errors: {
+        items: {
+          type: 'object',
+          properties: errorSchema
+        }
+      }
+    },
+    example
+  }
+}
+
 module.exports = {
   getRelationExpression,
   createUUID,
   parseJsonApiParams,
   makeQueryStringFilters,
-  makeQueryStringFields
+  makeQueryStringFields,
+  parseErrorExamples
 }

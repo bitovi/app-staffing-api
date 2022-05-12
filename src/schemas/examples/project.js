@@ -163,6 +163,18 @@ module.exports = {
             description: null
           }
         }
+      },
+      404: {
+        errors: [
+          {
+            status: 404,
+            code: 'not-found',
+            message: 'Not found',
+            source: {
+              parameter: 'id'
+            }
+          }
+        ]
       }
     },
     create: {
@@ -182,8 +194,17 @@ module.exports = {
         }
       },
       422: {
-        status: 422,
-        title: 'body should NOT have additional properties'
+        errors: [
+          {
+            status: 422,
+            code: 'invalid-parameter',
+            message: 'something is an invalid parameter',
+            detail: 'body should NOT have additional properties',
+            source: {
+              pointer: '/data/attributes/something'
+            }
+          }
+        ]
       }
     },
     patch: {
@@ -204,8 +225,31 @@ module.exports = {
         }
       },
       422: {
-        status: '422',
-        title: 'body should NOT have additional properties'
+        errors: [
+          {
+            status: 422,
+            code: 'invalid-parameter',
+            message: 'descriptio is an invalid parameter',
+            detail: 'body should NOT have additional properties',
+            source: {
+              pointer: '/data/attributes/descriptio'
+            }
+          }
+        ]
+      }
+    },
+    remove: {
+      404: {
+        errors: [
+          {
+            status: 404,
+            code: 'not-found',
+            message: 'Not found',
+            source: {
+              parameter: 'id'
+            }
+          }
+        ]
       }
     }
   },

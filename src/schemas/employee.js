@@ -1,8 +1,7 @@
-const { makeQueryStringFilters, makeQueryStringFields } = require('../utils')
+const { makeQueryStringFilters, makeQueryStringFields, parseErrorExamples } = require('../utils')
 const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
 const employee = require('./examples/employee')
-const error = require('./error')
 
 const properties = {
   id: {
@@ -83,10 +82,7 @@ const get = {
       type: 'object',
       example: employee.response.get[200]
     },
-    404: {
-      description: 'Error: Not Found',
-      type: 'object'
-    }
+    404: parseErrorExamples({ description: 'Error: Not Found', example: employee.response.get[404] })
   }
 }
 const create = {
@@ -106,16 +102,8 @@ const create = {
       type: 'object',
       example: employee.response.create[201]
     },
-    403: {
-      description: 'Error: Forbidden',
-      type: 'object'
-    },
-    422: {
-      description: 'Error: Unprocessable Entity',
-      type: 'object',
-      properties: error,
-      example: employee.response.create[422]
-    }
+    409: parseErrorExamples({ description: 'Error: Conflict', example: employee.response.create[409] }),
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity', example: employee.response.create[422] })
   }
 }
 const patch = {
@@ -135,16 +123,8 @@ const patch = {
       type: 'object',
       example: employee.response.patch[200]
     },
-    404: {
-      description: 'Not Found',
-      type: 'object'
-    },
-    422: {
-      description: 'Error: Unprocessable Entity',
-      type: 'object',
-      properties: error,
-      example: employee.response.patch[422]
-    }
+    409: parseErrorExamples({ description: 'Error: Conflict', example: employee.response.patch[409] }),
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity', example: employee.response.patch[422] })
   }
 }
 const remove = {
@@ -157,10 +137,7 @@ const remove = {
       description: 'Default response',
       type: 'object'
     },
-    404: {
-      description: 'Error: Not Found',
-      type: 'object'
-    }
+    404: parseErrorExamples({ description: 'Error: Not Found', example: employee.response.remove[404] })
   }
 }
 module.exports = {

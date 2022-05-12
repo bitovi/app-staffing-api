@@ -38,7 +38,7 @@ describe('POST /skills', function () {
       name: name
     })
     const response = await post(payload)
-    expect(response.statusCode).toBe(500)
+    expect(response.statusCode).toBe(409)
   })
 
   function post (payload) {

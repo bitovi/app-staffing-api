@@ -1,8 +1,7 @@
-const { makeQueryStringFilters, makeQueryStringFields } = require('../utils')
+const { makeQueryStringFilters, makeQueryStringFields, parseErrorExamples } = require('../utils')
 const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
 const assignment = require('./examples/assignment')
-const error = require('./error')
 
 const properties = {
   id: {
@@ -83,10 +82,7 @@ const get = {
       type: 'object',
       example: assignment.response.get[200]
     },
-    404: {
-      description: 'Error: Not Found',
-      type: 'object'
-    }
+    404: parseErrorExamples({ description: 'Error: Not Found', example: assignment.response.get[404] })
   }
 }
 const create = {
@@ -101,32 +97,13 @@ const create = {
     example: assignment.request.create
   },
   response: {
-    409: {
-      description: 'Conflict: Date error',
-      type: 'object',
-      properties: {}
-    },
     default: {
       description: 'Success: Object created and returned',
       type: 'object',
       example: assignment.response.create[201]
     },
-    403: {
-      description: 'Error: Forbidden',
-      type: 'object'
-    },
-    422: {
-      description: 'Error: Unprocessable Entity',
-      type: 'object',
-      properties: error,
-      example: assignment.response.create[422]
-    },
-    500: {
-      description: 'Error: Unprocessable Entity',
-      type: 'object',
-      properties: error,
-      example: assignment.response.create[500]
-    }
+    409: parseErrorExamples({ description: 'Error: Conflict', example: assignment.response.create[409] }),
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity', example: assignment.response.create[422] })
   }
 }
 const patch = {
@@ -146,21 +123,8 @@ const patch = {
       type: 'object',
       example: assignment.response.patch[200]
     },
-    409: {
-      description: 'Conflict: Date error',
-      type: 'object',
-      properties: {}
-    },
-    404: {
-      description: 'Not Found',
-      type: 'object'
-    },
-    422: {
-      description: 'Error: Unprocessable Entity',
-      type: 'object',
-      properties: error,
-      example: assignment.response.patch[422]
-    }
+    409: parseErrorExamples({ description: 'Error: Conflict', example: assignment.response.patch[409] }),
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity' })
   }
 }
 const remove = {
@@ -173,10 +137,7 @@ const remove = {
       description: 'Default response',
       type: 'object'
     },
-    404: {
-      description: 'Not Found',
-      type: 'object'
-    }
+    404: parseErrorExamples({ description: 'Error: Not Found', example: assignment.response.remove[404] })
   }
 }
 

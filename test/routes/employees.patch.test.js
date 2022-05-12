@@ -34,7 +34,7 @@ describe('PATCH /employees/:id', function () {
     expect(response.statusCode).toBe(404)
   })
 
-  test('should return 404 if employee skill does not exist', async function () {
+  test('should return 409 if employee skill does not exist', async function () {
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
       start_date: faker.date.past(),
@@ -53,7 +53,7 @@ describe('PATCH /employees/:id', function () {
 
     const payload = Serializer.serialize('employees', updatedEmployee)
     const response = await patch(employee.id, payload)
-    expect(response.statusCode).toBe(404)
+    expect(response.statusCode).toBe(409)
   })
 
   test('should add skills to employee record without previous relations', async function () {

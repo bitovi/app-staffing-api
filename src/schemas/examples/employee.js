@@ -164,6 +164,18 @@ module.exports = {
             end_date: null
           }
         }
+      },
+      404: {
+        errors: [
+          {
+            status: 404,
+            code: 'not-found',
+            message: 'Not found',
+            source: {
+              parameter: 'id'
+            }
+          }
+        ]
       }
     },
     create: {
@@ -194,14 +206,27 @@ module.exports = {
           }
         }
       },
-      422: {
-        status: 422,
-        title: 'body should NOT have additional properties'
+      409: {
+        errors: [
+          {
+            status: 409,
+            source: {},
+            message: 'Foreign key constraint violation'
+          }
+        ]
       },
-      500: {
-        status: 500,
-        title:
-          'insert into "employee__skill" ("employee_id", "skill_id") values ($1, $2) returning "skill_id" - insert or update on table "employee__skill" violates foreign key constraint "employee__skill_skill_id_foreign"'
+      422: {
+        errors: [
+          {
+            status: 422,
+            code: 'parameter-required',
+            message: "should have required property 'name'",
+            detail: "body should have required property 'name'",
+            source: {
+              pointer: '/data/attributes/name'
+            }
+          }
+        ]
       }
     },
     patch: {
@@ -241,9 +266,41 @@ module.exports = {
           }
         ]
       },
+      409: {
+        errors: [
+          {
+            status: 409,
+            source: {},
+            message: 'Foreign key constraint violation'
+          }
+        ]
+      },
       422: {
-        status: 422,
-        title: 'body should NOT have additional properties'
+        errors: [
+          {
+            status: 422,
+            code: 'invalid-parameter',
+            detail: 'body should NOT have additional properties',
+            source: {
+              pointer: '/data/attributes/something'
+            },
+            message: 'something is an invalid parameter'
+          }
+        ]
+      }
+    },
+    remove: {
+      404: {
+        errors: [
+          {
+            status: 404,
+            code: 'not-found',
+            message: 'Not found',
+            source: {
+              parameter: 'id'
+            }
+          }
+        ]
       }
     }
   },

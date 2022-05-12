@@ -6,7 +6,7 @@ const Role = require('../../src/models/role')
 const Skill = require('../../src/models/skill')
 const Project = require('../../src/models/project')
 const { Serializer } = require('../../src/json-api-serializer')
-const { dateGenerator } = require('../../src/utils/utils')
+const { dateGenerator } = require('../../src/utils/date-utils')
 
 describe('PATCH /roles/:id', function () {
   let trx

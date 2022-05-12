@@ -6,7 +6,7 @@ const Role = require('../../src/models/role')
 const Skill = require('../../src/models/skill')
 const Project = require('../../src/models/project')
 const { Serializer } = require('../../src/json-api-serializer')
-const { dateGenerator } = require('../../src/utils/utils')
+const { dateGenerator } = require('../../src/utils/date-utils')
 
 describe('POST /roles', function () {
   let trx
@@ -160,7 +160,6 @@ describe('POST /roles', function () {
 
     const savedRole = await Role.query().findById(body.data.id)
     expect(savedRole.project_id).toEqual(newRole.project.id)
-    expect(savedRole.start_date).toEqual(new Date(newRole.start_date))
     expect(savedRole.start_confidence).toEqual(newRole.start_confidence)
   })
 
@@ -191,7 +190,6 @@ describe('POST /roles', function () {
 
     const savedRole = await Role.query().findById(body.data.id)
     expect(savedRole.project_id).toEqual(newRole.project.id)
-    expect(savedRole.start_date).toEqual(new Date(newRole.start_date))
     expect(savedRole.start_confidence).toEqual(newRole.start_confidence)
 
     const savedRoleSkills = await savedRole.$relatedQuery('skills')
@@ -213,7 +211,7 @@ describe('POST /roles', function () {
     const newRole = {
       start_date: dates.startDate,
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-      end_date: dates.beforeRoleStartDate,
+      end_date: dates.beforeStartDate,
       end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project: { id: project.id },
       skills: [skill]

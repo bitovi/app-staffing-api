@@ -2,7 +2,7 @@ const faker = require('faker')
 const omitBy = require('lodash/omitBy')
 const isUndefined = require('lodash/isUndefined')
 const schema = require('./schema')
-const { dateGenerator } = require('../../src/utils/utils')
+const { dateGenerator } = require('../../src/utils/date-utils')
 
 const routesWithIndividualTests = new Map([
   ['assignments', true],
@@ -666,7 +666,7 @@ async function deleteCreatedIDs (createdIDs) {
 function createFakeData (key, value, dates = {}) {
   if (value.type === 'string') {
     // if (typeof value.faker === 'function') return (value.faker)
-    if (value.faker){
+    if (value.faker) {
       if (value.faker === 'date.past') return dates.startDate
       if (value.faker === 'date.future') return dates.endDate
       if (value.faker === 'date.assignment.start') return dates.startAssignmentDate

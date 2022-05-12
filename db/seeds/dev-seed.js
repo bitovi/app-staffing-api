@@ -3,7 +3,7 @@ const Project = require('../../src/models/project')
 const faker = require('faker')
 const _ = require('lodash')
 const Skill = require('../../src/models/skill')
-const { dateGenerator } = require('../../src/utils/utils')
+const { dateGenerator } = require('../../src/utils/date-utils')
 
 const NUMBER_OF_RECORDS_TO_INSERT = 15
 

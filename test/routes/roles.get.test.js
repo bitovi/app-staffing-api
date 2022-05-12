@@ -6,7 +6,7 @@ const { transaction, Model } = require('objection')
 const Role = require('../../src/models/role')
 const Project = require('../../src/models/project')
 const { Serializer } = require('../../src/json-api-serializer')
-const { dateGenerator } = require('../../src/utils/utils')
+const { dateGenerator } = require('../../src/utils/date-utils')
 
 describe('GET /roles', function () {
   let trx
@@ -54,7 +54,7 @@ describe('GET /roles', function () {
     await Promise.all(
       range(projectBRolesTotal).map(() => {
         return Role.query().insert({
-          start_date: dates.beforeRoleStartDate,
+          start_date: dates.beforeStartDate,
           start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
           end_date: dates.afterRoleEndDate,
           end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),

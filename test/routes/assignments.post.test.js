@@ -7,7 +7,7 @@ const Project = require('../../src/models/project')
 const Employee = require('../../src/models/employee')
 const Assignment = require('../../src/models/assignment')
 const { Serializer } = require('../../src/json-api-serializer')
-const { dateGenerator } = require('../../src/utils/utils')
+const { dateGenerator } = require('../../src/utils/date-utils')
 
 describe('POST /assignments', function () {
   let trx
@@ -139,7 +139,7 @@ describe('POST /assignments', function () {
     })
 
     const newAssignment = {
-      start_date: dates.beforeRoleStartDate,
+      start_date: dates.beforeStartDate,
       end_date: dates.endAssignmentDate,
       employee: { id: employee.id },
       role: { id: role.id }
@@ -172,7 +172,7 @@ describe('POST /assignments', function () {
 
     const newAssignment = {
       start_date: dates.startAssignmentDate,
-      end_date: dates.afterRoleEndDate,
+      end_date: dates.afterEndDate,
       employee: { id: employee.id },
       role: { id: role.id }
     }
@@ -204,7 +204,7 @@ describe('POST /assignments', function () {
 
     const newAssignment = {
       start_date: dates.startBeforeAssignmentDate,
-      end_date: dates.afterRoleEndDate,
+      end_date: dates.afterEndDate,
       employee: { id: employee.id },
       role: { id: role.id }
     }

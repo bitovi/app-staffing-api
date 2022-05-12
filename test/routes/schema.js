@@ -28,7 +28,7 @@ module.exports = {
       properties: {
         id: { type: 'string', format: 'uuid' },
         name: {
-          type: 'string',
+          type: 'string'
           // faker: 'name.findName'
         },
         start_date: {

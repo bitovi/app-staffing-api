@@ -7,7 +7,7 @@ const { transaction, Model } = require('objection')
 const Skill = require('../../src/models/skill')
 const Employee = require('../../src/models/employee')
 const { Serializer } = require('../../src/json-api-serializer')
-const { dateGenerator } = require('../../src/utils/utils')
+const { dateGenerator } = require('../../src/utils/date-utils')
 
 describe('POST /employees', function () {
   let trx

@@ -7,7 +7,7 @@ const { transaction, Model } = require('objection')
 const Skill = require('../../src/models/skill')
 const Employee = require('../../src/models/employee')
 const { Serializer } = require('../../src/json-api-serializer')
-const { dateGenerator } = require('../../src/utils/utils')
+const { dateGenerator } = require('../../src/utils/date-utils')
 
 describe('PATCH /employees/:id', function () {
   let trx
@@ -135,9 +135,7 @@ describe('PATCH /employees/:id', function () {
     const response = await patch(employee.id, payload)
     expect(response.statusCode).toBe(200)
 
-    const responseBody = deserialize(
-      JSON.parse(response.body)
-    )
+    const responseBody = deserialize(JSON.parse(response.body))
     expect(responseBody.skills).toHaveLength(1)
 
     // make sure the employee associated skills are updated correctly
@@ -149,18 +147,17 @@ describe('PATCH /employees/:id', function () {
   test('should update date fields to null', async function () {
     const dates = dateGenerator()
 
-    const newEmployee = {
+    const employee = await Employee.query().insert({
       name: faker.name.findName(),
       start_date: dates.startDate,
       end_date: dates.endDate
-    }
-    const employee = await Employee.query().insert(newEmployee)
-
-    const payload = serialize({
-      ...newEmployee,
-      start_date: null,
-      end_date: null
     })
+
+    const updatedEmployee = cloneDeep(employee)
+    updatedEmployee.start_date = null
+    updatedEmployee.end_date = null
+
+    const payload = serialize(updatedEmployee)
     const response = await patch(employee.id, payload)
 
     expect(response.statusCode).toBe(200)
@@ -183,8 +180,8 @@ describe('PATCH /employees/:id', function () {
     })
 
     const updatedEmployee = cloneDeep(employee)
-    updatedEmployee.start_date = dates.afterRoleEndDate
-    updatedEmployee.end_date = dates.beforeRoleStartDate
+    updatedEmployee.start_date = dates.afterEndDate
+    updatedEmployee.end_date = dates.beforeStartDate
 
     const payload = serialize(updatedEmployee)
     const response = await patch(employee.id, payload)

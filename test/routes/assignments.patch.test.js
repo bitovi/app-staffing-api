@@ -6,7 +6,7 @@ const Project = require('../../src/models/project')
 const Employee = require('../../src/models/employee')
 const Assignment = require('../../src/models/assignment')
 const { Serializer } = require('../../src/json-api-serializer')
-const { dateGenerator } = require('../../src/utils/utils')
+const { dateGenerator } = require('../../src/utils/date-utils')
 
 describe('PATCH /assignments/:id', function () {
   let trx
@@ -58,7 +58,7 @@ describe('PATCH /assignments/:id', function () {
 
     const assignment = await Assignment.query().insertGraph(
       {
-        start_date: faker.date.future(),
+        start_date: dates.startAssignmentDate,
         employee: { id: employee.id },
         role: { id: role.id }
       },
@@ -273,7 +273,7 @@ describe('PATCH /assignments/:id', function () {
 
     const payload = serialize({
       ...newAssignment,
-      start_date: dates.beforeRoleStartDate,
+      start_date: dates.beforeStartDate,
       end_date: dates.endAssignmentDate
     })
     const response = await patch(assignment.id, payload)
@@ -315,7 +315,7 @@ describe('PATCH /assignments/:id', function () {
     const payload = serialize({
       ...newAssignment,
       start_date: dates.startAssignmentDate,
-      end_date: dates.afterRoleEndDate
+      end_date: dates.afterEndDate
     })
     const response = await patch(assignment.id, payload)
 
@@ -355,8 +355,8 @@ describe('PATCH /assignments/:id', function () {
 
     const payload = serialize({
       ...newAssignment,
-      start_date: dates.beforeRoleStartDate,
-      end_date: dates.afterRoleEndDate
+      start_date: dates.beforeStartDate,
+      end_date: dates.afterEndDate
     })
     const response = await patch(assignment.id, payload)
 

@@ -180,6 +180,18 @@ module.exports = {
             end_date: '2022-09-28T23:02:06.942Z'
           }
         }
+      },
+      404: {
+        errors: [
+          {
+            status: 404,
+            code: 'not-found',
+            message: 'Not found',
+            source: {
+              parameter: 'id'
+            }
+          }
+        ]
       }
     },
     create: {
@@ -215,14 +227,30 @@ module.exports = {
           }
         }
       },
-      422: {
-        status: 422,
-        title: "body should have required property 'employee'"
+      409: {
+        errors: [
+          {
+            status: 409,
+            code: 'resource_conflict-occurred',
+            source: {
+              pointer: '/data/attributes/role/id'
+            },
+            message: 'Conflict'
+          }
+        ]
       },
-      500: {
-        status: 500,
-        title:
-          'insert into "assignment" ("employee_id", "end_date", "role_id", "start_date") values ($1, $2, $3, $4) returning "id" - insert or update on table "assignment" violates foreign key constraint "assignment_role_id_foreign"'
+      422: {
+        errors: [
+          {
+            status: 422,
+            code: 'parameter-required',
+            message: "should have required property 'employee'",
+            detail: "body should have required property 'employee'",
+            source: {
+              pointer: '/data/attributes/employee'
+            }
+          }
+        ]
       }
     },
     patch: {
@@ -280,9 +308,44 @@ module.exports = {
           }
         ]
       },
+      409: {
+        errors: [
+          {
+            status: 409,
+            code: 'resource_conflict-occurred',
+            source: {
+              pointer: '/data/attributes/role/id'
+            },
+            message: 'Conflict'
+          }
+        ]
+      },
       422: {
-        status: 422,
-        title: 'body should NOT have additional properties'
+        errors: [
+          {
+            status: 422,
+            code: 'invalid-parameter',
+            message: 'employe is an invalid parameter',
+            detail: 'body should NOT have additional properties',
+            source: {
+              pointer: '/data/attributes/employe'
+            }
+          }
+        ]
+      }
+    },
+    remove: {
+      404: {
+        errors: [
+          {
+            status: 404,
+            code: 'not-found',
+            message: 'Not found',
+            source: {
+              parameter: 'id'
+            }
+          }
+        ]
       }
     }
   },

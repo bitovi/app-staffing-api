@@ -196,6 +196,18 @@ module.exports = {
             project_id: '359a1044-a823-4582-b189-c1932b54382a'
           }
         }
+      },
+      404: {
+        errors: [
+          {
+            status: 404,
+            code: 'not-found',
+            message: 'Not found',
+            source: {
+              parameter: 'id'
+            }
+          }
+        ]
       }
     },
     create: {
@@ -234,14 +246,27 @@ module.exports = {
           }
         }
       },
-      422: {
-        status: 422,
-        title: 'body.project should be object'
+      409: {
+        errors: [
+          {
+            status: 409,
+            source: {},
+            message: 'Foreign key constraint violation'
+          }
+        ]
       },
-      500: {
-        status: 500,
-        title:
-          'insert into "role__skill" ("role_id", "skill_id") values ($1, $2) returning "skill_id" - insert or update on table "role__skill" violates foreign key constraint "role__skill_skill_id_foreign"'
+      422: {
+        errors: [
+          {
+            status: 422,
+            code: 'parameter-required',
+            message: "should have required property 'start_date'",
+            detail: "body should have required property 'start_date'",
+            source: {
+              pointer: '/data/attributes/start_date'
+            }
+          }
+        ]
       }
     },
     patch: {
@@ -298,29 +323,61 @@ module.exports = {
           }
         ]
       },
+      409: {
+        errors: [
+          {
+            status: 409,
+            source: {},
+            message: 'Foreign key constraint violation'
+          }
+        ]
+      },
       422: {
-        status: 422,
-        title: 'body.project should be object'
+        errors: [
+          {
+            status: 422,
+            message: 'startDate is after endDate',
+            source: {
+              pointer: '/data/attributes/start_date'
+            }
+          }
+        ]
+      }
+    },
+    remove: {
+      404: {
+        errors: [
+          {
+            status: 404,
+            code: 'not-found',
+            message: 'Not found',
+            source: {
+              parameter: 'id'
+            }
+          }
+        ]
       }
     }
   },
   request: {
     create: {
       data: {
-        type: 'roles',
-        attributes: {
-          start_date: '2023-01-01T05:00:00.000Z',
-          start_confidence: '1',
-          end_date: '2022-01-01T05:00:00.000Z',
-          end_confidence: '0.5',
-          project: {
-            id: '359a1044-a823-4582-b189-c1932b54382a'
-          },
-          skills: [
-            {
-              id: '26bc9580-c91f-43f6-a7dc-d1328e9b9a8a'
-            }
-          ]
+        data: {
+          type: 'roles',
+          attributes: {
+            start_date: '2022-01-01T05:00:00.000Z',
+            start_confidence: '1',
+            end_date: '2022-04-01T05:00:00.000Z',
+            end_confidence: '0.5',
+            project: {
+              id: '359a1044-a823-4582-b189-c1932b54382a'
+            },
+            skills: [
+              {
+                id: '26bc9580-c91f-43f6-a7dc-d1328e9b9a8a'
+              }
+            ]
+          }
         }
       }
     },
@@ -328,9 +385,9 @@ module.exports = {
       data: {
         type: 'roles',
         attributes: {
-          start_date: '2023-01-01T05:00:00.000Z',
+          start_date: '2022-01-01T05:00:00.000Z',
           start_confidence: '1',
-          end_date: '2022-01-01T05:00:00.000Z',
+          end_date: '2022-04-01T05:00:00.000Z',
           end_confidence: '0.9',
           project: {
             id: '359a1044-a823-4582-b189-c1932b54382a'

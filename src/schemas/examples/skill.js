@@ -132,6 +132,18 @@ module.exports = {
             name: 'compressing.js'
           }
         }
+      },
+      404: {
+        errors: [
+          {
+            status: 404,
+            code: 'not-found',
+            message: 'Not found',
+            source: {
+              parameter: 'id'
+            }
+          }
+        ]
       }
     },
     create: {
@@ -150,14 +162,30 @@ module.exports = {
           }
         }
       },
-      422: {
-        status: 422,
-        title: 'body should NOT have additional properties'
+      409: {
+        errors: [
+          {
+            status: 409,
+            code: 'resource_conflict-occurred',
+            source: {
+              pointer: '/data/attributes/name'
+            },
+            message: 'Record with name already exists'
+          }
+        ]
       },
-      500: {
-        status: 500,
-        title:
-          'insert into "role__skill" ("role_id", "skill_id") values ($1, $2) returning "skill_id" - insert or update on table "role__skill" violates foreign key constraint "role__skill_skill_id_foreign"'
+      422: {
+        errors: [
+          {
+            status: 422,
+            code: 'parameter-required',
+            message: "should have required property 'name'",
+            detail: "body should have required property 'name'",
+            source: {
+              pointer: '/data/attributes/name'
+            }
+          }
+        ]
       }
     },
     patch: {
@@ -176,9 +204,44 @@ module.exports = {
           }
         }
       },
+      409: {
+        errors: [
+          {
+            status: 409,
+            code: 'resource_conflict-occurred',
+            source: {
+              pointer: '/data/attributes/name'
+            },
+            message: 'Record with name already exists'
+          }
+        ]
+      },
       422: {
-        status: 422,
-        title: 'body should NOT have additional properties'
+        errors: [
+          {
+            status: 422,
+            code: 'invalid-parameter',
+            message: 'nam is an invalid parameter',
+            detail: 'body should NOT have additional properties',
+            source: {
+              pointer: '/data/attributes/nam'
+            }
+          }
+        ]
+      }
+    },
+    remove: {
+      404: {
+        errors: [
+          {
+            status: 404,
+            code: 'not-found',
+            message: 'Not found',
+            source: {
+              parameter: 'id'
+            }
+          }
+        ]
       }
     }
   },

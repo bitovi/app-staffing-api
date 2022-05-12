@@ -22,7 +22,7 @@ describe('POST /assignments', function () {
     Model.knex(knex)
   })
 
-  test('should return 403 if payload body includes id', async function () {
+  test('should return 422 if payload body includes id', async function () {
     const payload = serialize({
       id: faker.datatype.uuid(),
       start_date: faker.date.future(),
@@ -30,7 +30,7 @@ describe('POST /assignments', function () {
       role: { id: faker.datatype.uuid() }
     })
     const response = await post(payload)
-    expect(response.statusCode).toBe(403)
+    expect(response.statusCode).toBe(422)
   })
 
   test('should return 422 if payload is missing required field', async function () {
@@ -70,7 +70,7 @@ describe('POST /assignments', function () {
       role: { id: faker.datatype.uuid() }
     })
     const response = await post(payload)
-    expect(response.statusCode).toBe(500)
+    expect(response.statusCode).toBe(409)
   })
   test('should return 201 for valid payload with end_date', async function () {
     const project = await Project.query().insert({

@@ -3,6 +3,9 @@ const Knex = require('knex')
 const { Serializer } = require('./json-api-serializer')
 const knexfile = require('./knexfile')
 const setupFastifySwagger = require('./fastify-swagger')
+const errorHandler = require('./managers/error-handler')
+const { statusCodes } = require('./managers/error-handler/constants')
+const { GeneralError } = require('./managers/error-handler/errors')
 
 const build = () => {
   const knex = Knex(knexfile)
@@ -13,7 +16,8 @@ const build = () => {
     ajv: {
       customOptions: {
         schemaId: 'auto',
-        removeAdditional: false
+        removeAdditional: false,
+        allErrors: true
       }
     }
   })
@@ -33,24 +37,13 @@ const build = () => {
         const result = Serializer.deserialize(body.data?.type, body)
         done(null, result)
       } catch (error) {
-        error.status = 422
-        done(error)
+        done(new GeneralError({ ...error, status: statusCodes.UNPROCESSABLE_ENTITY }))
       }
     }
   )
 
   // Custom Error handler for JSON-API spec
-  fastify.setErrorHandler(function (error, request, reply) {
-    let status = error.status || error.statusCode || 500
-    if (error.validation) {
-      status = 422
-    }
-    this.log.error({ ...error, statusCode: status })
-    reply.status(status).send({
-      status: status,
-      title: error.message
-    })
-  })
+  fastify.setErrorHandler(errorHandler)
 
   fastify.addHook('onClose', async (server, done) => {
     await knex.destroy()

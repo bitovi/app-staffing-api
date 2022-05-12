@@ -39,7 +39,7 @@ describe('PATCH /skills/:id', function () {
       name: skill.name
     })
     const response = await patch(oldSkill.id, payload)
-    expect(response.statusCode).toBe(404)
+    expect(response.statusCode).toBe(409)
   })
   function patch (id, payload) {
     return global.app.inject({

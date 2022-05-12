@@ -17,7 +17,7 @@ const routesSchemas = schema.routes.map((route) =>
   })
 )
 const schemasForGenericTests = routesSchemas.filter(
-  r => !routesWithIndividualTests.has(r.routeName)
+  (r) => !routesWithIndividualTests.has(r.routeName)
 )
 
 describe.each(schemasForGenericTests)('POST /%s', (myroute) => {
@@ -168,8 +168,8 @@ describe.each(schemasForGenericTests)('POST /%s', (myroute) => {
     })
 
     expect(response.statusCode).toEqual(422)
-    const { title } = JSON.parse(response.body)
-    expect(title).toBe('body should NOT have additional properties')
+    const { detail } = JSON.parse(response.body).errors[0]
+    expect(detail).toBe('body should NOT have additional properties')
   })
 })
 
@@ -270,8 +270,8 @@ describe.each(schemasForGenericTests)('PATCH /%s', (myroute) => {
       }
     })
     expect(response.statusCode).toEqual(422)
-    const { title } = JSON.parse(response.body)
-    expect(title).toBe('body should NOT have additional properties')
+    const { detail } = JSON.parse(response.body).errors[0]
+    expect(detail).toBe('body should NOT have additional properties')
   })
 })
 
@@ -342,8 +342,12 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
     const results = json.data
     expect(resp.statusCode).toBe(200)
     expect(results.length).toBeGreaterThan(1)
-    expect(results.findIndex(el => el[pkey] === createdObjects[0][pkey])).toBeGreaterThan(-1)
-    expect(results.findIndex(el => el[pkey] === createdObjects[1][pkey])).toBeGreaterThan(-1)
+    expect(
+      results.findIndex((el) => el[pkey] === createdObjects[0][pkey])
+    ).toBeGreaterThan(-1)
+    expect(
+      results.findIndex((el) => el[pkey] === createdObjects[1][pkey])
+    ).toBeGreaterThan(-1)
   })
 
   test(`GET by ID: should get 1 row for GET /${objname}/id`, async () => {
@@ -388,16 +392,22 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
     })
     const results = JSON.parse(response.body)
     expect(results.data.attributes.results.length).toBe(2)
-    const selfLinkParams = (new URL('http://localhost:3000/' + results?.links?.self)).searchParams
+    const selfLinkParams = new URL(
+      'http://localhost:3000/' + results?.links?.self
+    ).searchParams
 
     expect(selfLinkParams.get('page[number]')).toBe('1')
     expect(selfLinkParams.get('page[size]')).toBe('2')
 
-    const nextLinkParams = (new URL('http://localhost:3000/' + results?.links?.next)).searchParams
+    const nextLinkParams = new URL(
+      'http://localhost:3000/' + results?.links?.next
+    ).searchParams
     expect(nextLinkParams.get('page[number]')).toBe('2')
     expect(selfLinkParams.get('page[size]')).toBe('2')
 
-    const prevLinkParams = (new URL('http://localhost:3000/' + results?.links?.prev)).searchParams
+    const prevLinkParams = new URL(
+      'http://localhost:3000/' + results?.links?.prev
+    ).searchParams
     expect(prevLinkParams.get('page[number]')).toBe('0')
     expect(prevLinkParams.get('page[size]')).toBe('2')
   })
@@ -412,7 +422,7 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
         'page[size]': '2'
       }
     })
-    expect(response.statusCode).toBe(400)
+    expect(response.statusCode).toBe(422)
   })
 
   // test Invalid Page size
@@ -425,11 +435,13 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
         'page[size]': '0'
       }
     })
-    expect(response.statusCode).toBe(400)
+    expect(response.statusCode).toBe(422)
   })
 
   // testing SORT
-  const props = Object.keys(properties).filter(prop => !myroute.relations.includes(prop))
+  const props = Object.keys(properties).filter(
+    (prop) => !myroute.relations.includes(prop)
+  )
   test.each(props)(`SORT ${objname}?sort=%s`, async (prop) => {
     // expect.assertions(2)
     // console.log(objname, relation)
@@ -445,10 +457,16 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
     expect(resp.statusCode).toBe(200)
     // console.log('results', results)
     expect(results.length).toBeGreaterThan(0)
-    const index1 = results.findIndex(el => el[pkey] === createdObjects[0][pkey])
-    const index2 = results.findIndex(el => el[pkey] === createdObjects[1][pkey])
+    const index1 = results.findIndex(
+      (el) => el[pkey] === createdObjects[0][pkey]
+    )
+    const index2 = results.findIndex(
+      (el) => el[pkey] === createdObjects[1][pkey]
+    )
     if (createdObjects[1][prop] !== createdObjects[0][prop]) {
-      expect(index2 > index1).toBe(createdObjects[1][prop] > createdObjects[0][prop])
+      expect(index2 > index1).toBe(
+        createdObjects[1][prop] > createdObjects[0][prop]
+      )
     }
   })
   // Testing SORT DESC
@@ -467,10 +485,16 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
     expect(resp.statusCode).toBe(200)
     // console.log('results', results)
     expect(results.length).toBeGreaterThan(0)
-    const index1 = results.findIndex(el => el[pkey] === createdObjects[0][pkey])
-    const index2 = results.findIndex(el => el[pkey] === createdObjects[1][pkey])
+    const index1 = results.findIndex(
+      (el) => el[pkey] === createdObjects[0][pkey]
+    )
+    const index2 = results.findIndex(
+      (el) => el[pkey] === createdObjects[1][pkey]
+    )
     if (createdObjects[1][prop] !== createdObjects[0][prop]) {
-      expect(index2 > index1).toBe(createdObjects[1][prop] < createdObjects[0][prop])
+      expect(index2 > index1).toBe(
+        createdObjects[1][prop] < createdObjects[0][prop]
+      )
     }
   })
 
@@ -484,27 +508,33 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
         sort: 'foobooNo'
       }
     })
-    expect(result.statusCode).toBe(400)
+    expect(result.statusCode).toBe(422)
   })
 
   // Testing FILTER
   // @TODO: fix after fixing swagger schema
-  test.each(props.filter(el => properties[el]?.format !== 'uuid'))(`FILTER ${objname}?filter[%s]=`, async (prop) => {
-    const isString = properties[prop].type === 'string'
-    const unixTime = Date.parse(createdObjects[0][prop]) || new Date()
-    const filterby = (isString && unixTime) ? (new Date(unixTime)).toISOString().slice(0, 10) || createdObjects[0][prop] : createdObjects[0][prop]
-    const url = `${objname}?filter[${prop}]=${filterby}`
-    const response = await global.app.inject({
-      url: url,
-      method: 'GET',
-      headers: { 'Content-Type': 'application/vnd.api+json' }
-    })
-    // console.log(prop, ' ', unixTime)
-    const json = JSON.parse(response.body)
-    const results = json.data
-    expect(response.statusCode).toBe(200)
-    expect(Array.isArray(results)).toBe(true)
-  })
+  test.each(props.filter((el) => properties[el]?.format !== 'uuid'))(
+    `FILTER ${objname}?filter[%s]=`,
+    async (prop) => {
+      const isString = properties[prop].type === 'string'
+      const unixTime = Date.parse(createdObjects[0][prop]) || new Date()
+      const filterby =
+        isString && unixTime
+          ? new Date(unixTime).toISOString().slice(0, 10) ||
+            createdObjects[0][prop]
+          : createdObjects[0][prop]
+      const url = `${objname}?filter[${prop}]=${filterby}`
+      const response = await global.app.inject({
+        url: url,
+        method: 'GET',
+        headers: { 'Content-Type': 'application/vnd.api+json' }
+      })
+      const json = JSON.parse(response.body)
+      const results = json.data
+      expect(response.statusCode).toBe(200)
+      expect(Array.isArray(results)).toBe(true)
+    }
+  )
 })
 
 describe.each(routesSchemas)('%s: GET include relations', (myroute) => {
@@ -533,57 +563,67 @@ describe.each(routesSchemas)('%s: GET include relations', (myroute) => {
       method: 'GET',
       headers: { 'Content-Type': 'application/vnd.api+json' }
     })
-    expect(resp.statusCode).toBe(400)
-    const json = JSON.parse(resp.body)
-    expect(json.title).toBe('Cannot include non-existing relation')
+    expect(resp.statusCode).toBe(422)
+    const json = JSON.parse(resp.body).errors[0]
+    expect(json.message).toBe('Cannot include non-existing relation')
   })
 
-  test.each(relations)(`get ONE included relation of GET ${objname}?include=%s`, async (relation) => {
-    // expect.assertions(2)
-    // console.log(objname, relation)
-    const url = `${objname}?include=${relation}`
-    const resp = await global.app.inject({
-      url: url,
-      method: 'GET',
-      headers: { 'Content-Type': 'application/vnd.api+json' }
-    })
-    const json = JSON.parse(resp.body)
+  test.each(relations)(
+    `get ONE included relation of GET ${objname}?include=%s`,
+    async (relation) => {
+      // expect.assertions(2)
+      // console.log(objname, relation)
+      const url = `${objname}?include=${relation}`
+      const resp = await global.app.inject({
+        url: url,
+        method: 'GET',
+        headers: { 'Content-Type': 'application/vnd.api+json' }
+      })
+      const json = JSON.parse(resp.body)
 
-    const results = json.data
-    expect(resp.statusCode).toBe(200)
-    // console.log(url, results[0].relationships)
-    expect(results.length).toBeGreaterThan(0)
-    expect(results.filter(el => el[pkey] === createdObjects[0][pkey])[0]).toHaveProperty(`relationships.${relation}`)
-  })
-
-  const multiIncludes = getAllSubsets(relations).filter(el => el.length > 1).map(el => el.join(','))
-
-  test.each(multiIncludes)(`get MULTIPLE included relations of GET ${objname}?include=%s`, async (relation) => {
-    // expect.assertions(2)
-    // console.log(objname, relation)
-    const resp = await global.app.inject({
-      url: `${objname}?include=${relation}`,
-      method: 'GET',
-      headers: { 'Content-Type': 'application/vnd.api+json' }
-    })
-    const json = JSON.parse(resp.body)
-
-    const results = json.data
-    expect(resp.statusCode).toBe(200)
-    // console.log('results', results)
-    expect(results.length).toBeGreaterThan(0)
-    const relationParts = relation.split(',')
-    for (let i = 0; i < relationParts.length; i++) {
-      // console.log('relations[i]', relationParts[i])
-      expect(results[0]).toHaveProperty(`relationships.${relationParts[i]}`)
-      // console.log('results', results.filter(el => el[pkey] === createdObject1[pkey])[0])
+      const results = json.data
+      expect(resp.statusCode).toBe(200)
+      // console.log(url, results[0].relationships)
+      expect(results.length).toBeGreaterThan(0)
+      expect(
+        results.filter((el) => el[pkey] === createdObjects[0][pkey])[0]
+      ).toHaveProperty(`relationships.${relation}`)
     }
-  })
+  )
+
+  const multiIncludes = getAllSubsets(relations)
+    .filter((el) => el.length > 1)
+    .map((el) => el.join(','))
+
+  test.each(multiIncludes)(
+    `get MULTIPLE included relations of GET ${objname}?include=%s`,
+    async (relation) => {
+      // expect.assertions(2)
+      // console.log(objname, relation)
+      const resp = await global.app.inject({
+        url: `${objname}?include=${relation}`,
+        method: 'GET',
+        headers: { 'Content-Type': 'application/vnd.api+json' }
+      })
+      const json = JSON.parse(resp.body)
+
+      const results = json.data
+      expect(resp.statusCode).toBe(200)
+      // console.log('results', results)
+      expect(results.length).toBeGreaterThan(0)
+      const relationParts = relation.split(',')
+      for (let i = 0; i < relationParts.length; i++) {
+        // console.log('relations[i]', relationParts[i])
+        expect(results[0]).toHaveProperty(`relationships.${relationParts[i]}`)
+        // console.log('results', results.filter(el => el[pkey] === createdObject1[pkey])[0])
+      }
+    }
+  )
 })
 
 // Recursivey create object and its required connected objects
 async function createDbObject (objname, createdIDs, useExisting = false) {
-  const route = schema.routes.filter(el => el.routeName === objname)[0]
+  const route = schema.routes.filter((el) => el.routeName === objname)[0]
   const Model = route.model
   const foreignKeys = route?.foreignKeys
   const properties = route.properties
@@ -606,7 +646,8 @@ async function createDbObject (objname, createdIDs, useExisting = false) {
   // fill properties
   for (const [key, value] of Object.entries(properties)) {
     if (primaryKeys.includes(key)) continue
-    objectToBeCreated[key] = objectToBeCreated[key] || createFakeData(key, value)
+    objectToBeCreated[key] =
+      objectToBeCreated[key] || createFakeData(key, value)
   }
 
   const createdObject = await Model.query().insert(
@@ -616,7 +657,9 @@ async function createDbObject (objname, createdIDs, useExisting = false) {
   if (createdObject) {
     createdIDs[objname] = createdIDs[objname] || []
     const idObj = {}
-    primaryKeys.forEach(el => { idObj[el] = createdObject[el] })
+    primaryKeys.forEach((el) => {
+      idObj[el] = createdObject[el]
+    })
     createdIDs[objname].push(idObj)
   }
 
@@ -624,7 +667,7 @@ async function createDbObject (objname, createdIDs, useExisting = false) {
 }
 
 async function getCreatedObjectbyID (objname, createdIDs) {
-  const route = schema.routes.filter(el => el.routeName === objname)[0]
+  const route = schema.routes.filter((el) => el.routeName === objname)[0]
   const Model = route.model
   const primaryKeys = route?.primaryKeys || ['id']
   const id = createdIDs[objname][0][primaryKeys[0]]
@@ -635,7 +678,7 @@ async function getCreatedObjectbyID (objname, createdIDs) {
 async function deleteCreatedIDs (createdIDs) {
   for (const [key, value] of Object.entries(createdIDs)) {
     // console.log('Inside deleteCreatedIDS', key)
-    const route = schema.routes.filter(el => el.routeName === key)[0]
+    const route = schema.routes.filter((el) => el.routeName === key)[0]
     const primaryKeys = route?.primaryKeys || ['id']
 
     for (let i = 0; i < value.length; i++) {
@@ -655,7 +698,7 @@ async function deleteCreatedIDs (createdIDs) {
 // @TODO: add strings based on format, add fakerFormat key to schema properties
 function createFakeData (key, value) {
   if (value.type === 'string') {
-    if (typeof value.faker === 'function') return (value.faker)
+    if (typeof value.faker === 'function') return value.faker
     if (key === 'start_date') return '2022-01-01 00:00:01.000 -0000'
     if (key === 'end_date') return '2023-01-01 00:00:01.000 -0000'
     if (value?.format === 'datetime' || key.indexOf('date') > -1) {
@@ -686,9 +729,7 @@ function randomIntFromInterval (min = 0, max = 100) {
  */
 function getAllSubsets (theArray) {
   return theArray.reduce(
-    (subsets, value) => subsets.concat(
-      subsets.map(set => [...set, value])
-    ),
+    (subsets, value) => subsets.concat(subsets.map((set) => [...set, value])),
     [[]]
   )
 }

@@ -166,7 +166,7 @@ module.exports = {
         errors: [
           {
             status: 409,
-            code: 'resource_conflict-occurred',
+            code: 'resource-conflict-occurred',
             source: {
               pointer: '/data/attributes/name'
             },
@@ -208,7 +208,7 @@ module.exports = {
         errors: [
           {
             status: 409,
-            code: 'resource_conflict-occurred',
+            code: 'resource-conflict-occurred',
             source: {
               pointer: '/data/attributes/name'
             },

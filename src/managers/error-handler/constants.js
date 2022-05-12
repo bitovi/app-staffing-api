@@ -1,6 +1,6 @@
 const codes = {
   ERR_PARAMETER_REQUIRED: 'parameter-required',
-  ERR_CONFLICT: 'resource_conflict-occurred',
+  ERR_CONFLICT: 'resource-conflict-occurred',
   ERR_RANGE: 'range-error',
   ERR_INVALID_PARAMETER: 'invalid-parameter',
   ERR_DUPLICATE_PARAMETER: 'duplicate-parameter',

@@ -36,7 +36,7 @@ const getListHandler = (Model) => {
     ) {
       throw new ValidationError({
         status: statusCodes.UNPROCESSABLE_ENTITY,
-        message: 'Cannot include non-existing relation',
+        title: 'Cannot include non-existing relation',
         detail: 'The include parameter must be a relation of the model',
         parameter: '/include',
         code: codes.ERR_INVALID_PARAMETER
@@ -59,7 +59,7 @@ const getListHandler = (Model) => {
         if (!modelHasColumn(items)) {
           throw new ValidationError({
             status: statusCodes.UNPROCESSABLE_ENTITY,
-            message: 'Cannot select non-existing fields',
+            title: 'Cannot select non-existing fields',
             detail: 'The fields parameter must be a column of the model',
             parameter: '/fields',
             code: codes.ERR_INVALID_PARAMETER
@@ -82,7 +82,7 @@ const getListHandler = (Model) => {
       if (filterKeys.length > new Set(filterKeys).size) {
         throw new ValidationError({
           status: statusCodes.UNPROCESSABLE_ENTITY,
-          message: 'Cannot have duplicate filter keys',
+          title: 'Cannot have duplicate filter keys',
           detail: 'The filter parameter must not have duplicate keys',
           parameter: '/filter',
           code: codes.ERR_DUPLICATE_PARAMETER
@@ -94,7 +94,7 @@ const getListHandler = (Model) => {
         if (!modelHasColumn(normalizedName)) {
           throw new ValidationError({
             status: statusCodes.UNPROCESSABLE_ENTITY,
-            message: `Cannot filter on non existing column name: ${filter.key}`,
+            title: `Cannot filter on non existing column name: ${filter.key}`,
             detail: 'The filter parameter must be a column of the model',
             parameter: `filter/${filter.key}`,
             code: codes.ERR_INVALID_PARAMETER
@@ -144,7 +144,7 @@ const getListHandler = (Model) => {
     if (size < 1 || number < 0) {
       throw new ValidationError({
         status: statusCodes.UNPROCESSABLE_ENTITY,
-        message: 'Cannot have negative page size or negative page number',
+        title: 'Cannot have negative page size or negative page number',
         detail: 'The page parameter must have a positive size and number',
         parameter: (size < 1 && '/page/size') || (number < 0 && '/page/number'),
         code: codes.ERR_INVALID_PARAMETER
@@ -166,7 +166,7 @@ const getListHandler = (Model) => {
         } else {
           throw new ValidationError({
             status: statusCodes.UNPROCESSABLE_ENTITY,
-            message: `Cannot sort on non existing column name: ${name}`,
+            title: `Cannot sort on non existing column name: ${name}`,
             detail: 'The sort parameter must be a column of the model',
             parameter: `/sort/${name}`,
             code: codes.ERR_INVALID_PARAMETER
@@ -231,7 +231,7 @@ const getPostHandler = (Model) => {
     if (body.id) {
       throw new ValidationError({
         status: statusCodes.UNPROCESSABLE_ENTITY,
-        message: 'Cannot post with an id',
+        title: 'Cannot post with an id',
         detail: 'The id parameter cannot be set on POST requests',
         parameter: '/id',
         code: codes.ERR_INVALID_PARAMETER

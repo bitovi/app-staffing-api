@@ -100,7 +100,7 @@ module.exports = class Assignment extends Model {
     if (data.length > 0) {
       await trx.rollback()
       throw new ValidationError({
-        message: 'Employee already assigned',
+        title: 'Employee already assigned',
         status: 409,
         pointer: 'employee/id'
       })
@@ -141,7 +141,7 @@ module.exports = class Assignment extends Model {
       ((body.end_date !== null && role.end_date !== null) &&
         (assignmentStart < role.start_date || assignmentEnd > role.end_date))) {
       throw new ValidationError({
-        message: 'Assignment not in date range of role',
+        title: 'Assignment not in date range of role',
         status: statusCodes.CONFLICT,
         pointer: 'start_date'
       })

@@ -565,7 +565,7 @@ describe.each(routesSchemas)('%s: GET include relations', (myroute) => {
     })
     expect(resp.statusCode).toBe(422)
     const json = JSON.parse(resp.body).errors[0]
-    expect(json.message).toBe('Cannot include non-existing relation')
+    expect(json.title).toBe('Cannot include non-existing relation')
   })
 
   test.each(relations)(

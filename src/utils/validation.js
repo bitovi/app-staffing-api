@@ -8,7 +8,7 @@ const validateStartDate = (body) => {
     body.start_date > body.end_date
   ) {
     throw new ValidationError({
-      message: 'startDate is after endDate',
+      title: 'startDate is after endDate',
       status: statusCodes.UNPROCESSABLE_ENTITY,
       pointer: 'start_date'
     })

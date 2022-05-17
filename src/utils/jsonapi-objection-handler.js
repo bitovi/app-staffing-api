@@ -2,34 +2,45 @@ const pluralize = require('pluralize')
 const { Serializer } = require('../json-api-serializer')
 const { getRelationExpression, parseJsonApiParams } = require('../utils')
 const modelHasColumn = require('../schemas/all-properties')
+const {
+  ValidationError,
+  NotFoundError
+} = require('../managers/error-handler/errors')
+const { codes, statusCodes } = require('../managers/error-handler/constants')
 
-const normalizeColumn = (tableName, column) => column.includes('.') ? column : `${tableName}.${column}`
+const normalizeColumn = (tableName, column) =>
+  column.includes('.') ? column : `${tableName}.${column}`
 
 let databaseName
 
+const asyncHandler = (fn) => (request, reply, done) =>
+  Promise.resolve(fn(request, reply)).catch(done)
+
 const getListHandler = (Model) => {
-  return async (request, reply) => {
+  return asyncHandler(async (request, reply) => {
     const relationExpression = getRelationExpression(request.query)
     const parsedParams = parseJsonApiParams(request.query)
     const tableName = Model.tableName
 
     const modelRelations = Object.keys(Model.getRelations())
-    databaseName = databaseName || Model.knex().client.config.connection.database
-    // const columnNames = Object.keys(request.context.schema.querystring.properties)
-    // DEBUG columnInfo
-
-    // const knex = Model.knex()
-    // const allnames = await knex.raw(`SELECT * from information_schema.columns where table_catalog = '${databaseName}'`)
+    databaseName =
+      databaseName || Model.knex().client.config.connection.database
 
     // Check if there is any include that is not in Model relations, return 404
     // Checking first level only for now
-    if (parsedParams?.include && parsedParams.include.filter(el => !modelRelations.includes(el.split('.')[0])).length > 0) {
-      return reply
-        .code(400)
-        .send({
-          status: 400,
-          title: 'Cannot include non-existing relation'
-        })
+    if (
+      parsedParams?.include &&
+      parsedParams.include.filter(
+        (el) => !modelRelations.includes(el.split('.')[0])
+      ).length > 0
+    ) {
+      throw new ValidationError({
+        status: statusCodes.UNPROCESSABLE_ENTITY,
+        title: 'Cannot include non-existing relation',
+        detail: 'The include parameter must be a relation of the model',
+        parameter: '/include',
+        code: codes.ERR_INVALID_PARAMETER
+      })
     }
 
     // chain
@@ -44,43 +55,50 @@ const getListHandler = (Model) => {
     // @TODO verify column names
     if (Object.keys(parsedParams.fields).length) {
       for (const [key, val] of Object.entries(parsedParams.fields)) {
-        const items = val.map(el => normalizeColumn(key.slice(0, -1), el))
+        const items = val.map((el) => normalizeColumn(key.slice(0, -1), el))
         if (!modelHasColumn(items)) {
-          return reply
-            .code(400)
-            .send({
-              status: 400,
-              title: 'Cannot select non-existing fields'
-            })
+          throw new ValidationError({
+            status: statusCodes.UNPROCESSABLE_ENTITY,
+            title: 'Cannot select non-existing fields',
+            detail: 'The fields parameter must be a column of the model',
+            parameter: '/fields',
+            code: codes.ERR_INVALID_PARAMETER
+          })
         }
         if (key.slice(0, -1) === tableName) {
           queryBuilder.columns(...items)
         } else {
-          queryBuilder.modifyGraph(key, builder => builder.columns(...items))
+          queryBuilder.modifyGraph(key, (builder) => builder.columns(...items))
         }
       }
     }
 
     if (parsedParams.filter.length) {
       // check for duplicate filter keys, return 500
-      const filterkeys = parsedParams.filter.map(el => el.key + '_-_' + el.type)
+      const filterKeys = parsedParams.filter.map(
+        (el) => el.key + '_-_' + el.type
+      )
 
-      if (filterkeys.length > (new Set(filterkeys)).size) {
-        return reply.status(400)
-          .send({
-            status: 400,
-            title: 'Cannot have the same filter more than once.'
-          })
+      if (filterKeys.length > new Set(filterKeys).size) {
+        throw new ValidationError({
+          status: statusCodes.UNPROCESSABLE_ENTITY,
+          title: 'Cannot have duplicate filter keys',
+          detail: 'The filter parameter must not have duplicate keys',
+          parameter: '/filter',
+          code: codes.ERR_DUPLICATE_PARAMETER
+        })
       }
 
       parsedParams.filter.forEach((filter) => {
         const normalizedName = normalizeColumn(tableName, filter.key)
         if (!modelHasColumn(normalizedName)) {
-          return reply.status(400)
-            .send({
-              status: 400,
-              title: `Cannot filter on non existing column name: ${filter.key}`
-            })
+          throw new ValidationError({
+            status: statusCodes.UNPROCESSABLE_ENTITY,
+            title: `Cannot filter on non existing column name: ${filter.key}`,
+            detail: 'The filter parameter must be a column of the model',
+            parameter: `filter/${filter.key}`,
+            code: codes.ERR_INVALID_PARAMETER
+          })
         }
 
         const isInt = Number.isInteger(Number(filter.value))
@@ -123,12 +141,14 @@ const getListHandler = (Model) => {
       })
     }
     const { size = 100, number = 0 } = parsedParams?.page || {}
-    if ((size < 1) || (number < 0)) {
-      return reply.status(400)
-        .send({
-          status: 400,
-          title: 'Invalid page[size] or page[number]'
-        })
+    if (size < 1 || number < 0) {
+      throw new ValidationError({
+        status: statusCodes.UNPROCESSABLE_ENTITY,
+        title: 'Cannot have negative page size or negative page number',
+        detail: 'The page parameter must have a positive size and number',
+        parameter: (size < 1 && '/page/size') || (number < 0 && '/page/number'),
+        code: codes.ERR_INVALID_PARAMETER
+      })
     }
     // @TODO return error for pad page values
 
@@ -144,11 +164,13 @@ const getListHandler = (Model) => {
         if (modelHasColumn(normalizedName)) {
           queryBuilder.orderBy(normalizedName, direction)
         } else {
-          reply.status(400)
-            .send({
-              status: 400,
-              title: `Cannot sort by invalid column name: ${name}`
-            })
+          throw new ValidationError({
+            status: statusCodes.UNPROCESSABLE_ENTITY,
+            title: `Cannot sort on non existing column name: ${name}`,
+            detail: 'The sort parameter must be a column of the model',
+            parameter: `/sort/${name}`,
+            code: codes.ERR_INVALID_PARAMETER
+          })
         }
       })
     }
@@ -157,7 +179,9 @@ const getListHandler = (Model) => {
     const data = await queryBuilder.execute()
 
     if (!data) {
-      return reply.code(404).send()
+      throw new NotFoundError({
+        parameter: 'id'
+      })
     }
 
     const result = Serializer.serialize(pluralize(tableName), data, {
@@ -167,54 +191,66 @@ const getListHandler = (Model) => {
       url: request.url
     })
     reply.send(result)
-  }
+  })
 }
 
 const getDeleteHandler = (Model) => {
-  return async (request, reply) => {
+  return asyncHandler(async (request, reply) => {
     const id = request.params.id
     const numberDeleted = await Model.query().deleteById(id)
-    const status = numberDeleted > 0 ? 204 : 404
-    reply.status(status).send()
-  }
+
+    if (numberDeleted > 0) {
+      reply.status(204).send()
+    } else {
+      throw new NotFoundError({
+        parameter: 'id'
+      })
+    }
+  })
 }
 
 const getUpdateHandler = (Model) => {
-  return async (request, reply) => {
-    try {
-      const updatedGraph = await Model.query().upsertGraphAndFetch(request.body, {
-        update: false,
-        relate: true,
-        unrelate: true
-      })
-      const serialized = Serializer.serialize(
-        pluralize(Model.name.toLowerCase()),
-        updatedGraph
-      )
-      reply.code(200).send(serialized)
-    } catch (e) {
-      if (e.type === 'ModelValidation') {
-        reply.status(e.statusCode).send(e.message)
-      }
-      reply.status(404).send()
-    }
-  }
-}
+  return asyncHandler(async (request, reply) => {
+    const updatedGraph = await Model.query().upsertGraphAndFetch(request.body, {
+      update: false,
+      relate: true,
+      unrelate: true
+    })
 
+    const serialized = Serializer.serialize(
+      pluralize(Model.name.toLowerCase()),
+      updatedGraph
+    )
+
+    reply.code(200).send(serialized)
+  })
+}
 const getPostHandler = (Model) => {
-  return async (request, reply) => {
+  return asyncHandler(async (request, reply) => {
     const { body, url } = request
     if (body.id) {
-      return reply.status(403).send()
+      throw new ValidationError({
+        status: statusCodes.UNPROCESSABLE_ENTITY,
+        title: 'Cannot post with an id',
+        detail: 'The id parameter cannot be set on POST requests',
+        parameter: '/id',
+        code: codes.ERR_INVALID_PARAMETER
+      })
     }
 
     const newModel = await Model.query().insertGraph(body, { relate: true })
-      .catch(e => reply.status(e.statusCode).send(e.message))
     const modelName = pluralize(Model.name.toLowerCase())
-    const data = Serializer.serialize(modelName, newModel, { url: `/${modelName}/${newModel.id}` })
+    const data = Serializer.serialize(modelName, newModel, {
+      url: `/${modelName}/${newModel.id}`
+    })
     const location = `${url}/${newModel.id}`
     return reply.status(201).header('Location', location).send(data)
-  }
+  })
 }
 
-module.exports = { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler }
+module.exports = {
+  getListHandler,
+  getDeleteHandler,
+  getUpdateHandler,
+  getPostHandler
+}

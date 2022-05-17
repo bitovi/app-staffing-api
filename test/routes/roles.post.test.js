@@ -23,9 +23,8 @@ describe('POST /roles', function () {
     Model.knex(knex)
   })
 
-  test('should return 403 if payload body includes id', async function () {
+  test('should return 422 if payload body includes id', async function () {
     const dates = dateGenerator()
-
     const payload = serialize({
       id: faker.datatype.uuid(),
       project: { id: faker.datatype.uuid() },
@@ -33,7 +32,7 @@ describe('POST /roles', function () {
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision })
     })
     const response = await post(payload)
-    expect(response.statusCode).toBe(403)
+    expect(response.statusCode).toBe(422)
   })
 
   test('should return 422 if payload is missing start_date', async function () {
@@ -45,7 +44,9 @@ describe('POST /roles', function () {
     expect(response.statusCode).toBe(422)
 
     const body = JSON.parse(response.body)
-    expect(body.title).toEqual("body should have required property 'start_date'")
+    expect(body.errors[0].detail).toEqual(
+      "body should have required property 'start_date'"
+    )
   })
 
   test('should return 422 if payload is missing start_confidence', async function () {
@@ -59,7 +60,7 @@ describe('POST /roles', function () {
     expect(response.statusCode).toBe(422)
 
     const body = JSON.parse(response.body)
-    expect(body.title).toEqual(
+    expect(body.errors[0].detail).toEqual(
       "body should have required property 'start_confidence'"
     )
   })
@@ -76,7 +77,7 @@ describe('POST /roles', function () {
     expect(response.statusCode).toBe(422)
 
     const body = JSON.parse(response.body)
-    expect(body.title).toEqual('body.start_confidence should be >= 0')
+    expect(body.errors[0].detail).toEqual('body.start_confidence should be >= 0')
   })
 
   test('should return 422 if start_confidence is greater than 1', async function () {
@@ -91,7 +92,7 @@ describe('POST /roles', function () {
     expect(response.statusCode).toBe(422)
 
     const body = JSON.parse(response.body)
-    expect(body.title).toEqual('body.start_confidence should be <= 1')
+    expect(body.errors[0].detail).toEqual('body.start_confidence should be <= 1')
   })
 
   test('should return 422 if payload has unknown fields', async function () {
@@ -116,7 +117,7 @@ describe('POST /roles', function () {
       project: { id: faker.datatype.uuid() }
     })
     const response = await post(payload)
-    expect(response.statusCode).toBe(500)
+    expect(response.statusCode).toBe(409)
   })
 
   test('should fail if associated skill does not exist', async function () {
@@ -135,7 +136,7 @@ describe('POST /roles', function () {
     }
     const payload = serialize(newRole)
     const response = await post(payload)
-    expect(response.statusCode).toBe(500)
+    expect(response.statusCode).toBe(409)
   })
 
   test('should return 201 for valid payload', async function () {
@@ -220,7 +221,6 @@ describe('POST /roles', function () {
     const response = await post(payload)
     expect(response.statusCode).toBe(422)
   })
-
   function post (payload) {
     return global.app.inject({
       method: 'POST',

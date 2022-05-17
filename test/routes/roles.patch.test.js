@@ -36,8 +36,9 @@ describe('PATCH /roles/:id', function () {
     expect(response.statusCode).toBe(404)
   })
 
-  test('should return 404 if associated project does not exist', async function () {
+  test('should return 409 if associated project does not exist', async function () {
     const dates = dateGenerator()
+
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -52,14 +53,19 @@ describe('PATCH /roles/:id', function () {
     })
 
     const payload = serialize({
-      project: { id: faker.datatype.uuid() }
+      project: { id: faker.datatype.uuid() },
+      start_date: faker.date.recent(),
+      start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
+      end_date: faker.date.future(),
+      end_confidence: faker.datatype.float({ min: 0, max: 1, precision })
     })
     const response = await patch(role.id, payload)
-    expect(response.statusCode).toEqual(404)
+    expect(response.statusCode).toEqual(409)
   })
 
-  test('should return 404 if associated skill does not exist', async function () {
+  test('should return 409 if associated skill does not exist', async function () {
     const dates = dateGenerator()
+
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -79,7 +85,7 @@ describe('PATCH /roles/:id', function () {
       skills: [{ id: faker.datatype.uuid() }]
     })
     const response = await patch(role.id, payload)
-    expect(response.statusCode).toEqual(404)
+    expect(response.statusCode).toEqual(409)
   })
 
   test('should return 422 if start_confidence is negative', async function () {
@@ -242,7 +248,6 @@ describe('PATCH /roles/:id', function () {
       project_id: project.id
     }
     const role = await Role.query().insert(roleData)
-
     const payload = serialize({
       ...omit(roleData, ['project_id']),
       project: { id: project.id },
@@ -253,7 +258,6 @@ describe('PATCH /roles/:id', function () {
     const response = await patch(role.id, payload)
     expect(response.statusCode).toEqual(422)
   })
-
   function patch (id, payload) {
     return global.app.inject({
       method: 'PATCH',

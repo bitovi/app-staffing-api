@@ -23,13 +23,14 @@ describe('POST /employees', function () {
     Model.knex(knex)
   })
 
-  test('should return 403 if body includes id', async function () {
+  test('should return 422 if body includes id', async function () {
     const payload = serialize({
+
       id: faker.datatype.uuid(),
       name: faker.name.findName()
     })
     const response = await post(payload)
-    expect(response.statusCode).toBe(403)
+    expect(response.statusCode).toBe(422)
   })
 
   test('should return 201 for valid employee with skills payload', async function () {
@@ -39,8 +40,8 @@ describe('POST /employees', function () {
     const howManySkills = 3
     const skills = await Skill.query()
       .insert(
-        range(howManySkills).map(() => ({
-          name: faker.lorem.word()
+        range(howManySkills).map((num) => ({
+          name: faker.lorem.word() + num
         }))
       )
       .returning('*')
@@ -78,11 +79,12 @@ describe('POST /employees', function () {
       skills: [faker.datatype.uuid()]
     })
     const response = await post(payload)
-    expect(response.statusCode).toBe(500)
+    expect(response.statusCode).toBe(409)
   })
 
-  test('should return 422 if skills payload contains duplicated items', async function () {
+  test('should return 400 if skills payload contains duplicated items', async function () {
     const dates = dateGenerator()
+
     const skillId = faker.datatype.uuid()
 
     const payload = serialize({
@@ -92,8 +94,9 @@ describe('POST /employees', function () {
       skills: [skillId, skillId, skillId]
     })
     const response = await post(payload)
-    expect(response.statusCode).toBe(422)
+    expect(response.statusCode).toBe(400)
   })
+
   test('should return 422 for payload with startDate after endDate', async function () {
     const dates = dateGenerator()
     const skillId = faker.datatype.uuid()
@@ -107,7 +110,6 @@ describe('POST /employees', function () {
     const response = await post(payload)
     expect(response.statusCode).toBe(422)
   })
-
   function post (payload) {
     return global.app.inject({
       method: 'POST',

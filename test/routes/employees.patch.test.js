@@ -36,8 +36,9 @@ describe('PATCH /employees/:id', function () {
     expect(response.statusCode).toBe(404)
   })
 
-  test('should return 404 if employee skill does not exist', async function () {
+  test('should return 409 if employee skill does not exist', async function () {
     const dates = dateGenerator()
+
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
       start_date: dates.startDate,
@@ -56,7 +57,7 @@ describe('PATCH /employees/:id', function () {
 
     const payload = serialize(updatedEmployee)
     const response = await patch(employee.id, payload)
-    expect(response.statusCode).toBe(404)
+    expect(response.statusCode).toBe(409)
   })
 
   test('should add skills to employee record without previous relations', async function () {
@@ -110,8 +111,8 @@ describe('PATCH /employees/:id', function () {
     const howManySkills = 3
     const skills = await Skill.query()
       .insert(
-        range(howManySkills).map(() => ({
-          name: faker.lorem.word()
+        range(howManySkills).map((num) => ({
+          name: faker.lorem.word() + num
         }))
       )
       .returning('*')
@@ -184,6 +185,23 @@ describe('PATCH /employees/:id', function () {
     updatedEmployee.end_date = dates.beforeStartDate
 
     const payload = serialize(updatedEmployee)
+    const response = await patch(employee.id, payload)
+
+    expect(response.statusCode).toBe(422)
+  })
+
+  test('should return 422 when updates\'s payload has a startDate that is after endDate', async function () {
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: faker.date.past(),
+      end_date: faker.date.future()
+    })
+
+    const updatedEmployee = cloneDeep(employee)
+    updatedEmployee.start_date = faker.date.future()
+    updatedEmployee.end_date = faker.date.past()
+
+    const payload = Serializer.serialize('employees', updatedEmployee)
     const response = await patch(employee.id, payload)
 
     expect(response.statusCode).toBe(422)

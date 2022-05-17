@@ -105,8 +105,8 @@ describe('PATCH /employees/:id', function () {
     const howManySkills = 3
     const skills = await Skill.query()
       .insert(
-        range(howManySkills).map(() => ({
-          name: faker.lorem.word()
+        range(howManySkills).map((num) => ({
+          name: faker.lorem.word() + num
         }))
       )
       .returning('*')

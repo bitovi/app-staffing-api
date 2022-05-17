@@ -523,7 +523,6 @@ describe.each(routesSchemas)('%s: GET include relations', (myroute) => {
   const objname = myroute.routeName
   const relations = myroute.relations
   const createdIDs = {}
-  const dates = dateGenerator()
 
   beforeAll(async () => {
     // create 2 of objname

@@ -55,7 +55,7 @@ describe('Overlapping assignments are prevented while multiple records are inser
     const response = await post(payload)
     if (response.statusCode === 201) idList.push(response.headers.location.split('/')[2])
     expect(response.statusCode).toEqual(expected)
-  }, 0)
+  })
 
   function post (payload) {
     return global.app.inject({

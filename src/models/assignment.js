@@ -52,12 +52,12 @@ module.exports = class Assignment extends Model {
     await this.validateRoleOverlap(this)
     const trx = await Assignment.startTransaction()
     await this.validateAssignmentOverlap(this, trx)
-    queryContext._resoloveTransaction = trx
+    queryContext._resolveTransaction = trx
   }
 
   async $afterInsert (queryContext) {
     await super.$afterInsert(queryContext)
-    await queryContext._resoloveTransaction.commit()
+    await queryContext._resolveTransaction.commit()
   }
 
   async $beforeUpdate (opt, queryContext) {
@@ -66,38 +66,32 @@ module.exports = class Assignment extends Model {
     await this.validateRoleOverlap(this)
     const trx = await Assignment.startTransaction()
     await this.validateAssignmentOverlap(this, trx)
-    queryContext._resoloveTransaction = trx
-  }
-
-  async $afterUpdate (opt, queryContext) {
-    await super.$afterUpdate(opt, queryContext)
-    await queryContext._resoloveTransaction.commit()
+    await trx.commit()
   }
 
   async validateAssignmentOverlap (body, trx) {
-    let data
+    let assignmentList
     try {
-      Assignment.query(trx)
+      await Assignment.query(trx)
         .where('employee_id', '=', body.employee_id)
         .forUpdate()
       if (body.end_date) {
-        data = await Assignment.query(trx)
+        assignmentList = await Assignment.query(trx)
           .where('employee_id', '=', body.employee_id)
           .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")',
             [body.start_date, body.end_date])
       } else { // If end_date is entered is blank or null
-        data = await Assignment.query(trx)
+        assignmentList = await Assignment.query(trx)
           .where('employee_id', '=', body.employee_id)
           .andWhereRaw('(?, \'infinity\') OVERLAPS ("start_date", "end_date")', body.start_date)
-          .forUpdate()
+      }
+      if (body.id) {
+        assignmentList = assignmentList.filter(e => e.id !== body.id)
+      }
+      if (assignmentList.length > 0) {
+        throw new Error('Overlap')
       }
     } catch (e) {
-      await trx.rollback()
-    }
-    if (body.id) {
-      data = data.filter(e => e.id !== body.id)
-    }
-    if (data.length > 0) {
       await trx.rollback()
       throw new ValidationError({
         title: 'Employee already assigned',
@@ -105,45 +99,45 @@ module.exports = class Assignment extends Model {
         pointer: 'employee/id'
       })
     }
-    // Check for DB deadlock
-    // else {
-    //   await Assignment.query(trx).where('employee_id', '=', body.employee_id)
-    //     .timeout(999999999999999)
-    // }
   }
 
   async validateRoleOverlap (body) {
     const role = await Role.query()
       .findById(body.role_id)
       .select('start_date', 'end_date')
-    const assignmentStart = new Date(body.start_date)
-    const assignmentEnd = new Date(body.end_date)
-
     if (!role) {
       throw new ConflictError({
         pointer: 'role/id'
       })
     }
-
-    /*
-    This if statement checks for the following scenarios:
-    1. If there is no end date in assignment and the assignment start date is outside of the role's start and end date
-    2. If there is no end date in role and the assignment start or end date is before the role's start date
-    3. If both the role and assignment end date are not null and assignment start is before role start or assignment end is after role end
-     If any of these scenarios are true, throw a Validation Error
-     */
-    if (
-      // 1
-      (body.end_date === null && (assignmentStart < role.start_date || assignmentStart > role.end_date)) ||
-      // 2
-      (role.end_date === null && (assignmentStart < role.start_date || assignmentEnd < role.start_date)) ||
-      // 3
-      ((body.end_date !== null && role.end_date !== null) &&
-        (assignmentStart < role.start_date || assignmentEnd > role.end_date))) {
+    const assignmentStart = new Date(body.start_date)
+    const assignmentEnd = body.end_date && new Date(body.end_date)
+    const assignmentBeforeRoleStart = assignmentStart < role.start_date
+    if (assignmentEnd && !role.end_date && assignmentStart < role.start_date) {
       throw new ValidationError({
-        title: 'Assignment not in date range of role',
+        message: 'Assignment start date not in date range of role',
         status: statusCodes.CONFLICT,
         pointer: 'start_date'
+      })
+    } else if (
+      (assignmentEnd && (assignmentBeforeRoleStart || assignmentStart > role.end_date))) {
+      throw new ValidationError({
+        message: 'Assignment start date not in date range of role',
+        status: statusCodes.CONFLICT,
+        pointer: 'start_date'
+      })
+    } else if (!role.end_date && (assignmentBeforeRoleStart || assignmentEnd < role.start_date)) {
+      throw new ValidationError({
+        message: 'Assignment dates are before role start date',
+        status: statusCodes.CONFLICT,
+        pointer: assignmentBeforeRoleStart ? 'start_date' : 'end_date'
+      })
+    } else if ((assignmentEnd && role.end_date) &&
+      (assignmentBeforeRoleStart || assignmentEnd > role.end_date)) {
+      throw new ValidationError({
+        message: 'Assignment not in date range of role',
+        status: statusCodes.CONFLICT,
+        pointer: assignmentBeforeRoleStart ? 'start_date' : 'end_date'
       })
     }
   }

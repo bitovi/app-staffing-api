@@ -54,9 +54,9 @@ describe('PATCH /roles/:id', function () {
 
     const payload = serialize({
       project: { id: faker.datatype.uuid() },
-      start_date: faker.date.recent(),
+      start_date: dates.startAssignmentDate,
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-      end_date: faker.date.future(),
+      end_date: dates.endAssignmentDate,
       end_confidence: faker.datatype.float({ min: 0, max: 1, precision })
     })
     const response = await patch(role.id, payload)

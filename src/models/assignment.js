@@ -95,7 +95,7 @@ module.exports = class Assignment extends Model {
     } catch (e) {
       await trx.rollback()
       throw new ValidationError({
-        message: 'Employee already assigned',
+        title: 'Employee already assigned',
         status: 409,
         pointer: 'employee/id'
       })

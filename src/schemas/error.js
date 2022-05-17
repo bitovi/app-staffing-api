@@ -13,9 +13,9 @@ const errorSchema = {
     enum: Object.values(codes),
     example: 'invalid-parameter'
   },
-  message: {
+  title: {
     type: 'string',
-    description: 'error message',
+    description: 'error title',
     example: 'Invalid parameter'
   },
   detail: {

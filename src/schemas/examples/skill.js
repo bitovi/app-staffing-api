@@ -138,7 +138,7 @@ module.exports = {
           {
             status: 404,
             code: 'not-found',
-            message: 'Not found',
+            title: 'Not found',
             source: {
               parameter: 'id'
             }
@@ -170,7 +170,7 @@ module.exports = {
             source: {
               pointer: '/data/attributes/name'
             },
-            message: 'Record with name already exists'
+            title: 'Record with name already exists'
           }
         ]
       },
@@ -179,7 +179,7 @@ module.exports = {
           {
             status: 422,
             code: 'parameter-required',
-            message: "should have required property 'name'",
+            title: "should have required property 'name'",
             detail: "body should have required property 'name'",
             source: {
               pointer: '/data/attributes/name'
@@ -212,7 +212,7 @@ module.exports = {
             source: {
               pointer: '/data/attributes/name'
             },
-            message: 'Record with name already exists'
+            title: 'Record with name already exists'
           }
         ]
       },
@@ -221,7 +221,7 @@ module.exports = {
           {
             status: 422,
             code: 'invalid-parameter',
-            message: 'nam is an invalid parameter',
+            title: 'nam is an invalid parameter',
             detail: 'body should NOT have additional properties',
             source: {
               pointer: '/data/attributes/nam'
@@ -236,7 +236,7 @@ module.exports = {
           {
             status: 404,
             code: 'not-found',
-            message: 'Not found',
+            title: 'Not found',
             source: {
               parameter: 'id'
             }

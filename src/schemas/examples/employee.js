@@ -170,7 +170,7 @@ module.exports = {
           {
             status: 404,
             code: 'not-found',
-            message: 'Not found',
+            title: 'Not found',
             source: {
               parameter: 'id'
             }
@@ -211,7 +211,7 @@ module.exports = {
           {
             status: 409,
             source: {},
-            message: 'Foreign key constraint violation'
+            title: 'Foreign key constraint violation'
           }
         ]
       },
@@ -220,7 +220,7 @@ module.exports = {
           {
             status: 422,
             code: 'parameter-required',
-            message: "should have required property 'name'",
+            title: "should have required property 'name'",
             detail: "body should have required property 'name'",
             source: {
               pointer: '/data/attributes/name'
@@ -271,7 +271,7 @@ module.exports = {
           {
             status: 409,
             source: {},
-            message: 'Foreign key constraint violation'
+            title: 'Foreign key constraint violation'
           }
         ]
       },
@@ -284,7 +284,7 @@ module.exports = {
             source: {
               pointer: '/data/attributes/something'
             },
-            message: 'something is an invalid parameter'
+            title: 'something is an invalid parameter'
           }
         ]
       }
@@ -295,7 +295,7 @@ module.exports = {
           {
             status: 404,
             code: 'not-found',
-            message: 'Not found',
+            title: 'Not found',
             source: {
               parameter: 'id'
             }

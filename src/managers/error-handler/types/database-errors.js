@@ -28,20 +28,20 @@ const databaseErrorHandlers = (error) => {
       case 'UnallowedRelation':
       case 'InvalidGraph':
       default:
-        error = new ValidationError({ message, status: statusCode || status })
+        error = new ValidationError({ title: message, status: statusCode || status })
 
         break
     }
   } else if (error.constructor !== ValidationError) {
     switch (error.constructor) {
       case ObjectionNotFoundError:
-        error = new NotFoundError({ message })
+        error = new NotFoundError({ title: message })
 
         break
 
       case UniqueViolationError:
         error = new UniqueConstraintError({
-          message: `Record with ${error.columns[0]} already exists`,
+          title: `Record with ${error.columns[0]} already exists`,
           pointer: error.columns[0]
         })
 
@@ -52,7 +52,7 @@ const databaseErrorHandlers = (error) => {
       case ConstraintViolationError:
       case DataError:
         error = new GeneralError({
-          message,
+          title: message,
           pointer: error.column,
           status: statusCodes.BAD_REQUEST
         })
@@ -61,7 +61,7 @@ const databaseErrorHandlers = (error) => {
 
       case ForeignKeyViolationError:
         error = new GeneralError({
-          message: 'Foreign key constraint violation',
+          title: 'Foreign key constraint violation',
           status: statusCodes.CONFLICT
         })
 
@@ -70,7 +70,7 @@ const databaseErrorHandlers = (error) => {
       case DBError:
       default:
         error = new GeneralError({
-          message,
+          title: message,
           status: statusCodes.INTERNAL_SERVER_ERROR
         })
 

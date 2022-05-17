@@ -14,7 +14,7 @@ const ajvValidationErrorHandlers = require('./types/ajv-validation-errors')
 const databaseErrorHandlers = require('./types/database-errors')
 const generalErrorHandlers = require('./types/general-errors')
 
-const errorHandler = (error, request, reply) => {
+const errorHandler = function (error, _, reply) {
   let errors = []
   let status = statusCodes.INTERNAL_SERVER_ERROR
 
@@ -43,6 +43,8 @@ const errorHandler = (error, request, reply) => {
 
     status = errors[0].status
   }
+
+  this.log.error({ ...error, statusCode: status })
 
   reply.status(status).send({
     errors

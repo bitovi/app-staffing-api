@@ -8,27 +8,27 @@ class Source {
 }
 
 class GeneralError extends Error {
-  constructor ({ message, status, code, detail, pointer, parameter }) {
+  constructor ({ title, status, code, detail, pointer, parameter }) {
     super()
     this.status = status || statusCodes.INTERNAL_SERVER_ERROR
     this.code = code
     this.detail = detail
     this.source = new Source(pointer, parameter)
-    super.message = message || 'Server Error ocurred'
+    this.title = title || 'Server Error ocurred'
   }
 }
 
 class ValidationError extends GeneralError {
-  constructor ({ message, status, code, detail, pointer, parameter }) {
-    super({ message, status, code, detail, pointer, parameter })
+  constructor ({ title, status, code, detail, pointer, parameter }) {
+    super({ title, status, code, detail, pointer, parameter })
     this.status = status || statusCodes.BAD_REQUEST
   }
 }
 
 class NotFoundError extends GeneralError {
-  constructor ({ message, detail, pointer, parameter }) {
+  constructor ({ title, detail, pointer, parameter }) {
     super({
-      message: message || 'Not found',
+      title: title || 'Not found',
       detail,
       pointer,
       parameter
@@ -39,9 +39,9 @@ class NotFoundError extends GeneralError {
 }
 
 class UniqueConstraintError extends GeneralError {
-  constructor ({ message, detail, pointer, parameter }) {
+  constructor ({ title, detail, pointer, parameter }) {
     super({
-      message: message || 'Conflict',
+      title: title || 'Conflict',
       detail,
       pointer,
       parameter
@@ -52,9 +52,9 @@ class UniqueConstraintError extends GeneralError {
 }
 
 class ConflictError extends GeneralError {
-  constructor ({ message, detail, pointer, parameter }) {
-    super({ message, detail, pointer, parameter })
-    this.message = message || 'Conflict'
+  constructor ({ title, detail, pointer, parameter }) {
+    super({ title, detail, pointer, parameter })
+    this.title = title || 'Conflict'
     this.code = codes.ERR_CONFLICT
     this.status = statusCodes.CONFLICT
   }

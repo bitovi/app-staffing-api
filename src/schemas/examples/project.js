@@ -169,7 +169,7 @@ module.exports = {
           {
             status: 404,
             code: 'not-found',
-            message: 'Not found',
+            title: 'Not found',
             source: {
               parameter: 'id'
             }
@@ -198,7 +198,7 @@ module.exports = {
           {
             status: 422,
             code: 'invalid-parameter',
-            message: 'something is an invalid parameter',
+            title: 'something is an invalid parameter',
             detail: 'body should NOT have additional properties',
             source: {
               pointer: '/data/attributes/something'
@@ -229,7 +229,7 @@ module.exports = {
           {
             status: 422,
             code: 'invalid-parameter',
-            message: 'descriptio is an invalid parameter',
+            title: 'descriptio is an invalid parameter',
             detail: 'body should NOT have additional properties',
             source: {
               pointer: '/data/attributes/descriptio'
@@ -244,7 +244,7 @@ module.exports = {
           {
             status: 404,
             code: 'not-found',
-            message: 'Not found',
+            title: 'Not found',
             source: {
               parameter: 'id'
             }

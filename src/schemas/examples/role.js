@@ -202,7 +202,7 @@ module.exports = {
           {
             status: 404,
             code: 'not-found',
-            message: 'Not found',
+            title: 'Not found',
             source: {
               parameter: 'id'
             }
@@ -251,7 +251,7 @@ module.exports = {
           {
             status: 409,
             source: {},
-            message: 'Foreign key constraint violation'
+            title: 'Foreign key constraint violation'
           }
         ]
       },
@@ -260,7 +260,7 @@ module.exports = {
           {
             status: 422,
             code: 'parameter-required',
-            message: "should have required property 'start_date'",
+            title: "should have required property 'start_date'",
             detail: "body should have required property 'start_date'",
             source: {
               pointer: '/data/attributes/start_date'
@@ -328,7 +328,7 @@ module.exports = {
           {
             status: 409,
             source: {},
-            message: 'Foreign key constraint violation'
+            title: 'Foreign key constraint violation'
           }
         ]
       },
@@ -336,7 +336,7 @@ module.exports = {
         errors: [
           {
             status: 422,
-            message: 'startDate is after endDate',
+            title: 'startDate is after endDate',
             source: {
               pointer: '/data/attributes/start_date'
             }
@@ -350,7 +350,7 @@ module.exports = {
           {
             status: 404,
             code: 'not-found',
-            message: 'Not found',
+            title: 'Not found',
             source: {
               parameter: 'id'
             }

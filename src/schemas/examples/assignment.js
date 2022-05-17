@@ -186,7 +186,7 @@ module.exports = {
           {
             status: 404,
             code: 'not-found',
-            message: 'Not found',
+            title: 'Not found',
             source: {
               parameter: 'id'
             }
@@ -235,7 +235,7 @@ module.exports = {
             source: {
               pointer: '/data/attributes/role/id'
             },
-            message: 'Conflict'
+            title: 'Conflict'
           }
         ]
       },
@@ -244,7 +244,7 @@ module.exports = {
           {
             status: 422,
             code: 'parameter-required',
-            message: "should have required property 'employee'",
+            title: "should have required property 'employee'",
             detail: "body should have required property 'employee'",
             source: {
               pointer: '/data/attributes/employee'
@@ -316,7 +316,7 @@ module.exports = {
             source: {
               pointer: '/data/attributes/role/id'
             },
-            message: 'Conflict'
+            title: 'Conflict'
           }
         ]
       },
@@ -325,7 +325,7 @@ module.exports = {
           {
             status: 422,
             code: 'invalid-parameter',
-            message: 'employe is an invalid parameter',
+            title: 'employe is an invalid parameter',
             detail: 'body should NOT have additional properties',
             source: {
               pointer: '/data/attributes/employe'
@@ -340,7 +340,7 @@ module.exports = {
           {
             status: 404,
             code: 'not-found',
-            message: 'Not found',
+            title: 'Not found',
             source: {
               parameter: 'id'
             }

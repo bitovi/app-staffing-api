@@ -9,7 +9,7 @@ const ajvValidationErrorHandlers = (error) => {
       case 'minimum':
       case 'maximum':
         errors.push(new ValidationError({
-          message: validationBody.message,
+          title: validationBody.message,
           status: statusCodes.UNPROCESSABLE_ENTITY,
           pointer: validationBody.dataPath.split('.')[1],
           code: codes.ERR_RANGE,
@@ -22,7 +22,7 @@ const ajvValidationErrorHandlers = (error) => {
         errors.push(new ValidationError({
           status: statusCodes.UNPROCESSABLE_ENTITY,
           code: codes.ERR_PARAMETER_REQUIRED,
-          message: validationBody.message,
+          title: validationBody.message,
           detail: error.message,
           pointer: validationBody.params.missingProperty
         }))
@@ -32,7 +32,7 @@ const ajvValidationErrorHandlers = (error) => {
         errors.push(new ValidationError({
           status: statusCodes.UNPROCESSABLE_ENTITY,
           code: codes.ERR_INVALID_PARAMETER,
-          message: `${validationBody.params.additionalProperty} is an invalid parameter`,
+          title: `${validationBody.params.additionalProperty} is an invalid parameter`,
           detail: error.message,
           pointer: validationBody.params.additionalProperty
         }))
@@ -40,7 +40,7 @@ const ajvValidationErrorHandlers = (error) => {
 
       default:
         errors.push(new ValidationError({
-          message: validationBody.message,
+          title: validationBody.message,
           detail: error.message
         }))
         break

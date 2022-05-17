@@ -70,7 +70,7 @@ const create = {
     additionalProperties: false,
     example: project.request.create
   },
-  errorMessage: {
+  errortitle: {
     required: {
       name: 'name is required'
     }

@@ -22,8 +22,8 @@ const dateGenerator = function () {
     startBeforeAssignmentDate: toDateFormat(faker.date.between(start, startAssignmentDate)),
     startAssignmentDate: toDateFormat(startAssignmentDate),
     endAssignmentDate: toDateFormat(endAssignmentDate),
-    endAfterAssignmentDate: toDateFormat(faker.date.between(endAssignmentDate, end), 2),
-    endDate: toDateFormat(end, 3),
+    endAfterAssignmentDate: toDateFormat(faker.date.between(endAssignmentDate, end), 3),
+    endDate: toDateFormat(end, 5),
     afterEndDate: toDateFormat(faker.date.future(5, new Date(end.setFullYear(end.getFullYear() + 1))))
   }
 }

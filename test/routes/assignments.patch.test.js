@@ -72,7 +72,7 @@ describe('PATCH /assignments/:id', function () {
       role: {
         id: role.id
       },
-      start_date: '2021-08-07T13:34:29.613Z',
+      start_date: dates.startBeforeAssignmentDate,
       end_date: null
     })
 
@@ -190,7 +190,6 @@ describe('PATCH /assignments/:id', function () {
     )
 
     const payload = serialize({ ...newAssignment, end_date: null })
-    })
 
     const response = await patch(assignment.id, payload)
 
@@ -209,7 +208,7 @@ describe('PATCH /assignments/:id', function () {
 
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: dates.startDate,
+      start_date: dates.startDate
     })
 
     const role = await Role.query().insert({
@@ -239,8 +238,8 @@ describe('PATCH /assignments/:id', function () {
     const payload = serialize({
       ...newAssignment,
       employee: { id: newAssociatedEmployee.id },
-      start_date: '2024-03-25 00:00:01.000 -0400',
-      end_date: '2024-05-25 00:00:01.000 -0400'
+      start_date: dates.startAssignmentDate,
+      end_date: dates.endAssignmentDate
     })
     const response = await patch(assignment.id, payload)
 
@@ -248,7 +247,6 @@ describe('PATCH /assignments/:id', function () {
     const responseBody = deserialize(JSON.parse(response.body))
     expect(responseBody.employee.id).toEqual(newAssociatedEmployee.id)
   })
-  // These following tests will be moved to dedicated validation test page in assignment overlap validation branch
   test('should return 409 for payload dates out of range of role, assignment dates before roles', async function () {
     const dates = dateGenerator()
     const project = await Project.query().insert({

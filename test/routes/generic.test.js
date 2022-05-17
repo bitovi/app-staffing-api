@@ -658,7 +658,6 @@ async function createDbObject (objname, createdIDs, dates, useExisting = false) 
   for (const [key, value] of Object.entries(properties)) {
     if (primaryKeys.includes(key)) continue
     objectToBeCreated[key] = objectToBeCreated[key] || createFakeData(key, value, dates)
-
   }
 
   const createdObject = await Model.query().insert(

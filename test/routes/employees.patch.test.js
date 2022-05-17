@@ -77,8 +77,8 @@ describe('PATCH /employees/:id', function () {
     const howManySkills = 3
     const skills = await Skill.query()
       .insert(
-        range(howManySkills).map(() => ({
-          name: faker.lorem.word()
+        range(howManySkills).map((num) => ({
+          name: faker.lorem.word() + num
         }))
       )
       .returning('*')
@@ -165,9 +165,7 @@ describe('PATCH /employees/:id', function () {
     const responseBody = deserialize(JSON.parse(response.body))
     expect(responseBody.start_date).toBeNull()
     expect(responseBody.end_date).toBeNull()
-    console.log(responseBody)
     const dbEmployee = await Employee.query().findById(employee.id)
-    console.log(dbEmployee)
     expect(dbEmployee.start_date).toBeNull()
     expect(dbEmployee.end_date).toBeNull()
   })

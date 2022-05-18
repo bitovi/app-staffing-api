@@ -5,12 +5,14 @@ const Project = require('../../src/models/project')
 const Employee = require('../../src/models/employee')
 const Assignment = require('../../src/models/assignment')
 const { Serializer } = require('../../src/json-api-serializer')
+const { dateGenerator } = require('../../src/utils/date-utils')
 
 describe('Overlapping assignments are prevented while multiple records are inserted at the same time', function () {
   const idList = []
   let project
   let role
   let employee
+  const dates = dateGenerator()
   beforeAll(async () => {
     project = await Project.query().insert({
       name: faker.company.companyName(),
@@ -18,13 +20,13 @@ describe('Overlapping assignments are prevented while multiple records are inser
     })
     employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
+      start_date: dates.startDate,
+      end_date: dates.endDate
     })
     role = await Role.query().insert({
-      start_date: '1001-01-15 00:00:01.000 -0000',
+      start_date: dates.beforeStartDate,
       start_confidence: faker.datatype.number(10),
-      end_date: '1003-01-15 00:00:01.000 -0000',
+      end_date: dates.afterEndDate,
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })
@@ -39,11 +41,9 @@ describe('Overlapping assignments are prevented while multiple records are inser
 
   test.concurrent.each(
     [
-      ['insert is successful, should return 201', '1001-01-15 00:00:01.000 -0000', '1001-03-20 00:00:01.000 -0000', 201],
-      ['overlap detected, should return 409', '1001-02-15 00:00:01.000 -0000', '1001-03-22 00:00:01.000 -0000', 409],
-      ['overlap detected, should return 409', '1001-01-01 00:00:01.000 -0000', '1002-03-01 00:00:01.000 -0000', 409],
-      ['insert is successful, should return 201', '1002-02-15 00:00:01.000 -0000', '1002-03-20 00:00:01.000 -0000', 201],
-      ['overlap detected, should return 409', '1002-02-15 00:00:01.000 -0000', '1002-03-27 00:00:01.000 -0000', 409]
+      ['insert is successful, should return 201', dates.startDate, dates.endAssignmentDate, 201],
+      ['overlap detected, should return 409', dates.startDate, dates.endAfterAssignmentDate, 409],
+      ['overlap detected, should return 409', dates.startDate, dates.endDate, 409]
     ])('%s', async (title, start, end, expected) => {
     const newAssignment = {
       start_date: start,
@@ -80,6 +80,8 @@ describe('Overlapping assignments are prevented while multiple records are updat
   let employee
   let assignment
   let newAssignment
+  const dates = dateGenerator()
+
   beforeAll(async () => {
     project = await Project.query().insert({
       name: faker.company.companyName(),
@@ -91,21 +93,21 @@ describe('Overlapping assignments are prevented while multiple records are updat
       end_date: faker.date.future()
     })
     role = await Role.query().insert({
-      start_date: '1001-01-01 00:00:01.000 -0000',
+      start_date: dates.beforeStartDate,
       start_confidence: faker.datatype.number(10),
-      end_date: '3003-03-30 00:00:01.000 -0000',
+      end_date: dates.afterEndDate,
       end_confidence: faker.datatype.number(10),
       project_id: project.id
     })
     newAssignment = {
-      start_date: '1001-01-15 00:00:01.000 -0000',
-      end_date: '1001-02-25 00:00:01.000 -0000',
+      start_date: dates.startAssignmentDate,
+      end_date: dates.endAssignmentDate,
       employee: { id: employee.id },
       role: { id: role.id }
     }
     await Assignment.query().insert({
-      start_date: '1001-01-01 00:00:01.000 -0000',
-      end_date: '1001-01-10 00:00:01.000 -0000',
+      start_date: dates.startDate,
+      end_date: dates.startBeforeAssignmentDate,
       employee_id: employee.id,
       role_id: role.id
     }
@@ -125,12 +127,10 @@ describe('Overlapping assignments are prevented while multiple records are updat
 
   test.concurrent.each(
     [
-      ['patch is successful, should return 200', '1001-03-15 00:00:01.000 -0000', '1001-03-20 00:00:01.000 -0000', 200],
-      ['overlap detected, should return 409', '1001-02-15 00:00:01.000 -0000', '1001-03-20 00:00:01.000 -0000', 409],
-      ['overlap detected, should return 409', '1001-01-01 00:00:01.000 -0000', '1001-02-20 00:00:01.000 -0000', 409],
-      ['overlap detected, should return 409', '1001-02-15 00:00:01.000 -0000', null, 409],
-      ['patch is successful, should return 200', '1002-05-15 00:00:01.000 -0000', '1002-05-20 00:00:01.000 -0000', 200],
-      ['overlap detected, should return 409', '1001-02-17 00:00:01.000 -0000', '1002-03-20 00:00:01.000 -0000', 409]
+      ['patch is successful, should return 200', dates.endAssignmentDate, dates.endAfterAssignmentDate, 200],
+      ['overlap detected, should return 409', dates.startBeforeAssignmentDate, dates.endAfterAssignmentDate, 409],
+      ['overlap detected, should return 409', dates.startDate, dates.endAssignmentDate, 409],
+      ['overlap detected, should return 409', dates.startDate, null, 409]
 
     ])('%s', async (title, start, end, expected) => {
     const payload = serialize({

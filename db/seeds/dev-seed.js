@@ -8,7 +8,7 @@ const { dateGenerator } = require('../../src/utils/date-utils')
 const NUMBER_OF_RECORDS_TO_INSERT = 15
 
 const fakesCache = new Map()
-
+const dates = dateGenerator()
 function generateAndCacheFake (keyPrefix, key, generator) {
   const prefixedKey = `${keyPrefix}.${key}`
   let value
@@ -64,9 +64,9 @@ function fakeProject (key) {
 
 function fakeRole (key, mixin = {}) {
   return generateAndCacheFake('role', key, () => Object.assign({}, mixin, {
-    start_date: new Date(faker.date.recent()).toISOString(),
+    start_date: dates.startDate,
     start_confidence: faker.datatype.number(10),
-    end_date: new Date(faker.date.future()).toISOString(),
+    end_date: dates.endDate,
     end_confidence: faker.datatype.number(10)
   }))
 }
@@ -112,7 +112,7 @@ const seed = async (knex) => {
 
               employee: {
                 name: fakeEmployee(i),
-                start_date: new Date(faker.date.past()).toISOString(),
+                start_date: dates.startDate,
                 end_date: null,
 
                 skills: [

@@ -13,7 +13,7 @@ const dateGenerator = function () {
   const startAssignmentDate = faker.date.between(start, midpoint)
   const endAssignmentDate = faker.date.between(midpoint, end)
   // Formats the date to 'YYYY-MM-DD' and if the offset parameter is passed in, adds the offset to the day to avoid overlap
-  const toDateFormat = (date, offset = false) => {
+  const toDateFormat = (date, offset = 0) => {
     return `${date.getFullYear() + 1}-${date.getMonth() + 1}-${offset ? date.getDay() + offset : date.getDay() + 1}`
   }
   return {

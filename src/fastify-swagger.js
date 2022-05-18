@@ -1,3 +1,4 @@
+const errorSchema = require('./schemas/error')
 const assignmentSchema = require('./schemas/assignment')
 const employeeSchema = require('./schemas/employee')
 const projectSchema = require('./schemas/project')
@@ -17,8 +18,8 @@ module.exports = function setupFastifySwagger (fastify) {
         url: 'https://swagger.io',
         description: 'Find more info here'
       },
-      consumes: ['application/vnd.api+json'],
-      produces: ['application/vnd.api+json'],
+      consumes: ['application/vnd.api+json', 'application/json'],
+      produces: ['application/vnd.api+json', 'application/json'],
       tags: [
         { name: 'assignment', description: 'Assignment-related endpoints' },
         { name: 'employee', description: 'Employee-related endpoints' },
@@ -27,6 +28,13 @@ module.exports = function setupFastifySwagger (fastify) {
         { name: 'skill', description: 'Skill-related endpoints' }
       ],
       definitions: {
+        Error: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: errorSchema
+          }
+        },
         Assignment: { type: 'object', properties: assignmentSchema.properties },
         Employee: { type: 'object', properties: employeeSchema.properties },
         Project: { type: 'object', properties: projectSchema.properties },

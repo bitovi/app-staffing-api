@@ -1,8 +1,7 @@
-const { makeQueryStringFilters, makeQueryStringFields } = require('../utils')
+const { makeQueryStringFilters, makeQueryStringFields, parseErrorExamples } = require('../utils')
 const queryStringSchema = require('./query-string')
 const { makeIdParams } = require('./params')
 const skill = require('./examples/skill')
-const error = require('./error')
 
 const properties = {
   id: { type: 'string', format: 'uuid' },
@@ -11,38 +10,7 @@ const properties = {
     description: 'The name of the skill'
   }
 }
-const exampleGetResponse = {
-  jsonapi: {
-    version: '1.0'
-  },
-  links: {
-    self: '/skills/20b853c7-2747-4c2d-8659-fa0777ab4d64'
-  },
-  data: {
-    type: 'skills',
-    id: '20b853c7-2747-4c2d-8659-fa0777ab4d64',
-    attributes: {
-      name: 'mobile.js'
-    }
-  }
-}
-const exampleCreateResponse = {
-  jsonapi: {
-    version: '1.0'
-  },
-  links: {
-    self: '',
-    first: '?',
-    prev: '?'
-  },
-  data: {
-    type: 'skills',
-    id: 'b691fad7-27ba-4d40-9545-cecca582b9a8',
-    attributes: {
-      name: 'example skill'
-    }
-  }
-}
+
 const name = 'skill'
 const tags = [name]
 
@@ -75,12 +43,9 @@ const get = {
     default: {
       description: 'Default response',
       type: 'object',
-      example: exampleGetResponse
+      example: skill.response.get[200]
     },
-    404: {
-      description: 'Error: Not Found',
-      type: 'object'
-    }
+    404: parseErrorExamples({ description: 'Error: Not Found', example: skill.response.get[404] })
   }
 }
 const create = {
@@ -99,14 +64,10 @@ const create = {
       description: 'Default response',
       type: 'object',
       properties: {},
-      example: exampleCreateResponse
+      example: skill.response.create[201]
     },
-    422: {
-      description: 'Error: Unprocessable Entity',
-      type: 'object',
-      properties: error,
-      example: skill.response.patch[422]
-    }
+    409: parseErrorExamples({ description: 'Error: Conflict', example: skill.response.create[409] }),
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity', example: skill.response.create[422] })
   }
 }
 const patch = {
@@ -126,16 +87,8 @@ const patch = {
       type: 'object',
       example: skill.response.patch[200]
     },
-    404: {
-      description: 'Not Found',
-      type: 'object'
-    },
-    422: {
-      description: 'Error: Unprocessable Entity',
-      type: 'object',
-      properties: error,
-      example: skill.response.patch[422]
-    }
+    409: parseErrorExamples({ description: 'Error: Conflict', example: skill.response.patch[409] }),
+    422: parseErrorExamples({ description: 'Error: Unprocessable Entity', example: skill.response.patch[422] })
   }
 }
 const remove = {
@@ -148,10 +101,7 @@ const remove = {
       description: 'Default response',
       type: 'object'
     },
-    404: {
-      description: 'Error: Not Found',
-      type: 'object'
-    }
+    404: parseErrorExamples({ description: 'Error: Not Found', example: skill.response.remove[404] })
   }
 }
 

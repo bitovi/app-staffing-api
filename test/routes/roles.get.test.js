@@ -6,7 +6,6 @@ const { transaction, Model } = require('objection')
 const Role = require('../../src/models/role')
 const Project = require('../../src/models/project')
 const { Serializer } = require('../../src/json-api-serializer')
-const { dateGenerator } = require('../../src/utils/date-utils')
 
 describe('GET /roles', function () {
   let trx
@@ -24,8 +23,6 @@ describe('GET /roles', function () {
   })
 
   test('should filter by project_id', async function () {
-    const dates = dateGenerator()
-
     const projectA = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -42,9 +39,9 @@ describe('GET /roles', function () {
     await Promise.all(
       range(projectARolesTotal).map(() => {
         return Role.query().insert({
-          start_date: dates.startDate,
+          start_date: faker.date.recent(),
           start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-          end_date: dates.endDate,
+          end_date: faker.date.future(),
           end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
           project_id: projectA.id
         })
@@ -54,9 +51,9 @@ describe('GET /roles', function () {
     await Promise.all(
       range(projectBRolesTotal).map(() => {
         return Role.query().insert({
-          start_date: dates.beforeStartDate,
+          start_date: faker.date.recent(),
           start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-          end_date: dates.afterRoleEndDate,
+          end_date: faker.date.future(),
           end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
           project_id: projectB.id
         })

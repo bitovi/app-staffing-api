@@ -7,7 +7,6 @@ const { transaction, Model } = require('objection')
 const Skill = require('../../src/models/skill')
 const Employee = require('../../src/models/employee')
 const { Serializer } = require('../../src/json-api-serializer')
-const { dateGenerator } = require('../../src/utils/date-utils')
 
 describe('POST /employees', function () {
   let trx
@@ -24,8 +23,7 @@ describe('POST /employees', function () {
   })
 
   test('should return 422 if body includes id', async function () {
-    const payload = serialize({
-
+    const payload = Serializer.serialize('employees', {
       id: faker.datatype.uuid(),
       name: faker.name.findName()
     })
@@ -34,8 +32,6 @@ describe('POST /employees', function () {
   })
 
   test('should return 201 for valid employee with skills payload', async function () {
-    const dates = dateGenerator()
-
     // create some skills records
     const howManySkills = 3
     const skills = await Skill.query()
@@ -48,11 +44,11 @@ describe('POST /employees', function () {
 
     const employee = {
       name: faker.name.findName(),
-      start_date: dates.startDate,
-      end_date: dates.endDate,
+      start_date: faker.date.past(),
+      end_date: faker.date.future(),
       skills: map(skills, 'id')
     }
-    const payload = serialize(employee)
+    const payload = Serializer.serialize('employees', employee)
     const response = await post(payload)
     expect(response.statusCode).toBe(201)
 
@@ -70,12 +66,10 @@ describe('POST /employees', function () {
   })
 
   test('should fail if skill id does not exist', async function () {
-    const dates = dateGenerator()
-
-    const payload = serialize({
+    const payload = Serializer.serialize('employees', {
       name: faker.name.findName(),
-      start_date: dates.startDate,
-      end_date: dates.endDate,
+      start_date: faker.date.past(),
+      end_date: faker.date.future(),
       skills: [faker.datatype.uuid()]
     })
     const response = await post(payload)
@@ -83,14 +77,12 @@ describe('POST /employees', function () {
   })
 
   test('should return 400 if skills payload contains duplicated items', async function () {
-    const dates = dateGenerator()
-
     const skillId = faker.datatype.uuid()
 
-    const payload = serialize({
+    const payload = Serializer.serialize('employees', {
       name: faker.name.findName(),
-      start_date: dates.startDate,
-      end_date: dates.endDate,
+      start_date: faker.date.past(),
+      end_date: faker.date.future(),
       skills: [skillId, skillId, skillId]
     })
     const response = await post(payload)
@@ -98,13 +90,12 @@ describe('POST /employees', function () {
   })
 
   test('should return 422 for payload with startDate after endDate', async function () {
-    const dates = dateGenerator()
     const skillId = faker.datatype.uuid()
 
-    const payload = serialize({
+    const payload = Serializer.serialize('employees', {
       name: faker.name.findName(),
-      start_date: dates.endDate,
-      end_date: dates.startDate,
+      start_date: faker.date.future(),
+      end_date: faker.date.past(),
       skills: [skillId]
     })
     const response = await post(payload)
@@ -120,8 +111,5 @@ describe('POST /employees', function () {
       },
       payload: JSON.stringify(payload)
     })
-  }
-  function serialize (obj) {
-    return Serializer.serialize('employees', obj)
   }
 })

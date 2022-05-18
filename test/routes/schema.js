@@ -28,8 +28,8 @@ module.exports = {
       properties: {
         id: { type: 'string', format: 'uuid' },
         name: {
-          type: 'string'
-          // faker: 'name.findName'
+          type: 'string',
+          faker: 'name.findName'
         },
         start_date: {
           type: 'string',
@@ -38,7 +38,9 @@ module.exports = {
         },
         end_date: {
           type: 'string',
-          faker: 'date.future'
+          faker () {
+            return new Date(9999, 12, 30)
+          }
         },
         skills: {
           type: 'array',
@@ -94,8 +96,7 @@ module.exports = {
           format: 'uuid'
         },
         start_date: {
-          type: 'string',
-          faker: 'date.past'
+          type: 'string'
         },
         start_confidence: {
           type: 'number',
@@ -104,7 +105,9 @@ module.exports = {
         },
         end_date: {
           type: 'string',
-          faker: 'date.future'
+          faker () {
+            return new Date(9999, 12, 30)
+          }
         },
         end_confidence: {
           type: 'number',
@@ -144,11 +147,14 @@ module.exports = {
         },
         start_date: {
           type: 'string',
-          faker: 'date.assignment.start'
+          format: 'date'
         },
         end_date: {
           type: 'string',
-          faker: 'date.assignment.end'
+          format: 'date',
+          faker () {
+            return new Date(9999, 12, 30)
+          }
         },
         employee: {
           type: 'object',

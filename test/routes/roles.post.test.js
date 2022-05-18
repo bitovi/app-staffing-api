@@ -6,7 +6,6 @@ const Role = require('../../src/models/role')
 const Skill = require('../../src/models/skill')
 const Project = require('../../src/models/project')
 const { Serializer } = require('../../src/json-api-serializer')
-const { dateGenerator } = require('../../src/utils/date-utils')
 
 describe('POST /roles', function () {
   let trx
@@ -24,11 +23,10 @@ describe('POST /roles', function () {
   })
 
   test('should return 422 if payload body includes id', async function () {
-    const dates = dateGenerator()
     const payload = serialize({
       id: faker.datatype.uuid(),
       project: { id: faker.datatype.uuid() },
-      start_date: dates.startDate,
+      start_date: faker.date.future(),
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision })
     })
     const response = await post(payload)
@@ -50,10 +48,8 @@ describe('POST /roles', function () {
   })
 
   test('should return 422 if payload is missing start_confidence', async function () {
-    const dates = dateGenerator()
-
     const payload = serialize({
-      start_date: dates.startDate,
+      start_date: faker.date.future(),
       project: { id: faker.datatype.uuid() }
     })
     const response = await post(payload)
@@ -66,10 +62,8 @@ describe('POST /roles', function () {
   })
 
   test('should return 422 if start_confidence is negative', async function () {
-    const dates = dateGenerator()
-
     const payload = serialize({
-      start_date: dates.startDate,
+      start_date: faker.date.future(),
       project: { id: faker.datatype.uuid() },
       start_confidence: -1
     })
@@ -81,10 +75,8 @@ describe('POST /roles', function () {
   })
 
   test('should return 422 if start_confidence is greater than 1', async function () {
-    const dates = dateGenerator()
-
     const payload = serialize({
-      start_date: dates.startDate,
+      start_date: faker.date.future(),
       project: { id: faker.datatype.uuid() },
       start_confidence: 1.1
     })
@@ -96,10 +88,8 @@ describe('POST /roles', function () {
   })
 
   test('should return 422 if payload has unknown fields', async function () {
-    const dates = dateGenerator()
-
     const payload = serialize({
-      start_date: dates.startDate,
+      start_date: faker.date.future(),
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project: { id: faker.datatype.uuid() },
       anUnknownField: 'foo bar baz'
@@ -109,10 +99,8 @@ describe('POST /roles', function () {
   })
 
   test('should fail if associated project does not exist', async function () {
-    const dates = dateGenerator()
-
     const payload = serialize({
-      start_date: dates.startDate,
+      start_date: faker.date.future(),
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project: { id: faker.datatype.uuid() }
     })
@@ -121,15 +109,13 @@ describe('POST /roles', function () {
   })
 
   test('should fail if associated skill does not exist', async function () {
-    const dates = dateGenerator()
-
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
     })
 
     const newRole = {
-      start_date: dates.startDate,
+      start_date: faker.date.future(),
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project: { id: project.id },
       skills: [{ id: faker.datatype.uuid() }]
@@ -140,15 +126,13 @@ describe('POST /roles', function () {
   })
 
   test('should return 201 for valid payload', async function () {
-    const dates = dateGenerator()
-
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
     })
 
     const newRole = {
-      start_date: dates.startDate,
+      start_date: faker.date.future(),
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project: { id: project.id }
     }
@@ -161,12 +145,11 @@ describe('POST /roles', function () {
 
     const savedRole = await Role.query().findById(body.data.id)
     expect(savedRole.project_id).toEqual(newRole.project.id)
+    expect(savedRole.start_date).toEqual(newRole.start_date)
     expect(savedRole.start_confidence).toEqual(newRole.start_confidence)
   })
 
   test('should return 201 for valid payload with skills', async function () {
-    const dates = dateGenerator()
-
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -177,7 +160,7 @@ describe('POST /roles', function () {
     })
 
     const newRole = {
-      start_date: dates.startDate,
+      start_date: faker.date.future(),
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project: { id: project.id },
       skills: [skill]
@@ -191,6 +174,7 @@ describe('POST /roles', function () {
 
     const savedRole = await Role.query().findById(body.data.id)
     expect(savedRole.project_id).toEqual(newRole.project.id)
+    expect(savedRole.start_date).toEqual(newRole.start_date)
     expect(savedRole.start_confidence).toEqual(newRole.start_confidence)
 
     const savedRoleSkills = await savedRole.$relatedQuery('skills')
@@ -198,8 +182,6 @@ describe('POST /roles', function () {
     expect(savedRoleSkills[0].id).toEqual(skill.id)
   })
   test('should return 422 for payload with startDate after endDate', async function () {
-    const dates = dateGenerator()
-
     const project = await Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
@@ -210,9 +192,9 @@ describe('POST /roles', function () {
     })
 
     const newRole = {
-      start_date: dates.startDate,
+      start_date: faker.date.future(),
       start_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
-      end_date: dates.beforeStartDate,
+      end_date: faker.date.past(),
       end_confidence: faker.datatype.float({ min: 0, max: 1, precision }),
       project: { id: project.id },
       skills: [skill]

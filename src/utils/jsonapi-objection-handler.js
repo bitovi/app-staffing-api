@@ -1,6 +1,7 @@
 const pluralize = require('pluralize')
+const querystringParser = require('@bitovi/querystring-parser')
 const { Serializer } = require('../json-api-serializer')
-const { getRelationExpression, parseJsonApiParams } = require('../utils')
+const { getRelationExpression} = require('../utils') 
 const modelHasColumn = require('../schemas/all-properties')
 const {
   ValidationError,
@@ -19,8 +20,8 @@ const getListHandler = (Model) => {
   return asyncHandler(async (request, reply) => {
     const relationExpression = getRelationExpression(request.query)
     const queryParameters = request.url.split('?')[1] 
-    const parsedParams = parseJsonApiParams(queryParameters)
-    const tableName = Model.tableName
+    const parsedParams =querystringParser.parse(queryParameters)  
+    const tableName = Model.tableName  
   
     const modelRelations = Object.keys(Model.getRelations())
     databaseName =
@@ -109,8 +110,15 @@ const getListHandler = (Model) => {
           queryBuilder.andWhere(normalizedName, comparator, sqlValue)
         }
       })
-    }
-    const { size = 100, number = 0 } = parsedParams?.page || {}
+    } 
+ 
+    let { size = 100, number = 0 } = parsedParams?.page || {}
+ 
+    if(parsedParams?.errors.page.length){
+      size = request.query['page[size]']
+      number = request.query['page[number]'] 
+    } 
+
     if (size < 1 || number < 0) {
       throw new ValidationError({
         status: statusCodes.UNPROCESSABLE_ENTITY,

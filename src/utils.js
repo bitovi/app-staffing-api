@@ -1,5 +1,4 @@
 const errorSchema = require('./schemas/error')
-const querystringParser = require('@bitovi/querystring-parser')
 
 
 /**
@@ -58,9 +57,6 @@ function createUUID () {
   return uuid
 }
 
-const parseJsonApiParams = (url) => {   
-  return querystringParser.parse(url)  
-}
 /**
  * Create queryString filters for validating and documenting the model entities
  * @param {*} properties
@@ -111,8 +107,7 @@ const parseErrorExamples = ({ description, example }) => {
 
 module.exports = {
   getRelationExpression,
-  createUUID,
-  parseJsonApiParams,
+  createUUID, 
   makeQueryStringFilters,
   makeQueryStringFields,
   parseErrorExamples

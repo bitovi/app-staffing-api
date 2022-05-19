@@ -1,13 +1,13 @@
 const pluralize = require('pluralize')
+const querystringParser = require('@bitovi/querystring-parser')
 const { Serializer } = require('../json-api-serializer')
-const { getRelationExpression, parseJsonApiParams } = require('../utils')
+const { getRelationExpression } = require('../utils')
 const modelHasColumn = require('../schemas/all-properties')
 const {
   ValidationError,
   NotFoundError
 } = require('../managers/error-handler/errors')
 const { codes, statusCodes } = require('../managers/error-handler/constants')
-
 const normalizeColumn = (tableName, column) =>
   column.includes('.') ? column : `${tableName}.${column}`
 
@@ -19,7 +19,8 @@ const asyncHandler = (fn) => (request, reply, done) =>
 const getListHandler = (Model) => {
   return asyncHandler(async (request, reply) => {
     const relationExpression = getRelationExpression(request.query)
-    const parsedParams = parseJsonApiParams(request.query)
+    const queryParameters = request.url.split('?')[1]
+    const parsedParams = querystringParser.parse(queryParameters)
     const tableName = Model.tableName
 
     const modelRelations = Object.keys(Model.getRelations())
@@ -76,7 +77,7 @@ const getListHandler = (Model) => {
     if (parsedParams.filter.length) {
       // check for duplicate filter keys, return 500
       const filterKeys = parsedParams.filter.map(
-        (el) => el.key + '_-_' + el.type
+        ({ field, comparator }) => field + '_-_' + comparator
       )
 
       if (filterKeys.length > new Set(filterKeys).size) {
@@ -90,47 +91,17 @@ const getListHandler = (Model) => {
       }
 
       parsedParams.filter.forEach((filter) => {
-        const normalizedName = normalizeColumn(tableName, filter.key)
+        const { field: key, comparator, value: sqlValue } = filter
+        const normalizedName = normalizeColumn(tableName, key)
+
         if (!modelHasColumn(normalizedName)) {
           throw new ValidationError({
             status: statusCodes.UNPROCESSABLE_ENTITY,
-            title: `Cannot filter on non existing column name: ${filter.key}`,
+            title: `Cannot filter on non existing column name: ${key}`,
             detail: 'The filter parameter must be a column of the model',
-            parameter: `filter/${filter.key}`,
+            parameter: `filter/${key}`,
             code: codes.ERR_INVALID_PARAMETER
           })
-        }
-
-        const isInt = Number.isInteger(Number(filter.value))
-        const isDate = !isNaN(Date.parse(filter.value))
-        const isEqual = isInt || isDate
-        let comparator = 'ilike'
-        let sqlValue = filter.value
-
-        switch (filter.type) {
-          case 'lt':
-            comparator = '<'
-            break
-          case 'gt':
-            comparator = '>'
-            break
-          case 'le':
-            comparator = '<='
-            break
-          case 'ge':
-            comparator = '>='
-            break
-          case 'eq':
-            comparator = '='
-            break
-          default:
-            sqlValue = `%${filter.value}%`
-            break
-        }
-
-        if (isEqual && filter.type === 'lk') {
-          comparator = '='
-          sqlValue = filter.value
         }
         // @TODO: compare datetime based on date only accepting YYYY-MM-DD?
         if (!queryBuilder.hasWheres()) {
@@ -140,7 +111,14 @@ const getListHandler = (Model) => {
         }
       })
     }
-    const { size = 100, number = 0 } = parsedParams?.page || {}
+
+    let { size = 100, number = 0 } = parsedParams?.page || {}
+
+    if (parsedParams?.errors.page.length) {
+      size = request.query['page[size]']
+      number = request.query['page[number]']
+    }
+
     if (size < 1 || number < 0) {
       throw new ValidationError({
         status: statusCodes.UNPROCESSABLE_ENTITY,
@@ -158,7 +136,8 @@ const getListHandler = (Model) => {
 
     if (parsedParams.sort.length) {
       parsedParams.sort.forEach((fieldDirection) => {
-        const { name, direction } = fieldDirection
+        const { field: name, direction } = fieldDirection
+
         const normalizedName = normalizeColumn(tableName, name)
 
         if (modelHasColumn(normalizedName)) {

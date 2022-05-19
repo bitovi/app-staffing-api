@@ -1,5 +1,5 @@
 const pluralize = require('pluralize')
-const querystringParser = require('@bitovi/querystring-parser')
+const querystringParser = require('@bitovi/querystring-parser') 
 const { Serializer } = require('../json-api-serializer')
 const { getRelationExpression} = require('../utils') 
 const modelHasColumn = require('../schemas/all-properties')
@@ -19,8 +19,8 @@ const asyncHandler = (fn) => (request, reply, done) =>
 const getListHandler = (Model) => {
   return asyncHandler(async (request, reply) => {
     const relationExpression = getRelationExpression(request.query)
-    const queryParameters = request.url.split('?')[1] 
-    const parsedParams =querystringParser.parse(queryParameters)  
+    const queryParameters = request.url.split('?')[1]  
+    const parsedParams = querystringParser.parse(queryParameters);     
     const tableName = Model.tableName  
   
     const modelRelations = Object.keys(Model.getRelations())
@@ -78,7 +78,7 @@ const getListHandler = (Model) => {
       // check for duplicate filter keys, return 500
       const filterKeys = parsedParams.filter.map(
         ({field, comparator}) => field + '_-_' + comparator
-      )
+      ) 
 
       if (filterKeys.length > new Set(filterKeys).size) {
         throw new ValidationError({

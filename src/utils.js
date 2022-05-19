@@ -1,6 +1,5 @@
 const errorSchema = require('./schemas/error')
 
-
 /**
  * Transforms the jsonapi request parameter ("include") into an Objection.js RelationExpression
  * @see https://jsonapi.org/format/#fetching-includes
@@ -56,7 +55,7 @@ function createUUID () {
   })
   return uuid
 }
-
+  
 /**
  * Create queryString filters for validating and documenting the model entities
  * @param {*} properties
@@ -107,7 +106,7 @@ const parseErrorExamples = ({ description, example }) => {
 
 module.exports = {
   getRelationExpression,
-  createUUID, 
+  createUUID,  
   makeQueryStringFilters,
   makeQueryStringFields,
   parseErrorExamples

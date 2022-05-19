@@ -1,13 +1,13 @@
 const pluralize = require('pluralize')
-const querystringParser = require('@bitovi/querystring-parser') 
+const querystringParser = require('@bitovi/querystring-parser')
 const { Serializer } = require('../json-api-serializer')
-const { getRelationExpression} = require('../utils') 
+const { getRelationExpression } = require('../utils')
 const modelHasColumn = require('../schemas/all-properties')
 const {
   ValidationError,
   NotFoundError
 } = require('../managers/error-handler/errors')
-const { codes, statusCodes } = require('../managers/error-handler/constants') 
+const { codes, statusCodes } = require('../managers/error-handler/constants')
 const normalizeColumn = (tableName, column) =>
   column.includes('.') ? column : `${tableName}.${column}`
 
@@ -19,14 +19,14 @@ const asyncHandler = (fn) => (request, reply, done) =>
 const getListHandler = (Model) => {
   return asyncHandler(async (request, reply) => {
     const relationExpression = getRelationExpression(request.query)
-    const queryParameters = request.url.split('?')[1]  
-    const parsedParams = querystringParser.parse(queryParameters);     
-    const tableName = Model.tableName  
-  
+    const queryParameters = request.url.split('?')[1]
+    const parsedParams = querystringParser.parse(queryParameters)
+    const tableName = Model.tableName
+
     const modelRelations = Object.keys(Model.getRelations())
     databaseName =
       databaseName || Model.knex().client.config.connection.database
-  
+
     // Check if there is any include that is not in Model relations, return 404
     // Checking first level only for now
     if (
@@ -74,11 +74,11 @@ const getListHandler = (Model) => {
       }
     }
 
-    if (parsedParams.filter.length) { 
+    if (parsedParams.filter.length) {
       // check for duplicate filter keys, return 500
       const filterKeys = parsedParams.filter.map(
-        ({field, comparator}) => field + '_-_' + comparator
-      ) 
+        ({ field, comparator }) => field + '_-_' + comparator
+      )
 
       if (filterKeys.length > new Set(filterKeys).size) {
         throw new ValidationError({
@@ -90,8 +90,8 @@ const getListHandler = (Model) => {
         })
       }
 
-      parsedParams.filter.forEach((filter) => { 
-        const {field: key, comparator, value: sqlValue} = filter;
+      parsedParams.filter.forEach((filter) => {
+        const { field: key, comparator, value: sqlValue } = filter
         const normalizedName = normalizeColumn(tableName, key)
 
         if (!modelHasColumn(normalizedName)) {
@@ -110,14 +110,14 @@ const getListHandler = (Model) => {
           queryBuilder.andWhere(normalizedName, comparator, sqlValue)
         }
       })
-    } 
- 
+    }
+
     let { size = 100, number = 0 } = parsedParams?.page || {}
- 
-    if(parsedParams?.errors.page.length){
+
+    if (parsedParams?.errors.page.length) {
       size = request.query['page[size]']
-      number = request.query['page[number]'] 
-    } 
+      number = request.query['page[number]']
+    }
 
     if (size < 1 || number < 0) {
       throw new ValidationError({
@@ -134,11 +134,10 @@ const getListHandler = (Model) => {
       queryBuilder.page(number, size)
     }
 
-    if (parsedParams.sort.length) { 
-      
+    if (parsedParams.sort.length) {
       parsedParams.sort.forEach((fieldDirection) => {
-        const { field: name, direction } = fieldDirection 
-  
+        const { field: name, direction } = fieldDirection
+
         const normalizedName = normalizeColumn(tableName, name)
 
         if (modelHasColumn(normalizedName)) {

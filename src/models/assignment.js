@@ -113,14 +113,14 @@ module.exports = class Assignment extends Model {
     const assignmentStart = new Date(body.start_date)
     const assignmentEnd = body.end_date && new Date(body.end_date)
     const assignmentBeforeRoleStart = assignmentStart < role.start_date
-    if (assignmentEnd && !role.end_date && assignmentStart < role.start_date) {
+    if (!assignmentEnd && !role.end_date && assignmentStart < role.start_date) {
       throw new ValidationError({
         message: 'Assignment start date not in date range of role',
         status: statusCodes.CONFLICT,
         pointer: 'start_date'
       })
     } else if (
-      (assignmentEnd && (assignmentBeforeRoleStart || assignmentStart > role.end_date))) {
+      (assignmentEnd && (assignmentBeforeRoleStart || (role.end_date && assignmentStart > role.end_date)))) {
       throw new ValidationError({
         message: 'Assignment start date not in date range of role',
         status: statusCodes.CONFLICT,

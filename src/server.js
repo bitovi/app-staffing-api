@@ -6,6 +6,10 @@ const setupFastifySwagger = require('./fastify-swagger')
 const errorHandler = require('./managers/error-handler')
 const { statusCodes } = require('./managers/error-handler/constants')
 const { GeneralError } = require('./managers/error-handler/errors')
+const { OAuth2Client } = require('google-auth-library')
+const createError = require('http-errors')
+
+const GoogleAuthClientId = '171066568525-kc3tu5jd313id60t355hm51v0i5udree.apps.googleusercontent.com'
 
 const build = () => {
   const knex = Knex(knexfile)
@@ -21,9 +25,42 @@ const build = () => {
       }
     }
   })
+  fastify.decorate('enableGoogleAuth', function () {
+    fastify.decorate('asyncValidateGoogleAuth', async function (request, reply) {
+      const { authorization } = request.headers
+      if (!authorization) {
+        throw createError(401)
+      }
 
+      if (!request.state) {
+        request.state = {}
+      }
+
+      const tokenId = authorization.replace('Bearer ', '')
+      const client = new OAuth2Client(GoogleAuthClientId)
+
+      try {
+        const ticket = await client.verifyIdToken({
+          idToken: tokenId,
+          audience: GoogleAuthClientId
+        })
+        const payload = ticket.getPayload()
+        request.state.user = payload
+      } catch (err) {
+        console.error(err)
+        throw createError(401)
+      }
+    })
+    fastify.after(() => {
+      fastify.addHook('preHandler', fastify.auth([
+        fastify.asyncValidateGoogleAuth
+      ]))
+    })
+    return fastify
+  })
   // Enable CORS for all routes
   fastify.register(require('fastify-cors'))
+  fastify.register(require('fastify-auth'))
 
   setupFastifySwagger(fastify)
 

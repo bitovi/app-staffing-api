@@ -3,11 +3,12 @@ const Project = require('../../src/models/project')
 const faker = require('faker')
 const _ = require('lodash')
 const Skill = require('../../src/models/skill')
+const { dateGenerator } = require('../../src/utils/date-utils')
 
 const NUMBER_OF_RECORDS_TO_INSERT = 15
 
 const fakesCache = new Map()
-
+const dates = dateGenerator()
 function generateAndCacheFake (keyPrefix, key, generator) {
   const prefixedKey = `${keyPrefix}.${key}`
   let value
@@ -63,9 +64,9 @@ function fakeProject (key) {
 
 function fakeRole (key, mixin = {}) {
   return generateAndCacheFake('role', key, () => Object.assign({}, mixin, {
-    start_date: new Date(faker.date.recent()).toISOString(),
+    start_date: dates.startDate,
     start_confidence: faker.datatype.number(10),
-    end_date: new Date(faker.date.future()).toISOString(),
+    end_date: dates.endDate,
     end_confidence: faker.datatype.number(10)
   }))
 }
@@ -88,8 +89,7 @@ const seed = async (knex) => {
   for (let i = 0; i < NUMBER_OF_RECORDS_TO_INSERT; i++) {
     // insert seed data
     const skill = getSkill(skillList)
-    const startDate = new Date(faker.date.past()).toISOString()
-    const endDate = new Date(faker.date.future()).toISOString()
+    const dates = dateGenerator()
     await Project.query().insertGraph([
       {
         name: fakeProject(i + 1),
@@ -97,9 +97,9 @@ const seed = async (knex) => {
 
         roles: [
           {
-            start_date: startDate,
+            start_date: dates.startDate,
             start_confidence: faker.datatype.float({ min: 0, max: 1, precision: 0.1 }),
-            end_date: endDate,
+            end_date: dates.endDate,
             end_confidence: faker.datatype.float({ min: 0, max: 1, precision: 0.1 }),
 
             skills: [{
@@ -107,12 +107,12 @@ const seed = async (knex) => {
             }],
 
             assignments: [{
-              start_date: startDate,
-              end_date: endDate,
+              start_date: dates.startAssignmentDate,
+              end_date: dates.endAssignmentDate,
 
               employee: {
                 name: fakeEmployee(i),
-                start_date: new Date(faker.date.past()).toISOString(),
+                start_date: dates.startDate,
                 end_date: null,
 
                 skills: [

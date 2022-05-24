@@ -7,6 +7,7 @@ const { transaction, Model } = require('objection')
 const Skill = require('../../src/models/skill')
 const Employee = require('../../src/models/employee')
 const { Serializer } = require('../../src/json-api-serializer')
+const { dateGenerator } = require('../../src/utils/date-utils')
 
 describe('PATCH /employees/:id', function () {
   let trx
@@ -23,22 +24,25 @@ describe('PATCH /employees/:id', function () {
   })
 
   test('should return 404 if employee id does not exist', async function () {
+    const dates = dateGenerator()
     const notFoundId = faker.datatype.uuid()
-    const payload = Serializer.serialize('employees', {
+    const payload = serialize({
       id: notFoundId,
       name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
+      start_date: dates.startDate,
+      end_date: dates.endDate
     })
     const response = await patch(notFoundId, payload)
     expect(response.statusCode).toBe(404)
   })
 
   test('should return 409 if employee skill does not exist', async function () {
+    const dates = dateGenerator()
+
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
+      start_date: dates.startDate,
+      end_date: dates.endDate
     })
 
     const employeeSkills = await employee.$relatedQuery('skills')
@@ -51,17 +55,19 @@ describe('PATCH /employees/:id', function () {
       faker.datatype.uuid()
     ]
 
-    const payload = Serializer.serialize('employees', updatedEmployee)
+    const payload = serialize(updatedEmployee)
     const response = await patch(employee.id, payload)
     expect(response.statusCode).toBe(409)
   })
 
   test('should add skills to employee record without previous relations', async function () {
+    const dates = dateGenerator()
+
     // create an employee record with no skills
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
+      start_date: dates.startDate,
+      end_date: dates.endDate
     })
 
     const employeeSkills = await employee.$relatedQuery('skills')
@@ -71,8 +77,8 @@ describe('PATCH /employees/:id', function () {
     const howManySkills = 3
     const skills = await Skill.query()
       .insert(
-        range(howManySkills).map(() => ({
-          name: faker.lorem.word()
+        range(howManySkills).map((num) => ({
+          name: faker.lorem.word() + num
         }))
       )
       .returning('*')
@@ -81,14 +87,12 @@ describe('PATCH /employees/:id', function () {
     const updatedEmployee = cloneDeep(employee)
     updatedEmployee.skills = map(skills, 'id')
 
-    const payload = Serializer.serialize('employees', updatedEmployee)
+    const payload = serialize(updatedEmployee)
     const response = await patch(employee.id, payload)
 
     // must return 200 and include updated employee in the body
     expect(response.statusCode).toBe(200)
-    const responseBody = Serializer.deserialize(
-      'employees',
-      JSON.parse(response.body)
+    const responseBody = deserialize(JSON.parse(response.body)
     )
     expect(responseBody.skills).toHaveLength(updatedEmployee.skills.length)
 
@@ -101,6 +105,8 @@ describe('PATCH /employees/:id', function () {
   })
 
   test('should return 200 when updating employee with existing skills', async function () {
+    const dates = dateGenerator()
+
     // first create an employee with associated skills in the DB
     const howManySkills = 3
     const skills = await Skill.query()
@@ -113,8 +119,8 @@ describe('PATCH /employees/:id', function () {
 
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
+      start_date: dates.startDate,
+      end_date: dates.endDate
     })
     await employee.$relatedQuery('skills').relate(map(skills, 'id'))
 
@@ -126,14 +132,11 @@ describe('PATCH /employees/:id', function () {
     const updatedEmployee = cloneDeep(employee)
     updatedEmployee.skills = [employeeSkills[0].id]
 
-    const payload = Serializer.serialize('employees', updatedEmployee)
+    const payload = serialize(updatedEmployee)
     const response = await patch(employee.id, payload)
     expect(response.statusCode).toBe(200)
 
-    const responseBody = Serializer.deserialize(
-      'employees',
-      JSON.parse(response.body)
-    )
+    const responseBody = deserialize(JSON.parse(response.body))
     expect(responseBody.skills).toHaveLength(1)
 
     // make sure the employee associated skills are updated correctly
@@ -143,43 +146,43 @@ describe('PATCH /employees/:id', function () {
   })
 
   test('should update date fields to null', async function () {
+    const dates = dateGenerator()
+
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
+      start_date: dates.startDate,
+      end_date: dates.endDate
     })
 
     const updatedEmployee = cloneDeep(employee)
     updatedEmployee.start_date = null
     updatedEmployee.end_date = null
 
-    const payload = Serializer.serialize('employees', updatedEmployee)
+    const payload = serialize(updatedEmployee)
     const response = await patch(employee.id, payload)
 
     expect(response.statusCode).toBe(200)
-    const responseBody = Serializer.deserialize(
-      'employees',
-      JSON.parse(response.body)
-    )
+    const responseBody = deserialize(JSON.parse(response.body))
     expect(responseBody.start_date).toBeNull()
     expect(responseBody.end_date).toBeNull()
-
     const dbEmployee = await Employee.query().findById(employee.id)
     expect(dbEmployee.start_date).toBeNull()
     expect(dbEmployee.end_date).toBeNull()
   })
   test('should return 422 for payload with startDate after endDate', async function () {
+    const dates = dateGenerator()
+
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
-      start_date: faker.date.past(),
-      end_date: faker.date.future()
+      start_date: dates.startDate,
+      end_date: dates.endDate
     })
 
     const updatedEmployee = cloneDeep(employee)
-    updatedEmployee.start_date = faker.date.future()
-    updatedEmployee.end_date = faker.date.past()
+    updatedEmployee.start_date = dates.afterEndDate
+    updatedEmployee.end_date = dates.beforeStartDate
 
-    const payload = Serializer.serialize('employees', updatedEmployee)
+    const payload = serialize(updatedEmployee)
     const response = await patch(employee.id, payload)
 
     expect(response.statusCode).toBe(422)
@@ -212,5 +215,11 @@ describe('PATCH /employees/:id', function () {
       },
       payload: JSON.stringify(payload)
     })
+  }
+  function serialize (obj) {
+    return Serializer.serialize('employees', obj)
+  }
+  function deserialize (obj) {
+    return Serializer.deserialize('employees', obj)
   }
 })

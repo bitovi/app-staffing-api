@@ -2,6 +2,7 @@ const faker = require('faker')
 const omitBy = require('lodash/omitBy')
 const isUndefined = require('lodash/isUndefined')
 const schema = require('./schema')
+const { dateGenerator } = require('../../src/utils/date-utils')
 
 const routesWithIndividualTests = new Map([
   ['assignments', true],
@@ -34,10 +35,11 @@ describe.each(schemasForGenericTests)('POST /%s', (myroute) => {
     const primaryKeys = myroute?.primaryKeys || ['id']
     const pkey = primaryKeys[0]
     const routeName = myroute.routeName
+    const dates = dateGenerator()
 
     if (myroute?.foreignKeys) {
       for (const [key, value] of Object.entries(foreignKeys)) {
-        const createdObj = await createDbObject(key, createdIDs)
+        const createdObj = await createDbObject(key, createdIDs, dates)
         // console.log('POST createdObj', createdObj)
         const keyFrom = createdObj[value.from]
         obj[value.into] = keyFrom
@@ -45,7 +47,7 @@ describe.each(schemasForGenericTests)('POST /%s', (myroute) => {
     }
     for (const [key, value] of Object.entries(myroute.properties)) {
       if (required.includes(key) && !obj[key] && key !== pkey) {
-        obj[key] = createFakeData(key, value)
+        obj[key] = createFakeData(key, value, dates)
       }
     }
     const testBody = {
@@ -88,10 +90,11 @@ describe.each(schemasForGenericTests)('POST /%s', (myroute) => {
     const primaryKeys = myroute?.primaryKeys || ['id']
     const pkey = primaryKeys[0]
     const routeName = myroute.routeName
+    const dates = dateGenerator()
 
     if (myroute?.foreignKeys) {
       for (const [key, value] of Object.entries(foreignKeys)) {
-        const createdObj = await createDbObject(key, createdIDs)
+        const createdObj = await createDbObject(key, createdIDs, dates)
         // console.log('POST createdObj', createdObj)
         const keyFrom = createdObj[value.from]
         obj[value.into] = keyFrom
@@ -99,7 +102,7 @@ describe.each(schemasForGenericTests)('POST /%s', (myroute) => {
     }
     for (const [key, value] of Object.entries(myroute.properties)) {
       if (required.includes(key) && !obj[key] && key !== pkey) {
-        obj[key] = createFakeData(key, value)
+        obj[key] = createFakeData(key, value, dates)
       }
     }
     const testBody = {
@@ -140,6 +143,7 @@ describe.each(schemasForGenericTests)('POST /%s', (myroute) => {
   it('should fail with 422 if payload has unknown fields', async () => {
     const { routeName, required, properties, primaryKeys } = myroute
     const primaryKey = primaryKeys[0]
+    const dates = dateGenerator()
 
     const attrs = {
       aPropertyMissingFromTheSchema: 'foo bar baz'
@@ -148,7 +152,7 @@ describe.each(schemasForGenericTests)('POST /%s', (myroute) => {
     // make sure the payload includes required properties
     for (const [key, value] of Object.entries(properties)) {
       if (required.includes(key) && !(key in attrs) && key !== primaryKey) {
-        attrs[key] = createFakeData(key, value)
+        attrs[key] = createFakeData(key, value, dates)
       }
     }
 
@@ -180,19 +184,20 @@ describe.each(schemasForGenericTests)('PATCH /%s', (myroute) => {
   const primaryKeys = myroute.primaryKeys || ['id']
   const pkey = primaryKeys[0]
   const routeName = myroute.routeName
+  const dates = dateGenerator()
 
   afterAll(async () => {
     await deleteCreatedIDs(createdIDs)
   })
 
   it('should update record', async () => {
-    const createdObj = await createDbObject(routeName, createdIDs)
+    const createdObj = await createDbObject(routeName, createdIDs, dates)
 
     const obj = {}
     let sampleProperty
     if (myroute?.foreignKeys) {
       for (const [key, value] of Object.entries(foreignKeys)) {
-        const createdObj = await createDbObject(key, createdIDs)
+        const createdObj = await createDbObject(key, createdIDs, dates)
         // console.log('POST createdObj', createdObj)
         const keyFrom = createdObj[value.from]
         obj[value.into] = keyFrom
@@ -200,7 +205,7 @@ describe.each(schemasForGenericTests)('PATCH /%s', (myroute) => {
     }
     for (const [key, value] of Object.entries(myroute.properties)) {
       if (required.includes(key) && !obj[key] && key !== pkey) {
-        obj[key] = createFakeData(key, value)
+        obj[key] = createFakeData(key, value, dates)
         if (!sampleProperty) {
           sampleProperty = key
         }
@@ -230,7 +235,9 @@ describe.each(schemasForGenericTests)('PATCH /%s', (myroute) => {
   })
 
   it('should fail with 422 if payload has unknown fields', async () => {
-    const dbRecord = await createDbObject(routeName, createdIDs)
+    const dates = dateGenerator()
+
+    const dbRecord = await createDbObject(routeName, createdIDs, dates)
 
     // json:api payload attributes
     const attrs = {
@@ -239,7 +246,7 @@ describe.each(schemasForGenericTests)('PATCH /%s', (myroute) => {
 
     // create the database records for the resource relationships
     for (const [key, value] of Object.entries(foreignKeys)) {
-      const createdObj = await createDbObject(key, createdIDs)
+      const createdObj = await createDbObject(key, createdIDs, dates)
       const keyFrom = createdObj[value.from]
       attrs[value.into] = keyFrom
     }
@@ -247,7 +254,7 @@ describe.each(schemasForGenericTests)('PATCH /%s', (myroute) => {
     // make sure the payload includes required attributes
     for (const [key, value] of Object.entries(myroute.properties)) {
       if (required.includes(key) && !(key in attrs) && key !== pkey) {
-        attrs[key] = createFakeData(key, value)
+        attrs[key] = createFakeData(key, value, dates)
       }
     }
 
@@ -283,11 +290,13 @@ describe.each(routesSchemas)('DELETE /%s', (myroute) => {
   })
 
   it('should delete record and return 204', async () => {
+    const dates = dateGenerator()
+
     const primaryKeys = myroute?.primaryKeys || ['id']
     const pkey = primaryKeys[0]
     const routeName = myroute.routeName
 
-    const createdObj = await createDbObject(routeName, createdIDs)
+    const createdObj = await createDbObject(routeName, createdIDs, dates)
 
     const response = await global.app.inject({
       url: `${routeName}/${createdObj[pkey]}`,
@@ -318,11 +327,12 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
   const createdObjects = []
   const objname = myroute.routeName
   const createdIDs = {}
+  const dates = dateGenerator()
 
   beforeAll(async () => {
     // create 4 of objname, why not a loop you might ask.
     for (let i = 0; i < 8; i++) {
-      createdObjects[i] = await createDbObject(objname, createdIDs)
+      createdObjects[i] = await createDbObject(objname, createdIDs, dates)
     }
   })
 
@@ -547,8 +557,8 @@ describe.each(routesSchemas)('%s: GET include relations', (myroute) => {
 
   beforeAll(async () => {
     // create 2 of objname
-    createdObjects[0] = await createDbObject(objname, createdIDs)
-    createdObjects[1] = await createDbObject(objname, createdIDs)
+    createdObjects[0] = await createDbObject(objname, createdIDs, dateGenerator())
+    createdObjects[1] = await createDbObject(objname, createdIDs, dateGenerator())
   })
 
   afterAll(async () => {
@@ -622,8 +632,9 @@ describe.each(routesSchemas)('%s: GET include relations', (myroute) => {
 })
 
 // Recursivey create object and its required connected objects
-async function createDbObject (objname, createdIDs, useExisting = false) {
-  const route = schema.routes.filter((el) => el.routeName === objname)[0]
+async function createDbObject (objname, createdIDs, dates, useExisting = false) {
+  const route = schema.routes.filter(el => el.routeName === objname)[0]
+
   const Model = route.model
   const foreignKeys = route?.foreignKeys
   const properties = route.properties
@@ -637,7 +648,7 @@ async function createDbObject (objname, createdIDs, useExisting = false) {
       if (useExisting && createdIDs[key] && createdIDs[key].length) {
         relatedCreatedObject = await getCreatedObjectbyID(key, createdIDs)
       } else {
-        relatedCreatedObject = await createDbObject(key, createdIDs)
+        relatedCreatedObject = await createDbObject(key, createdIDs, dates)
       }
       objectToBeCreated[value.into] = relatedCreatedObject[value.from]
     }
@@ -646,8 +657,7 @@ async function createDbObject (objname, createdIDs, useExisting = false) {
   // fill properties
   for (const [key, value] of Object.entries(properties)) {
     if (primaryKeys.includes(key)) continue
-    objectToBeCreated[key] =
-      objectToBeCreated[key] || createFakeData(key, value)
+    objectToBeCreated[key] = objectToBeCreated[key] || createFakeData(key, value, dates)
   }
 
   const createdObject = await Model.query().insert(
@@ -696,13 +706,13 @@ async function deleteCreatedIDs (createdIDs) {
 
 // helper functions, move to utils
 // @TODO: add strings based on format, add fakerFormat key to schema properties
-function createFakeData (key, value) {
+function createFakeData (key, value, dates = {}) {
   if (value.type === 'string') {
-    if (typeof value.faker === 'function') return value.faker
-    if (key === 'start_date') return '2022-01-01 00:00:01.000 -0000'
-    if (key === 'end_date') return '2023-01-01 00:00:01.000 -0000'
-    if (value?.format === 'datetime' || key.indexOf('date') > -1) {
-      return faker.date.past()
+    if (value.faker) {
+      if (value.faker === 'date.past') return dates.startDate
+      if (value.faker === 'date.future') return dates.endDate
+      if (value.faker === 'date.assignment.start') return dates.startAssignmentDate
+      if (value.faker === 'date.assignment.end') return dates.endAssignmentDate
     } else {
       return faker.name.findName()
     }

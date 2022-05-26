@@ -9,10 +9,9 @@ const { dateGenerator } = require('../../src/utils/date-utils')
 
 describe('Overlapping assignments are prevented while multiple records are inserted at the same time', function () {
   const idList = []
-  let project
-  let role
-  let employee
+  let project, role, employee
   const dates = dateGenerator()
+
   beforeAll(async () => {
     project = await Project.query().insert({
       name: faker.company.companyName(),
@@ -33,10 +32,10 @@ describe('Overlapping assignments are prevented while multiple records are inser
   })
 
   afterAll(async () => {
-    await Project.query().findById(project.id).delete()
-    await Employee.query().findById(employee.id).delete()
-    await Role.query().findById(role.id).delete()
-    await deleteIds(idList)
+    await Promise.all([Project.query().findById(project.id).delete(),
+      Employee.query().findById(employee.id).delete(),
+      Role.query().findById(role.id).delete(),
+      deleteIds(idList)])
   })
 
   test.concurrent.each(
@@ -75,47 +74,47 @@ describe('Overlapping assignments are prevented while multiple records are inser
 })
 describe('Overlapping assignments are prevented while multiple records are updated concurrently', function () {
   const idList = []
-  let project
-  let role
-  let employee
-  let assignment
-  let newAssignment
+  let project, role, employee, assignment, newAssignment
   const dates = dateGenerator()
 
   beforeAll(async () => {
-    project = await Project.query().insert({
+    [project, employee] = await Promise.all([Project.query().insert({
       name: faker.company.companyName(),
       description: faker.lorem.sentences()
-    })
-    employee = await Employee.query().insert({
+    }), Employee.query().insert({
       name: faker.name.findName(),
       start_date: faker.date.past(),
       end_date: faker.date.future()
-    })
+    })])
+
     role = await Role.query().insert({
       start_date: dates.beforeStartDate,
-      start_confidence: faker.datatype.number(10),
+      start_confidence: faker.datatype.number(1),
       end_date: dates.afterEndDate,
-      end_confidence: faker.datatype.number(10),
+      end_confidence: faker.datatype.number(1),
       project_id: project.id
     })
+
     newAssignment = {
       start_date: dates.startAssignmentDate,
       end_date: dates.endAssignmentDate,
       employee: { id: employee.id },
       role: { id: role.id }
     }
-    await Assignment.query().insert({
+
+    const promises = await Promise.all([Assignment.query().insertGraph(
+      newAssignment,
+      { relate: true }
+    ),
+    Assignment.query().insert({
       start_date: dates.startDate,
       end_date: dates.startBeforeAssignmentDate,
       employee_id: employee.id,
       role_id: role.id
-    }
-    )
-    assignment = await Assignment.query().insertGraph(
-      newAssignment,
-      { relate: true }
-    )
+    })
+    ])
+
+    assignment = promises[0]
   })
   afterAll(async () => {
     await deleteIds(idList)

@@ -4,6 +4,7 @@ const { validateStartDate, validateDateFormat } = require('../utils/validation')
 const Role = require('./role')
 const { statusCodes } = require('../managers/error-handler/constants')
 const { ConflictError, ValidationError } = require('../managers/error-handler/errors')
+const { compareDates } = require('../utils/date-utils')
 
 module.exports = class Assignment extends Model {
   static get tableName () {
@@ -112,34 +113,38 @@ module.exports = class Assignment extends Model {
         pointer: 'role/id'
       })
     }
-    const assignmentStart = new Date(body.start_date)
-    const assignmentEnd = body.end_date && new Date(body.end_date)
-    const assignmentBeforeRoleStart = assignmentStart < role.start_date
-    if (!assignmentEnd && !role.end_date && assignmentStart < role.start_date) {
+    const assignmentStart = body.start_date
+    const assignmentEnd = body.end_date
+    const roleStart = role.start_date
+    const roleEnd = role.end_date
+
+    const assignmentStartBeforeRoleStart = compareDates(assignmentStart, roleStart)
+
+    if (!assignmentEnd && !roleEnd && assignmentStartBeforeRoleStart) {
       throw new ValidationError({
-        message: 'Assignment start date not in date range of role',
+        title: 'Assignment start date not in date range of role',
         status: statusCodes.CONFLICT,
         pointer: 'start_date'
       })
     } else if (
-      (assignmentEnd && (assignmentBeforeRoleStart || (role.end_date && assignmentStart > role.end_date)))) {
+      (assignmentEnd && (assignmentStartBeforeRoleStart || (roleEnd && compareDates(roleEnd, assignmentStart))))) {
       throw new ValidationError({
-        message: 'Assignment start date not in date range of role',
+        title: 'Assignment start date not in date range of role',
         status: statusCodes.CONFLICT,
         pointer: 'start_date'
       })
-    } else if (!role.end_date && (assignmentBeforeRoleStart || assignmentEnd < role.start_date)) {
+    } else if (!roleEnd && (assignmentStartBeforeRoleStart || compareDates(assignmentEnd, roleStart))) {
       throw new ValidationError({
-        message: 'Assignment dates are before role start date',
+        title: 'Assignment dates are before role start date',
         status: statusCodes.CONFLICT,
-        pointer: assignmentBeforeRoleStart ? 'start_date' : 'end_date'
+        pointer: assignmentStartBeforeRoleStart ? 'start_date' : 'end_date'
       })
-    } else if ((assignmentEnd && role.end_date) &&
-      (assignmentBeforeRoleStart || assignmentEnd > role.end_date)) {
+    } else if ((assignmentEnd && roleEnd) &&
+      (assignmentStartBeforeRoleStart || compareDates(roleEnd, assignmentEnd))) {
       throw new ValidationError({
-        message: 'Assignment not in date range of role',
+        title: 'Assignment not in date range of role',
         status: statusCodes.CONFLICT,
-        pointer: assignmentBeforeRoleStart ? 'start_date' : 'end_date'
+        pointer: assignmentStartBeforeRoleStart ? 'start_date' : 'end_date'
       })
     }
   }

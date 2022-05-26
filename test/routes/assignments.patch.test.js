@@ -257,7 +257,7 @@ describe('PATCH /assignments/:id', function () {
     const employee = await Employee.query().insert({
       name: faker.name.findName(),
       start_date: dates.startDate,
-      end_date: faker.date.future()
+      end_date: dates.afterEndDate
     })
 
     const role = await Role.query().insert({

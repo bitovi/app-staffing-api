@@ -1,8 +1,9 @@
 const { statusCodes } = require('../managers/error-handler/constants')
 const { ValidationError } = require('../managers/error-handler/errors')
+const { compareDates } = require('./date-utils')
 
 const validateStartDate = (body) => {
-  if ((body.start_date && body.end_date) && body.start_date > body.end_date) {
+  if (compareDates(body.end_date, body.start_date)) {
     throw new ValidationError({
       title: 'startDate is after endDate',
       status: statusCodes.UNPROCESSABLE_ENTITY,
@@ -14,9 +15,8 @@ const validateStartDate = (body) => {
 const validateDateFormat = (body) => {
   if ((body.start_date && body.start_date.length > 10) || (body.end_date && body.end_date.length > 10)) {
     throw new ValidationError({
-      message: 'incorrect date format',
-      type: 'ModelValidation',
-      statusCode: 422,
+      title: 'incorrect date format',
+      statusCode: statusCodes.UNPROCESSABLE_ENTITY,
       pointer: 'start_date'
     })
   }

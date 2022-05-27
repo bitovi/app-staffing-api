@@ -40,7 +40,7 @@ describe.each(schemasForGenericTests)('POST /%s', (myroute) => {
     if (myroute?.foreignKeys) {
       for (const [key, value] of Object.entries(foreignKeys)) {
         const createdObj = await createDbObject(key, createdIDs, dates)
-        // console.log('POST createdObj', createdObj)
+
         const keyFrom = createdObj[value.from]
         obj[value.into] = keyFrom
       }
@@ -71,8 +71,7 @@ describe.each(schemasForGenericTests)('POST /%s', (myroute) => {
 
     const result = JSON.parse(response.body)
     // use console.log to get sample request and response
-    // console.log('testBody', testBody)
-    // console.log('result', result)
+
     expect(result?.data).toHaveProperty(pkey)
     expect(result?.links?.self).toBe(`/${routeName}/${result.data[pkey]}`)
 
@@ -95,7 +94,7 @@ describe.each(schemasForGenericTests)('POST /%s', (myroute) => {
     if (myroute?.foreignKeys) {
       for (const [key, value] of Object.entries(foreignKeys)) {
         const createdObj = await createDbObject(key, createdIDs, dates)
-        // console.log('POST createdObj', createdObj)
+
         const keyFrom = createdObj[value.from]
         obj[value.into] = keyFrom
       }
@@ -198,7 +197,7 @@ describe.each(schemasForGenericTests)('PATCH /%s', (myroute) => {
     if (myroute?.foreignKeys) {
       for (const [key, value] of Object.entries(foreignKeys)) {
         const createdObj = await createDbObject(key, createdIDs, dates)
-        // console.log('POST createdObj', createdObj)
+
         const keyFrom = createdObj[value.from]
         obj[value.into] = keyFrom
       }
@@ -454,7 +453,7 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
   )
   test.each(props)(`SORT ${objname}?sort=%s`, async (prop) => {
     // expect.assertions(2)
-    // console.log(objname, relation)
+
     const resp = await global.app.inject({
       url: `${objname}`,
       query: { sort: `${prop}` },
@@ -465,7 +464,7 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
 
     const results = json.data
     expect(resp.statusCode).toBe(200)
-    // console.log('results', results)
+
     expect(results.length).toBeGreaterThan(0)
     const index1 = results.findIndex(
       (el) => el[pkey] === createdObjects[0][pkey]
@@ -482,7 +481,7 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
   // Testing SORT DESC
   test.each(props)(`SORT DESC ${objname}?sort=-%s`, async (prop) => {
     // expect.assertions(2)
-    // console.log(objname, relation)
+
     const resp = await global.app.inject({
       url: `${objname}`,
       query: { sort: `-${prop}` },
@@ -493,7 +492,7 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
 
     const results = json.data
     expect(resp.statusCode).toBe(200)
-    // console.log('results', results)
+
     expect(results.length).toBeGreaterThan(0)
     const index1 = results.findIndex(
       (el) => el[pkey] === createdObjects[0][pkey]
@@ -582,7 +581,6 @@ describe.each(routesSchemas)('%s: GET include relations', (myroute) => {
     `get ONE included relation of GET ${objname}?include=%s`,
     async (relation) => {
       // expect.assertions(2)
-      // console.log(objname, relation)
       const url = `${objname}?include=${relation}`
       const resp = await global.app.inject({
         url: url,
@@ -593,7 +591,6 @@ describe.each(routesSchemas)('%s: GET include relations', (myroute) => {
 
       const results = json.data
       expect(resp.statusCode).toBe(200)
-      // console.log(url, results[0].relationships)
       expect(results.length).toBeGreaterThan(0)
       expect(
         results.filter((el) => el[pkey] === createdObjects[0][pkey])[0]
@@ -609,7 +606,7 @@ describe.each(routesSchemas)('%s: GET include relations', (myroute) => {
     `get MULTIPLE included relations of GET ${objname}?include=%s`,
     async (relation) => {
       // expect.assertions(2)
-      // console.log(objname, relation)
+
       const resp = await global.app.inject({
         url: `${objname}?include=${relation}`,
         method: 'GET',
@@ -619,13 +616,11 @@ describe.each(routesSchemas)('%s: GET include relations', (myroute) => {
 
       const results = json.data
       expect(resp.statusCode).toBe(200)
-      // console.log('results', results)
+
       expect(results.length).toBeGreaterThan(0)
       const relationParts = relation.split(',')
       for (let i = 0; i < relationParts.length; i++) {
-        // console.log('relations[i]', relationParts[i])
         expect(results[0]).toHaveProperty(`relationships.${relationParts[i]}`)
-        // console.log('results', results.filter(el => el[pkey] === createdObject1[pkey])[0])
       }
     }
   )
@@ -687,7 +682,6 @@ async function getCreatedObjectbyID (objname, createdIDs) {
 
 async function deleteCreatedIDs (createdIDs) {
   for (const [key, value] of Object.entries(createdIDs)) {
-    // console.log('Inside deleteCreatedIDS', key)
     const route = schema.routes.filter((el) => el.routeName === key)[0]
     const primaryKeys = route?.primaryKeys || ['id']
 

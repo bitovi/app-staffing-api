@@ -1,6 +1,6 @@
 const { Model } = require('objection')
 const Project = require('./project')
-const { validateStartDate, validateDateFormat } = require('../utils/validation')
+const { validateStartDate } = require('../utils/validation')
 const Role = require('./role')
 const { statusCodes } = require('../managers/error-handler/constants')
 const { ConflictError, ValidationError } = require('../managers/error-handler/errors')
@@ -50,7 +50,6 @@ module.exports = class Assignment extends Model {
   async $beforeInsert (queryContext) {
     await super.$beforeInsert(queryContext)
     validateStartDate(this)
-    validateDateFormat(this)
     await this.validateRoleOverlap(this)
     const trx = await Assignment.startTransaction()
     await this.validateAssignmentOverlap(this, trx)
@@ -65,7 +64,6 @@ module.exports = class Assignment extends Model {
   async $beforeUpdate (opt, queryContext) {
     await super.$beforeUpdate(opt, queryContext)
     validateStartDate(this)
-    validateDateFormat(this)
     await this.validateRoleOverlap(this)
     const trx = await Assignment.startTransaction()
     await this.validateAssignmentOverlap(this, trx)

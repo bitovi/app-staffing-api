@@ -127,7 +127,7 @@ describe('Overlapping assignments are prevented while multiple records are updat
   test.concurrent.each(
     [
       ['patch is successful, should return 200', dates.endAssignmentDate, dates.endAfterAssignmentDate, 200],
-      ['overlap detected, should return 409', dates.startBeforeAssignmentDate, dates.endAfterAssignmentDate, 409],
+      ['overlap detected, should return 409', dates.beforeStartDate, dates.afterEndDate, 409],
       ['overlap detected, should return 409', dates.startDate, dates.endAssignmentDate, 409],
       ['overlap detected, should return 409', dates.startDate, null, 409]
 

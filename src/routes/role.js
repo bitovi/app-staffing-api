@@ -1,5 +1,5 @@
 const RolesModel = require('../models/role')
-const { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
+const { getListHandler, getDeleteHandler, getUpdateOneHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
 const schema = require('../schemas/role')
 
 const routes = {
@@ -24,7 +24,7 @@ const routes = {
   patch: {
     method: 'PATCH',
     url: '/roles/:id',
-    handler: getUpdateHandler(RolesModel),
+    handler: getUpdateOneHandler(RolesModel),
     schema: schema.patch
   },
   delete: {

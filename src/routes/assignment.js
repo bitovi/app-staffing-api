@@ -1,5 +1,5 @@
 const Assignment = require('../models/assignment')
-const { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
+const { getListHandler, getDeleteHandler, getUpdateOneHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
 const schema = require('../schemas/assignment')
 
 const routes = {
@@ -27,7 +27,7 @@ const routes = {
   patch: {
     url: '/assignments/:id',
     method: 'PATCH',
-    handler: getUpdateHandler(Assignment),
+    handler: getUpdateOneHandler(Assignment),
     schema: schema.patch
   },
   delete: {

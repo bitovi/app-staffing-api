@@ -188,12 +188,14 @@ const getDeleteHandler = (Model) => {
   })
 }
 
-const getUpdateHandler = (Model) => {
+const getUpdateOneHandler = (Model) => {
   return asyncHandler(async (request, reply) => {
-    const updatedGraph = await Model.query().upsertGraphAndFetch(request.body, {
+    const updatedGraph = await Model.query().upsertGraphAndFetch(Object.assign(request.body, { id: request.params.id }), {
       update: false,
       relate: true,
-      unrelate: true
+      unrelate: true,
+      noInsert: true,
+      noDelete: true
     })
 
     const serialized = Serializer.serialize(
@@ -230,6 +232,6 @@ const getPostHandler = (Model) => {
 module.exports = {
   getListHandler,
   getDeleteHandler,
-  getUpdateHandler,
+  getUpdateOneHandler,
   getPostHandler
 }

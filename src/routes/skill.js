@@ -1,5 +1,5 @@
 const SkillModel = require('../models/skill')
-const { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
+const { getListHandler, getDeleteHandler, getUpdateOneHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
 const schema = require('../schemas/skill')
 
 const routes = {
@@ -24,7 +24,7 @@ const routes = {
   patch: {
     method: 'PATCH',
     url: '/skills/:id',
-    handler: getUpdateHandler(SkillModel),
+    handler: getUpdateOneHandler(SkillModel),
     schema: schema.patch
   },
   create: {

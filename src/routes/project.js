@@ -1,5 +1,5 @@
 const ProjectModel = require('../models/project')
-const { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
+const { getListHandler, getDeleteHandler, getUpdateOneHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
 const schema = require('../schemas/project')
 
 const routes = {
@@ -27,7 +27,7 @@ const routes = {
   update: {
     method: 'PATCH',
     url: '/projects/:id',
-    handler: getUpdateHandler(ProjectModel),
+    handler: getUpdateOneHandler(ProjectModel),
     schema: schema.patch
   },
 

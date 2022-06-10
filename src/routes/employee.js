@@ -1,5 +1,5 @@
 const Employee = require('../models/employee')
-const { getListHandler, getDeleteHandler, getUpdateHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
+const { getListHandler, getDeleteHandler, getUpdateOneHandler, getPostHandler } = require('../utils/jsonapi-objection-handler')
 const schema = require('../schemas/employee')
 
 const routes = {
@@ -27,7 +27,7 @@ const routes = {
   patch: {
     url: '/employees/:id',
     method: 'PATCH',
-    handler: getUpdateHandler(Employee),
+    handler: getUpdateOneHandler(Employee),
     schema: schema.patch
   },
 

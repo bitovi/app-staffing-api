@@ -27,12 +27,12 @@ describe('PATCH /employees/:id', function () {
     const dates = dateGenerator()
     const notFoundId = faker.datatype.uuid()
     const payload = serialize({
-      id: notFoundId,
       name: faker.name.findName(),
       start_date: dates.startDate,
       end_date: dates.endDate
     })
     const response = await patch(notFoundId, payload)
+
     expect(response.statusCode).toBe(404)
   })
 

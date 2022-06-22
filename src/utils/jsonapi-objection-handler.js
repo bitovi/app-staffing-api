@@ -8,7 +8,7 @@ const {
   NotFoundError
 } = require('../managers/error-handler/errors')
 const { codes, statusCodes } = require('../managers/error-handler/constants')
-const applyFilter = require('./filter-objection-handler')
+const applyFilters = require('./filter-objection-handler')
 const normalizeColumn = (tableName, column) =>
   column.includes('.') ? column : `${tableName}.${column}`
 
@@ -89,7 +89,7 @@ const getListHandler = (Model) => {
         }
       }
 
-      applyFilter(parsedParams.filter, queryBuilder, validatorFn)
+      applyFilters(parsedParams.filter, queryBuilder, validatorFn)
     }
 
     let { size = 100, number = 0 } = parsedParams?.page || {}

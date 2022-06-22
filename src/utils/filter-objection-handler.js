@@ -1,26 +1,31 @@
+/**
+ * NOTE: This implementation is likely temporary - to be replaced by a later
+ * version of @bitovi/querystring-parser once it supports objection directly.
+ */
+
 const knex = require('../models/skill').knex() // any model, doesn't matter
 
-// TODO: add note about how this implementation is temporary until the lib does it for us
-
 /**
- * TODO: document
+ * Applies filters to the queryBuilder recursively.
+ * @param {*} filter the filter output from the querystring-parser
+ * @param {*} queryBuilder the knex query builder to apply where clauses to
+ * @param {*} validatorFn a validation function to check column names against the model
+ * @returns nothing - the queryBuilder is mutated as a side effect
  */
-function applyFilter (filter, queryBuilder, validatorFn) {
+function applyFilters (filter, queryBuilder, validatorFn) {
   if (!queryBuilder.hasWheres()) {
-    return queryBuilder.where(function () {
-      applyFilterRec(filter, this, validatorFn)
+    queryBuilder.where(function () {
+      applyFilterRecs(filter, this, validatorFn)
     })
   } else {
-    return queryBuilder.andWhere(function () {
-      applyFilterRec(filter, this, validatorFn)
+    queryBuilder.andWhere(function () {
+      applyFilterRecs(filter, this, validatorFn)
     })
   }
 }
 
-/**
- * TODO: document
- */
-function applyFilterRec (filter, queryBuilder, validatorFn) {
+/** Recursively validate and apply filters to queryBuilder via operator handlers */
+function applyFilterRecs (filter, queryBuilder, validatorFn) {
   let [operator, operands] = Object.entries(filter)[0] // should only have one entry
 
   // run validation
@@ -30,8 +35,8 @@ function applyFilterRec (filter, queryBuilder, validatorFn) {
     validatorFn(unescape(ref))
   })
 
-  // update queryBuilder
-  return OperatorHandler[operator](filter, queryBuilder, validatorFn)
+  // apply filters to queryBuilder
+  OperatorHandlers[operator](filter, queryBuilder, validatorFn)
 }
 
 /** A enumeration of SQL operators. */
@@ -53,7 +58,7 @@ const Operator = Object.freeze({
 })
 
 /* TODO: document */
-const OperatorHandler = {
+const OperatorHandlers = {
   [Operator.EQUALS]: equalsHandler,
   [Operator.NOT_EQUALS]: notEqualsHandler,
   [Operator.GREATER_THAN]: greaterThanHandler,
@@ -70,16 +75,6 @@ const OperatorHandler = {
   [Operator.IS_NOT_NULL]: isNotNullHandler
 }
 
-/** Un-escapes an attribute reference (column) by removing the prepended '#' */
-function unescape (attributeRef) {
-  return attributeRef.slice(1)
-}
-
-/** Checks if operand is an attribute reference (ex: "#name") */
-function isAttributeRef (operand) {
-  return (typeof operand === 'string' || operand instanceof String) && operand[0] === '#'
-}
-
 /************************************************************************
  * Operator Handlers
  ************************************************************************/
@@ -87,58 +82,58 @@ function isAttributeRef (operand) {
 function equalsHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
   value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
-  return queryBuilder.where(unescape(column), '=', value)
+  queryBuilder.where(unescape(column), '=', value)
 }
 
 function notEqualsHandler (filter, queryBuilder, validationFn) {
   const [column, value] = Object.values(filter)[0]
-  return queryBuilder.where(unescape(column), '<>', value)
+  queryBuilder.where(unescape(column), '<>', value)
 }
 
 function isNullHandler (filter, queryBuilder, validationFn) {
   const column = Object.values(filter)[0]
-  return queryBuilder.whereNull(unescape(column))
+  queryBuilder.whereNull(unescape(column))
 }
 
 function isNotNullHandler (filter, queryBuilder, validationFn) {
   const column = Object.values(filter)[0]
-  return queryBuilder.whereNotNull(unescape(column))
+  queryBuilder.whereNotNull(unescape(column))
 }
 
 function greaterThanHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
   value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
-  return queryBuilder.where(unescape(column), '>', value)
+  queryBuilder.where(unescape(column), '>', value)
 }
 
 function greaterOrEqualHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
   value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
-  return queryBuilder.where(unescape(column), '>=', value)
+  queryBuilder.where(unescape(column), '>=', value)
 }
 
 function lessThanHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
   value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
-  return queryBuilder.where(unescape(column), '<', value)
+  queryBuilder.where(unescape(column), '<', value)
 }
 
 function lessOrEqualHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
   value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
-  return queryBuilder.where(unescape(column), '<=', value)
+  queryBuilder.where(unescape(column), '<=', value)
 }
 
 function likeHandler (filter, queryBuilder, validationFn) {
   const [column, value] = Object.values(filter)[0]
-  return queryBuilder.where(unescape(column), 'ilike', value)
+  queryBuilder.where(unescape(column), 'ilike', value)
 }
 
 function inHandler (filter, queryBuilder, validationFn) {
   let [column, ...values] = Object.values(filter)[0]
   if (values.length) {
     column = unescape(column)
-    return queryBuilder.where(function () {
+    queryBuilder.where(function () {
       for (const value of values) {
         if (value === null) {
           this.orWhereNull(column)
@@ -150,33 +145,47 @@ function inHandler (filter, queryBuilder, validationFn) {
 }
 
 function notInHandler (filter, queryBuilder, validationFn) {
-  return queryBuilder.whereNot(function () {
+  queryBuilder.whereNot(function () {
     inHandler(filter, this, validationFn)
   })
 }
 
 function notHandler (filter, queryBuilder, validationFn) {
   const subFilter = Object.values(filter)[0]
-  return queryBuilder.whereNot(function () {
-    applyFilterRec(subFilter, this, validationFn)
+  queryBuilder.whereNot(function () {
+    applyFilterRecs(subFilter, this, validationFn)
   })
 }
 
 function andHandler (filter, queryBuilder, validationFn) {
   const [subFilterA, subFilterB] = Object.values(filter)[0]
-  return queryBuilder.where(function () {
-    applyFilterRec(subFilterA, this, validationFn)
-    applyFilterRec(subFilterB, this, validationFn)
+  queryBuilder.where(function () {
+    applyFilterRecs(subFilterA, this, validationFn)
+    applyFilterRecs(subFilterB, this, validationFn)
   })
 }
 
 function orHandler (filter, queryBuilder, validationFn) {
   const [subFilterA, subFilterB] = Object.values(filter)[0]
-  return queryBuilder.where(function () {
-    applyFilterRec(subFilterA, this, validationFn)
+  queryBuilder.where(function () {
+    applyFilterRecs(subFilterA, this, validationFn)
   }).orWhere(function () {
-    applyFilterRec(subFilterB, this, validationFn)
+    applyFilterRecs(subFilterB, this, validationFn)
   })
 }
 
-module.exports = applyFilter
+/************************************************************************
+ * Helpers
+ ************************************************************************/
+
+/** Un-escapes an attribute reference ("column name") by removing the prepended '#'. */
+function unescape (attributeRef) {
+  return attributeRef.slice(1)
+}
+
+/** Checks if operand is an attribute reference ("column name"). Ex: "#name" */
+function isAttributeRef (operand) {
+  return (typeof operand === 'string' || operand instanceof String) && operand[0] === '#'
+}
+
+module.exports = applyFilters

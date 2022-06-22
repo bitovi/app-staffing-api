@@ -44,7 +44,7 @@ const errorHandler = function (error, _, reply) {
     status = errors[0].status
   }
 
-  this.log.error({ ...error, statusCode: status })
+  console.log(error)
 
   reply.status(status).send({
     errors

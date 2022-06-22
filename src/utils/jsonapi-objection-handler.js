@@ -75,7 +75,16 @@ const getListHandler = (Model) => {
       }
     }
 
-    if (parsedParams.filter) {
+    if (parsedParams.errors.filter.length) {
+      const err = parsedParams.errors.filter[0]
+      throw new ValidationError({
+        status: statusCodes.UNPROCESSABLE_ENTITY,
+        title: err.name,
+        detail: err.message,
+        parameter: 'filter',
+        code: codes.ERR_INVALID_PARAMETER
+      })
+    } else if (parsedParams.filter) {
       const validatorFn = (columnName) => {
         const normalizedName = normalizeColumn(tableName, columnName)
         if (!modelHasColumn(normalizedName)) {

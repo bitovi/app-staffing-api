@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/bitovi/app-staffing-api#readme",
   "dependencies": {
-    "@bitovi/querystring-parser": "^0.5.2",
+    "@bitovi/querystring-parser": "^0.5.4",
     "convict": "^6.2.1",
     "faker": "^5.5.3",
     "fastify": "^3.0.0",

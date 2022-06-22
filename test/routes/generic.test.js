@@ -526,11 +526,11 @@ describe.each(routesSchemas)('%s: GET Listing Component Tests', (myroute) => {
     `FILTER ${objname}?filter[%s]=`,
     async (prop) => {
       const isString = properties[prop].type === 'string'
-      const unixTime = Date.parse(createdObjects[0][prop]) || new Date()
+      const unixTime = Date.parse(createdObjects[0][prop])
       const filterby =
         isString && unixTime
           ? new Date(unixTime).toISOString().slice(0, 10) ||
-            createdObjects[0][prop]
+          createdObjects[0][prop]
           : createdObjects[0][prop]
       const url = `${objname}?filter[${prop}]=${filterby}`
       const response = await global.app.inject({

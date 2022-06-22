@@ -8,6 +8,7 @@ const {
   NotFoundError
 } = require('../managers/error-handler/errors')
 const { codes, statusCodes } = require('../managers/error-handler/constants')
+const applyFilter = require('./filter-objection-handler')
 const normalizeColumn = (tableName, column) =>
   column.includes('.') ? column : `${tableName}.${column}`
 
@@ -74,42 +75,21 @@ const getListHandler = (Model) => {
       }
     }
 
-    if (parsedParams.filter.length) {
-      // check for duplicate filter keys, return 500
-      const filterKeys = parsedParams.filter.map(
-        ({ field, comparator }) => field + '_-_' + comparator
-      )
-
-      if (filterKeys.length > new Set(filterKeys).size) {
-        throw new ValidationError({
-          status: statusCodes.UNPROCESSABLE_ENTITY,
-          title: 'Cannot have duplicate filter keys',
-          detail: 'The filter parameter must not have duplicate keys',
-          parameter: '/filter',
-          code: codes.ERR_DUPLICATE_PARAMETER
-        })
-      }
-
-      parsedParams.filter.forEach((filter) => {
-        const { field: key, comparator, value: sqlValue } = filter
-        const normalizedName = normalizeColumn(tableName, key)
-
+    if (parsedParams.filter) {
+      const validatorFn = (columnName) => {
+        const normalizedName = normalizeColumn(tableName, columnName)
         if (!modelHasColumn(normalizedName)) {
           throw new ValidationError({
             status: statusCodes.UNPROCESSABLE_ENTITY,
-            title: `Cannot filter on non existing column name: ${key}`,
+            title: `Cannot filter on non existing column name: ${columnName}`,
             detail: 'The filter parameter must be a column of the model',
-            parameter: `filter/${key}`,
+            parameter: 'filter',
             code: codes.ERR_INVALID_PARAMETER
           })
         }
-        // @TODO: compare datetime based on date only accepting YYYY-MM-DD?
-        if (!queryBuilder.hasWheres()) {
-          queryBuilder.where(normalizedName, comparator, sqlValue)
-        } else {
-          queryBuilder.andWhere(normalizedName, comparator, sqlValue)
-        }
-      })
+      }
+
+      applyFilter(parsedParams.filter, queryBuilder, validatorFn)
     }
 
     let { size = 100, number = 0 } = parsedParams?.page || {}

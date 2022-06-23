@@ -92,7 +92,7 @@ const getListHandler = (Model) => {
             status: statusCodes.UNPROCESSABLE_ENTITY,
             title: `Cannot filter on non existing column name: ${columnName}`,
             detail: 'The filter parameter must be a column of the model',
-            parameter: 'filter',
+            parameter: `filter/${columnName}`,
             code: codes.ERR_INVALID_PARAMETER
           })
         }

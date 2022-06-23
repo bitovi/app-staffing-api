@@ -3,8 +3,6 @@
  * version of @bitovi/querystring-parser once it supports objection directly.
  */
 
-const knex = require('../models/skill').knex() // any model, doesn't matter
-
 /**
  * Applies filters to the queryBuilder recursively.
  * @param {*} filter the filter output from the querystring-parser
@@ -15,17 +13,17 @@ const knex = require('../models/skill').knex() // any model, doesn't matter
 function applyFilters (filter, queryBuilder, validatorFn) {
   if (!queryBuilder.hasWheres()) {
     queryBuilder.where(function () {
-      applyFilterRecs(filter, this, validatorFn)
+      applyFilterRec(filter, this, validatorFn)
     })
   } else {
     queryBuilder.andWhere(function () {
-      applyFilterRecs(filter, this, validatorFn)
+      applyFilterRec(filter, this, validatorFn)
     })
   }
 }
 
 /** Recursively validate and apply filters to queryBuilder via operator handlers */
-function applyFilterRecs (filter, queryBuilder, validatorFn) {
+function applyFilterRec (filter, queryBuilder, validatorFn) {
   let [operator, operands] = Object.entries(filter)[0] // should only have one entry
 
   // run validation
@@ -81,6 +79,7 @@ const OperatorHandlers = {
 
 function equalsHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
+  const knex = queryBuilder.knex()
   value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
   queryBuilder.where(unescape(column), '=', value)
 }
@@ -102,24 +101,28 @@ function isNotNullHandler (filter, queryBuilder, validationFn) {
 
 function greaterThanHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
+  const knex = queryBuilder.knex()
   value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
   queryBuilder.where(unescape(column), '>', value)
 }
 
 function greaterOrEqualHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
+  const knex = queryBuilder.knex()
   value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
   queryBuilder.where(unescape(column), '>=', value)
 }
 
 function lessThanHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
+  const knex = queryBuilder.knex()
   value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
   queryBuilder.where(unescape(column), '<', value)
 }
 
 function lessOrEqualHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
+  const knex = queryBuilder.knex()
   value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
   queryBuilder.where(unescape(column), '<=', value)
 }
@@ -153,24 +156,24 @@ function notInHandler (filter, queryBuilder, validationFn) {
 function notHandler (filter, queryBuilder, validationFn) {
   const subFilter = Object.values(filter)[0]
   queryBuilder.whereNot(function () {
-    applyFilterRecs(subFilter, this, validationFn)
+    applyFilterRec(subFilter, this, validationFn)
   })
 }
 
 function andHandler (filter, queryBuilder, validationFn) {
   const [subFilterA, subFilterB] = Object.values(filter)[0]
   queryBuilder.where(function () {
-    applyFilterRecs(subFilterA, this, validationFn)
-    applyFilterRecs(subFilterB, this, validationFn)
+    applyFilterRec(subFilterA, this, validationFn)
+    applyFilterRec(subFilterB, this, validationFn)
   })
 }
 
 function orHandler (filter, queryBuilder, validationFn) {
   const [subFilterA, subFilterB] = Object.values(filter)[0]
   queryBuilder.where(function () {
-    applyFilterRecs(subFilterA, this, validationFn)
+    applyFilterRec(subFilterA, this, validationFn)
   }).orWhere(function () {
-    applyFilterRecs(subFilterB, this, validationFn)
+    applyFilterRec(subFilterB, this, validationFn)
   })
 }
 

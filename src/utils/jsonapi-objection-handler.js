@@ -98,6 +98,7 @@ const getListHandler = (Model) => {
         }
       }
 
+      queryBuilder.context({ defaultTable: tableName })
       applyFilters(parsedParams.filter, queryBuilder, validatorFn)
     }
 

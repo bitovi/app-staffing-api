@@ -13,10 +13,12 @@
 function applyFilters (filter, queryBuilder, validatorFn) {
   if (!queryBuilder.hasWheres()) {
     queryBuilder.where(function () {
+      this.context({ defaultTable: queryBuilder.context().defaultTable })
       applyFilterRec(filter, this, validatorFn)
     })
   } else {
     queryBuilder.andWhere(function () {
+      this.context({ defaultTable: queryBuilder.context().defaultTable })
       applyFilterRec(filter, this, validatorFn)
     })
   }
@@ -80,63 +82,64 @@ const OperatorHandlers = {
 function equalsHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
   const knex = queryBuilder.knex()
-  value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
-  queryBuilder.where(unescape(column), '=', value)
+  value = isAttributeRef(value) ? knex.ref(columnName(value, queryBuilder)) : value
+  queryBuilder.where(columnName(column, queryBuilder), '=', value)
 }
 
 function notEqualsHandler (filter, queryBuilder, validationFn) {
   const [column, value] = Object.values(filter)[0]
-  queryBuilder.where(unescape(column), '<>', value)
+  queryBuilder.where(columnName(column, queryBuilder), '<>', value)
 }
 
 function isNullHandler (filter, queryBuilder, validationFn) {
   const column = Object.values(filter)[0]
-  queryBuilder.whereNull(unescape(column))
+  queryBuilder.whereNull(columnName(column, queryBuilder))
 }
 
 function isNotNullHandler (filter, queryBuilder, validationFn) {
   const column = Object.values(filter)[0]
-  queryBuilder.whereNotNull(unescape(column))
+  queryBuilder.whereNotNull(columnName(column, queryBuilder))
 }
 
 function greaterThanHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
   const knex = queryBuilder.knex()
-  value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
-  queryBuilder.where(unescape(column), '>', value)
+  value = isAttributeRef(value) ? knex.ref(columnName(value, queryBuilder)) : value
+  queryBuilder.where(columnName(column, queryBuilder), '>', value)
 }
 
 function greaterOrEqualHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
   const knex = queryBuilder.knex()
-  value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
-  queryBuilder.where(unescape(column), '>=', value)
+  value = isAttributeRef(value) ? knex.ref(columnName(value, queryBuilder)) : value
+  queryBuilder.where(columnName(column, queryBuilder), '>=', value)
 }
 
 function lessThanHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
   const knex = queryBuilder.knex()
-  value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
-  queryBuilder.where(unescape(column), '<', value)
+  value = isAttributeRef(value) ? knex.ref(columnName(value, queryBuilder)) : value
+  queryBuilder.where(columnName(column, queryBuilder), '<', value)
 }
 
 function lessOrEqualHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
   const knex = queryBuilder.knex()
-  value = isAttributeRef(value) ? knex.ref(unescape(value)) : value
-  queryBuilder.where(unescape(column), '<=', value)
+  value = isAttributeRef(value) ? knex.ref(columnName(value, queryBuilder)) : value
+  queryBuilder.where(columnName(column, queryBuilder), '<=', value)
 }
 
 function likeHandler (filter, queryBuilder, validationFn) {
   const [column, value] = Object.values(filter)[0]
-  queryBuilder.where(unescape(column), 'ilike', value)
+  queryBuilder.where(columnName(column, queryBuilder), 'ilike', value)
 }
 
 function inHandler (filter, queryBuilder, validationFn) {
   let [column, ...values] = Object.values(filter)[0]
   if (values.length) {
-    column = unescape(column)
+    column = columnName(column, queryBuilder)
     queryBuilder.where(function () {
+      this.context({ defaultTable: queryBuilder.context().defaultTable })
       for (const value of values) {
         if (value === null) {
           this.orWhereNull(column)
@@ -149,6 +152,7 @@ function inHandler (filter, queryBuilder, validationFn) {
 
 function notInHandler (filter, queryBuilder, validationFn) {
   queryBuilder.whereNot(function () {
+    this.context({ defaultTable: queryBuilder.context().defaultTable })
     inHandler(filter, this, validationFn)
   })
 }
@@ -156,6 +160,7 @@ function notInHandler (filter, queryBuilder, validationFn) {
 function notHandler (filter, queryBuilder, validationFn) {
   const subFilter = Object.values(filter)[0]
   queryBuilder.whereNot(function () {
+    this.context({ defaultTable: queryBuilder.context().defaultTable })
     applyFilterRec(subFilter, this, validationFn)
   })
 }
@@ -163,6 +168,7 @@ function notHandler (filter, queryBuilder, validationFn) {
 function andHandler (filter, queryBuilder, validationFn) {
   const [subFilterA, subFilterB] = Object.values(filter)[0]
   queryBuilder.where(function () {
+    this.context({ defaultTable: queryBuilder.context().defaultTable })
     applyFilterRec(subFilterA, this, validationFn)
     applyFilterRec(subFilterB, this, validationFn)
   })
@@ -171,8 +177,10 @@ function andHandler (filter, queryBuilder, validationFn) {
 function orHandler (filter, queryBuilder, validationFn) {
   const [subFilterA, subFilterB] = Object.values(filter)[0]
   queryBuilder.where(function () {
+    this.context({ defaultTable: queryBuilder.context().defaultTable })
     applyFilterRec(subFilterA, this, validationFn)
   }).orWhere(function () {
+    this.context({ defaultTable: queryBuilder.context().defaultTable })
     applyFilterRec(subFilterB, this, validationFn)
   })
 }
@@ -189,6 +197,11 @@ function unescape (attributeRef) {
 /** Checks if operand is an attribute reference ("column name"). Ex: "#name" */
 function isAttributeRef (operand) {
   return (typeof operand === 'string' || operand instanceof String) && operand[0] === '#'
+}
+
+/**  Un-escapes an attribute reference and prepends the default table name. */
+function columnName (attributeRef, queryBuilder) {
+  return `${queryBuilder.context().defaultTable}.${unescape(attributeRef)}`
 }
 
 module.exports = applyFilters

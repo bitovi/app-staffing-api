@@ -3,6 +3,8 @@
  * version of @bitovi/querystring-parser once it supports objection directly.
  */
 
+const { ref } = require('objection')
+
 /**
  * Applies filters to the queryBuilder recursively.
  * @param {*} filter the filter output from the querystring-parser
@@ -10,17 +12,16 @@
  * @param {*} validatorFn a validation function to check column names against the model
  * @returns nothing - the queryBuilder is mutated as a side effect
  */
-function applyFilters (filter, queryBuilder, validatorFn) {
+function applyFilter (filter, queryBuilder, validatorFn) {
+  const { defaultTable } = queryBuilder.context()
+  const whereFunc = function () {
+    this.context({ defaultTable })
+    applyFilterRec(filter, this, validatorFn)
+  }
   if (!queryBuilder.hasWheres()) {
-    queryBuilder.where(function () {
-      this.context({ defaultTable: queryBuilder.context().defaultTable })
-      applyFilterRec(filter, this, validatorFn)
-    })
+    queryBuilder.where(whereFunc)
   } else {
-    queryBuilder.andWhere(function () {
-      this.context({ defaultTable: queryBuilder.context().defaultTable })
-      applyFilterRec(filter, this, validatorFn)
-    })
+    queryBuilder.andWhere(whereFunc)
   }
 }
 
@@ -35,11 +36,25 @@ function applyFilterRec (filter, queryBuilder, validatorFn) {
     validatorFn(unescape(ref))
   })
 
-  // apply filters to queryBuilder
-  OperatorHandlers[operator](filter, queryBuilder, validatorFn)
+  // check for nested filters (1 level deep)
+  if (isAttributeRef(operands[0]) && operands[0].includes('.')) {
+    const attributeRef = unescape(operands[0])
+    const [relation, relField] = attributeRef.split('.')
+
+    const nestedQb = queryBuilder.modelClass().relatedQuery(relation)
+    nestedQb.context({ defaultTable: relation })
+    filter[Object.keys(filter)[0]][0] = '#' + relField
+    OperatorHandlers[operator](filter, nestedQb, validatorFn)
+    queryBuilder.whereExists(
+      nestedQb
+    )
+  } else {
+    // apply filters to querybuilder
+    OperatorHandlers[operator](filter, queryBuilder, validatorFn)
+  }
 }
 
-/** A enumeration of SQL operators. */
+/** An enumeration of SQL operators. */
 const Operator = Object.freeze({
   EQUALS: '=',
   NOT_EQUALS: '<>',
@@ -81,8 +96,7 @@ const OperatorHandlers = {
 
 function equalsHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
-  const knex = queryBuilder.knex()
-  value = isAttributeRef(value) ? knex.ref(columnName(value, queryBuilder)) : value
+  value = isAttributeRef(value) ? ref(columnName(value, queryBuilder)) : value
   queryBuilder.where(columnName(column, queryBuilder), '=', value)
 }
 
@@ -103,29 +117,25 @@ function isNotNullHandler (filter, queryBuilder, validationFn) {
 
 function greaterThanHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
-  const knex = queryBuilder.knex()
-  value = isAttributeRef(value) ? knex.ref(columnName(value, queryBuilder)) : value
+  value = isAttributeRef(value) ? ref(columnName(value, queryBuilder)) : value
   queryBuilder.where(columnName(column, queryBuilder), '>', value)
 }
 
 function greaterOrEqualHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
-  const knex = queryBuilder.knex()
-  value = isAttributeRef(value) ? knex.ref(columnName(value, queryBuilder)) : value
+  value = isAttributeRef(value) ? ref(columnName(value, queryBuilder)) : value
   queryBuilder.where(columnName(column, queryBuilder), '>=', value)
 }
 
 function lessThanHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
-  const knex = queryBuilder.knex()
-  value = isAttributeRef(value) ? knex.ref(columnName(value, queryBuilder)) : value
+  value = isAttributeRef(value) ? ref(columnName(value, queryBuilder)) : value
   queryBuilder.where(columnName(column, queryBuilder), '<', value)
 }
 
 function lessOrEqualHandler (filter, queryBuilder, validationFn) {
   let [column, value] = Object.values(filter)[0]
-  const knex = queryBuilder.knex()
-  value = isAttributeRef(value) ? knex.ref(columnName(value, queryBuilder)) : value
+  value = isAttributeRef(value) ? ref(columnName(value, queryBuilder)) : value
   queryBuilder.where(columnName(column, queryBuilder), '<=', value)
 }
 
@@ -204,4 +214,4 @@ function columnName (attributeRef, queryBuilder) {
   return `${queryBuilder.context().defaultTable}.${unescape(attributeRef)}`
 }
 
-module.exports = applyFilters
+module.exports = applyFilter

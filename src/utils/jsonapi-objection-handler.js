@@ -8,7 +8,7 @@ const {
   NotFoundError
 } = require('../managers/error-handler/errors')
 const { codes, statusCodes } = require('../managers/error-handler/constants')
-const applyFilters = require('./filter-objection-handler')
+const applyFilter = require('./filter-objection-handler')
 const normalizeColumn = (tableName, column) =>
   column.includes('.') ? column : `${tableName}.${column}`
 
@@ -85,21 +85,33 @@ const getListHandler = (Model) => {
         code: codes.ERR_INVALID_PARAMETER
       })
     } else if (parsedParams.filter) {
-      const validatorFn = (columnName) => {
-        const normalizedName = normalizeColumn(tableName, columnName)
-        if (!modelHasColumn(normalizedName)) {
+      const validatorFn = (attributeRef) => {
+        // check if the attribute reference is a path (with dots)
+        if (attributeRef.split('.').length > 2) {
           throw new ValidationError({
             status: statusCodes.UNPROCESSABLE_ENTITY,
-            title: `Cannot filter on non existing column name: ${columnName}`,
-            detail: 'The filter parameter must be a column of the model',
-            parameter: `filter/${columnName}`,
+            title: `Cannot filter on nested attribute reference: ${attributeRef}`,
+            detail: 'Nested filters have a max depth of 1',
+            parameter: `filter/${attributeRef}`,
             code: codes.ERR_INVALID_PARAMETER
           })
+        // for attribute references that are a simple column name, validate
+        } else if (attributeRef.split('.').length === 1) {
+          const normalizedName = normalizeColumn(tableName, attributeRef)
+          if (!modelHasColumn(normalizedName)) {
+            throw new ValidationError({
+              status: statusCodes.UNPROCESSABLE_ENTITY,
+              title: `Cannot filter on non existing column name: ${attributeRef}`,
+              detail: 'The filter parameter must be a column of the model',
+              parameter: `filter/${attributeRef}`,
+              code: codes.ERR_INVALID_PARAMETER
+            })
+          }
         }
       }
 
       queryBuilder.context({ defaultTable: tableName })
-      applyFilters(parsedParams.filter, queryBuilder, validatorFn)
+      applyFilter(parsedParams.filter, queryBuilder, validatorFn)
     }
 
     let { size = 100, number = 0 } = parsedParams?.page || {}

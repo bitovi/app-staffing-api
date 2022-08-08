@@ -3,7 +3,10 @@ const Project = require('./project')
 const { validateStartDate } = require('../utils/validation')
 const Role = require('./role')
 const { statusCodes } = require('../managers/error-handler/constants')
-const { ConflictError, ValidationError } = require('../managers/error-handler/errors')
+const {
+  ConflictError,
+  ValidationError
+} = require('../managers/error-handler/errors')
 const { compareDates } = require('../utils/date-utils')
 
 module.exports = class Assignment extends Model {
@@ -80,15 +83,21 @@ module.exports = class Assignment extends Model {
         if (body.end_date) {
           assignmentList = await Assignment.query(trx)
             .where('employee_id', '=', body.employee_id)
-            .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")',
-              [body.start_date, body.end_date])
-        } else { // If end_date is entered is blank or null
+            .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")', [
+              body.start_date,
+              body.end_date
+            ])
+        } else {
+          // If end_date is entered is blank or null
           assignmentList = await Assignment.query(trx)
             .where('employee_id', '=', body.employee_id)
-            .andWhereRaw('(?, \'infinity\') OVERLAPS ("start_date", "end_date")', body.start_date)
+            .andWhereRaw(
+              '(?, \'infinity\') OVERLAPS ("start_date", "end_date")',
+              body.start_date
+            )
         }
         if (body.id) {
-          assignmentList = assignmentList.filter(e => e.id !== body.id)
+          assignmentList = assignmentList.filter((e) => e.id !== body.id)
         }
         if (assignmentList.length > 0) {
           throw new Error('Overlap')
@@ -108,18 +117,26 @@ module.exports = class Assignment extends Model {
     if (body.role_id) {
       const role = await Role.query()
         .findById(body.role_id)
-        .select('start_date', 'end_date')
+        .select('start_date', 'end_date', 'start_confidence', 'end_confidence')
+
       if (!role) {
         throw new ConflictError({
           pointer: 'role/id'
         })
       }
+
       const assignmentStart = body.start_date
       const assignmentEnd = body.end_date
       const roleStart = role.start_date
       const roleEnd = role.end_date
+      const startConfidence = role.start_confidence
+      const endConfidence = role.end_confidence
 
-      const assignmentStartBeforeRoleStart = compareDates(assignmentStart, roleStart)
+      const isFullyConfident = (confidence) => confidence < 1
+
+      const assignmentStartBeforeRoleStart =
+        compareDates(assignmentStart, roleStart) &&
+        !isFullyConfident(startConfidence)
 
       if (!assignmentEnd && !roleEnd && assignmentStartBeforeRoleStart) {
         throw new ValidationError({
@@ -128,20 +145,35 @@ module.exports = class Assignment extends Model {
           pointer: 'start_date'
         })
       } else if (
-        (assignmentEnd && (assignmentStartBeforeRoleStart || (roleEnd && compareDates(roleEnd, assignmentStart))))) {
+        assignmentEnd &&
+        (assignmentStartBeforeRoleStart ||
+          (roleEnd &&
+            compareDates(roleEnd, assignmentStart) &&
+            !isFullyConfident(endConfidence)))
+      ) {
         throw new ValidationError({
           title: 'Assignment start date not in date range of role',
           status: statusCodes.CONFLICT,
           pointer: 'start_date'
         })
-      } else if (!roleEnd && (assignmentStartBeforeRoleStart || compareDates(assignmentEnd, roleStart))) {
+      } else if (
+        !roleEnd &&
+        (assignmentStartBeforeRoleStart ||
+          (compareDates(assignmentEnd, roleStart) &&
+            !isFullyConfident(startConfidence)))
+      ) {
         throw new ValidationError({
           title: 'Assignment dates are before role start date',
           status: statusCodes.CONFLICT,
           pointer: assignmentStartBeforeRoleStart ? 'start_date' : 'end_date'
         })
-      } else if ((assignmentEnd && roleEnd) &&
-      (assignmentStartBeforeRoleStart || compareDates(roleEnd, assignmentEnd))) {
+      } else if (
+        assignmentEnd &&
+        roleEnd &&
+        (assignmentStartBeforeRoleStart ||
+          (compareDates(roleEnd, assignmentEnd) &&
+            !isFullyConfident(endConfidence)))
+      ) {
         throw new ValidationError({
           title: 'Assignment not in date range of role',
           status: statusCodes.CONFLICT,

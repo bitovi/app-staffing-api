@@ -132,11 +132,11 @@ module.exports = class Assignment extends Model {
       const startConfidence = role.start_confidence
       const endConfidence = role.end_confidence
 
-      const isFullyConfident = (confidence) => confidence < 1
+      const isFullyConfident = (confidence) => confidence === 1
 
       const assignmentStartBeforeRoleStart =
         compareDates(assignmentStart, roleStart) &&
-        !isFullyConfident(startConfidence)
+        isFullyConfident(startConfidence)
 
       if (!assignmentEnd && !roleEnd && assignmentStartBeforeRoleStart) {
         throw new ValidationError({
@@ -149,7 +149,7 @@ module.exports = class Assignment extends Model {
         (assignmentStartBeforeRoleStart ||
           (roleEnd &&
             compareDates(roleEnd, assignmentStart) &&
-            !isFullyConfident(endConfidence)))
+            isFullyConfident(endConfidence)))
       ) {
         throw new ValidationError({
           title: 'Assignment start date not in date range of role',
@@ -160,7 +160,7 @@ module.exports = class Assignment extends Model {
         !roleEnd &&
         (assignmentStartBeforeRoleStart ||
           (compareDates(assignmentEnd, roleStart) &&
-            !isFullyConfident(startConfidence)))
+            isFullyConfident(startConfidence)))
       ) {
         throw new ValidationError({
           title: 'Assignment dates are before role start date',
@@ -172,7 +172,7 @@ module.exports = class Assignment extends Model {
         roleEnd &&
         (assignmentStartBeforeRoleStart ||
           (compareDates(roleEnd, assignmentEnd) &&
-            !isFullyConfident(endConfidence)))
+            isFullyConfident(endConfidence)))
       ) {
         throw new ValidationError({
           title: 'Assignment not in date range of role',

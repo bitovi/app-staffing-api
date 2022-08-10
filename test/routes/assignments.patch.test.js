@@ -51,10 +51,10 @@ describe('PATCH /assignments/:id', function () {
 
     const role = await Role.query().insert({
       start_date: dates.startDate,
-      start_confidence: faker.datatype.number(10),
+      start_confidence: faker.datatype.float({ min: 0, max: 1 }),
       end_date: dates.endDate,
 
-      end_confidence: faker.datatype.number(10),
+      end_confidence: faker.datatype.float({ min: 0, max: 1 }),
       project_id: project.id
     })
 
@@ -96,10 +96,10 @@ describe('PATCH /assignments/:id', function () {
 
     const role = await Role.query().insert({
       start_date: dates.startDate,
-      start_confidence: faker.datatype.number(10),
+      start_confidence: faker.datatype.float({ min: 0, max: 1 }),
       end_date: dates.endDate,
 
-      end_confidence: faker.datatype.number(10),
+      end_confidence: faker.datatype.float({ min: 0, max: 1 }),
       project_id: project.id
     })
 
@@ -133,9 +133,9 @@ describe('PATCH /assignments/:id', function () {
     })
     const role = await Role.query().insert({
       start_date: dates.startDate,
-      start_confidence: faker.datatype.number(10),
+      start_confidence: faker.datatype.float({ min: 0, max: 1 }),
       end_date: dates.endDate,
-      end_confidence: faker.datatype.number(10),
+      end_confidence: faker.datatype.float({ min: 0, max: 1 }),
       project_id: project.id
     })
 
@@ -173,9 +173,9 @@ describe('PATCH /assignments/:id', function () {
 
     const role = await Role.query().insert({
       start_date: dates.startDate,
-      start_confidence: faker.datatype.number(10),
+      start_confidence: faker.datatype.float({ min: 0, max: 1 }),
       end_date: dates.endDate,
-      end_confidence: faker.datatype.number(10),
+      end_confidence: faker.datatype.float({ min: 0, max: 1 }),
       project_id: project.id
     })
 
@@ -184,10 +184,9 @@ describe('PATCH /assignments/:id', function () {
       employee: { id: employee.id },
       role: { id: role.id }
     }
-    const assignment = await Assignment.query().insertGraph(
-      newAssignment,
-      { relate: true }
-    )
+    const assignment = await Assignment.query().insertGraph(newAssignment, {
+      relate: true
+    })
 
     const payload = serialize({ ...newAssignment, end_date: null })
 
@@ -213,9 +212,9 @@ describe('PATCH /assignments/:id', function () {
 
     const role = await Role.query().insert({
       start_date: dates.startDate,
-      start_confidence: faker.datatype.number(10),
+      start_confidence: faker.datatype.float({ min: 0, max: 1 }),
       end_date: dates.endDate,
-      end_confidence: faker.datatype.number(10),
+      end_confidence: faker.datatype.float({ min: 0, max: 1 }),
       project_id: project.id
     })
 
@@ -247,7 +246,7 @@ describe('PATCH /assignments/:id', function () {
     const responseBody = deserialize(JSON.parse(response.body))
     expect(responseBody.employee.id).toEqual(newAssociatedEmployee.id)
   })
-  test('should return 409 for payload dates out of range of role, assignment dates before roles', async function () {
+  test('should return 200 for payload dates out of range of role, assignment dates before roles and start date is not confident', async function () {
     const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
@@ -262,9 +261,90 @@ describe('PATCH /assignments/:id', function () {
 
     const role = await Role.query().insert({
       start_date: dates.startDate,
-      start_confidence: faker.datatype.number(10),
+      start_confidence: faker.datatype.float({ min: 0, max: 0.9 }),
       end_date: dates.endDate,
-      end_confidence: faker.datatype.number(10),
+      end_confidence: faker.datatype.float({ min: 0, max: 0.9 }),
+      project_id: project.id
+    })
+
+    const newAssignment = {
+      start_date: dates.startAssignmentDate,
+      end_date: dates.endAssignmentDate,
+      employee: { id: employee.id },
+      role: { id: role.id }
+    }
+    const assignment = await Assignment.query().insertGraph(newAssignment, {
+      relate: true
+    })
+
+    const payload = serialize({
+      ...newAssignment,
+      start_date: dates.beforeStartDate,
+      end_date: dates.endAssignmentDate
+    })
+    const response = await patch(assignment.id, payload)
+
+    expect(response.statusCode).toBe(200)
+  })
+  test('should return 200 for payload dates out of range of role, assignment dates after roles and end date is not confident', async function () {
+    const dates = dateGenerator()
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: dates.startDate,
+      end_date: dates.endDate
+    })
+
+    const role = await Role.query().insert({
+      start_date: dates.startDate,
+      start_confidence: faker.datatype.float({ min: 0, max: 0.9 }),
+      end_date: dates.endDate,
+      end_confidence: faker.datatype.float({ min: 0, max: 0.9 }),
+      project_id: project.id
+    })
+
+    const newAssignment = {
+      start_date: dates.startAssignmentDate,
+      end_date: dates.endAssignmentDate,
+      employee: { id: employee.id },
+      role: { id: role.id }
+    }
+    const assignment = await Assignment.query().insertGraph(newAssignment, {
+      relate: true
+    })
+
+    const payload = serialize({
+      ...newAssignment,
+      start_date: dates.startAssignmentDate,
+      end_date: dates.afterEndDate
+    })
+    const response = await patch(assignment.id, payload)
+
+    expect(response.statusCode).toBe(200)
+  })
+
+  test('should return 409 for payload dates out of range of role, assignment dates before roles and start date is fully confident', async function () {
+    const dates = dateGenerator()
+    const project = await Project.query().insert({
+      name: faker.company.companyName(),
+      description: faker.lorem.sentences()
+    })
+
+    const employee = await Employee.query().insert({
+      name: faker.name.findName(),
+      start_date: dates.startDate,
+      end_date: dates.afterEndDate
+    })
+
+    const role = await Role.query().insert({
+      start_date: dates.startDate,
+      start_confidence: 1,
+      end_date: dates.endDate,
+      end_confidence: faker.datatype.float({ min: 0, max: 1 }),
       project_id: project.id
     })
 
@@ -287,7 +367,7 @@ describe('PATCH /assignments/:id', function () {
 
     expect(response.statusCode).toBe(409)
   })
-  test('should return 409 for payload dates out of range of role, assignment dates after roles', async function () {
+  test('should return 409 for payload dates out of range of role, assignment dates after roles and end date is fully confident', async function () {
     const dates = dateGenerator()
     const project = await Project.query().insert({
       name: faker.company.companyName(),
@@ -302,9 +382,9 @@ describe('PATCH /assignments/:id', function () {
 
     const role = await Role.query().insert({
       start_date: dates.startDate,
-      start_confidence: faker.datatype.number(10),
+      start_confidence: faker.datatype.float({ min: 0, max: 1 }),
       end_date: dates.endDate,
-      end_confidence: faker.datatype.number(10),
+      end_confidence: 1,
       project_id: project.id
     })
 
@@ -342,9 +422,9 @@ describe('PATCH /assignments/:id', function () {
 
     const role = await Role.query().insert({
       start_date: dates.startDate,
-      start_confidence: faker.datatype.number(10),
+      start_confidence: faker.datatype.float({ min: 0, max: 0.9 }),
       end_date: dates.endDate,
-      end_confidence: faker.datatype.number(10),
+      end_confidence: 1,
       project_id: project.id
     })
 

@@ -63,12 +63,14 @@ function fakeProject (key) {
 }
 
 function fakeRole (key, mixin = {}) {
-  return generateAndCacheFake('role', key, () => Object.assign({}, mixin, {
-    start_date: dates.startDate,
-    start_confidence: faker.datatype.number(10),
-    end_date: dates.endDate,
-    end_confidence: faker.datatype.number(10)
-  }))
+  return generateAndCacheFake('role', key, () =>
+    Object.assign({}, mixin, {
+      start_date: dates.startDate,
+      start_confidence: faker.datatype.float({ min: 0, max: 1 }),
+      end_date: dates.endDate,
+      end_confidence: faker.datatype.float({ min: 0, max: 1 })
+    })
+  )
 }
 
 const seed = async (knex) => {
@@ -90,45 +92,60 @@ const seed = async (knex) => {
     // insert seed data
     const skill = getSkill(skillList)
     const dates = dateGenerator()
-    await Project.query().insertGraph([
-      {
-        name: fakeProject(i + 1),
-        description: faker.lorem.sentences(),
+    await Project.query().insertGraph(
+      [
+        {
+          name: fakeProject(i + 1),
+          description: faker.lorem.sentences(),
 
-        roles: [
-          {
-            start_date: dates.startDate,
-            start_confidence: faker.datatype.float({ min: 0, max: 1, precision: 0.1 }),
-            end_date: dates.endDate,
-            end_confidence: faker.datatype.float({ min: 0, max: 1, precision: 0.1 }),
+          roles: [
+            {
+              start_date: dates.startDate,
+              start_confidence: faker.datatype.float({
+                min: 0,
+                max: 1,
+                precision: 0.1
+              }),
+              end_date: dates.endDate,
+              end_confidence: faker.datatype.float({
+                min: 0,
+                max: 1,
+                precision: 0.1
+              }),
 
-            skills: [{
-              id: skill
-            }],
+              skills: [
+                {
+                  id: skill
+                }
+              ],
 
-            assignments: [{
-              start_date: dates.startAssignmentDate,
-              end_date: dates.endAssignmentDate,
+              assignments: [
+                {
+                  start_date: dates.startAssignmentDate,
+                  end_date: dates.endAssignmentDate,
 
-              employee: {
-                name: fakeEmployee(i),
-                start_date: dates.startDate,
-                end_date: null,
+                  employee: {
+                    name: fakeEmployee(i),
+                    start_date: dates.startDate,
+                    end_date: null,
 
-                skills: [
-                  {
-                    id: skill
+                    skills: [
+                      {
+                        id: skill
+                      }
+                    ]
                   }
-                ]
-              }
-            }]
-          }
-        ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      {
+        allowRefs: true,
+        relate: true
       }
-    ], {
-      allowRefs: true,
-      relate: true
-    })
+    )
   }
 }
 

@@ -86,7 +86,7 @@ module.exports = class Assignment extends Model {
             .whereRaw('(?, ?) OVERLAPS ("start_date", "end_date")', [
               body.start_date,
               body.end_date
-            ])
+            ]).join('role', 'assignment.role_id', '=', 'role.id')
         } else {
           // If end_date is entered is blank or null
           assignmentList = await Assignment.query(trx)
@@ -94,18 +94,22 @@ module.exports = class Assignment extends Model {
             .andWhereRaw(
               '(?, \'infinity\') OVERLAPS ("start_date", "end_date")',
               body.start_date
-            )
+            ).join('role', 'assignment.role_id', '=', 'role.id')
         }
         if (body.id) {
           assignmentList = assignmentList.filter((e) => e.id !== body.id)
         }
         if (assignmentList.length > 0) {
+          assignmentList.forEach(async assignment => {
+            console.log(assignment);
+          })
           throw new Error('Overlap')
         }
       } catch (e) {
         await trx.rollback()
         throw new ValidationError({
           title: 'Employee already assigned',
+          detail: JSON.stringify(assignmentList),
           status: 409,
           pointer: 'employee/id'
         })

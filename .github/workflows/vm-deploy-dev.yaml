@@ -27,3 +27,9 @@ jobs:
         # dot_env: ${{ secrets.DOT_ENV }}
 
         app_port: 4000
+
+        # the load balancer needs an endpoint to determine health
+        # since the app does not expose health endpoint, we use another endpoint
+        # The app should be updated to provide either a root level 200 response to indicate "up"
+        # or an HTTP:4000/up endpoint (and update the following config accordingly)
+        lb_healthcheck: "HTTP:4000/skills"

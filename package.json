@@ -1,0 +1,32 @@
+{
+  "name": "app-staffing-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitovi/app-staffing-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bitovi/app-staffing-api/issues"
+  },
+  "homepage": "https://github.com/bitovi/app-staffing-api#readme",
+  "dependencies": {
+    "@koa/router": "^12.0.0",
+    "bitscaffold": "github:bitovi/bitscaffold",
+    "koa": "^2.14.1",
+    "pg": "^8.8.0",
+    "signale": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.13.5",
+    "@types/koa-compose": "^3.2.5",
+    "ts-node": "^10.9.1"
+  }
+}

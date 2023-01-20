@@ -2,6 +2,7 @@ import { Scaffold } from "bitscaffold";
 import Koa, { Context } from "koa";
 import signale from "signale";
 import KoaRouter from "@koa/router";
+import dotenv from 'dotenv';
 
 import { Assignment } from "./models/Assignment";
 import { Employee } from "./models/Employee";
@@ -9,7 +10,7 @@ import { Project } from "./models/Project";
 import { Role } from "./models/Role";
 import { Skill } from "./models/Skill";
 
-// REACT,
+dotenv.config();
 
 export function createStaffingAppInstance(): [Koa, Scaffold] {
   // Create a basic Koa application
@@ -45,7 +46,7 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
 
   // Set up any other Koa routes, middleware, etc, that you want.
   app.use(async (ctx) => {
-    ctx.body = { response: "Default Router Hit, HEALTH CHECK!!" };
+    ctx.body = { response: "up" };
   });
 
   return [app, scaffold];

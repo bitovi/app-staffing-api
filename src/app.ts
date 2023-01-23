@@ -1,14 +1,17 @@
-import { createStaffingAppInstance } from "./server";
+import { createStaffingAppInstance } from './server'
 
 async function init() {
-  const [app, scaffold] = await createStaffingAppInstance();
-  const port = Number(process.env.PORT) ?? 3000
+  const [app, scaffold] = await createStaffingAppInstance()
 
-  await scaffold.createDatabase();
+  await scaffold.createDatabase()
 
-  app.listen(port, () => {
-    console.log("Scaffold Started");
-  });
+  app.on('error', (err, ctx) => {
+    console.error('server error', err, ctx)
+  })
+
+  app.listen(3000, () => {
+    console.log('Scaffold Started')
+  })
 }
 
-init();
+init()

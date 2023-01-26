@@ -1,3 +1,4 @@
+import errorHandler from './managers/error-handler'
 import { createStaffingAppInstance } from './server'
 
 async function init() {
@@ -5,9 +6,7 @@ async function init() {
 
   await scaffold.createDatabase()
 
-  app.on('error', (err, ctx) => {
-    console.error('server error', err, ctx)
-  })
+  app.on('error', errorHandler)
 
   app.listen(3000, () => {
     console.log('Scaffold Started')

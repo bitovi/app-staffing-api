@@ -1,0 +1,8 @@
+{
+  "ext": "ts,json",
+  "exec": "ts-node --files src/app.ts",
+  "watch": ".",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

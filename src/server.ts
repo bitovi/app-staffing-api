@@ -1,5 +1,5 @@
 import { Scaffold } from "bitscaffold";
-import Koa, { Context } from "koa";
+import Koa from "koa";
 import signale from "signale";
 import KoaRouter from "@koa/router";
 import dotenv from 'dotenv';
@@ -23,11 +23,12 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
     expose: true,
     database: {
       dialect: 'postgres',
-      host: '127.0.0.1',
-      port: 5432,
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT) ?? 5432,
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
+      logging: false,
     }
   });
 

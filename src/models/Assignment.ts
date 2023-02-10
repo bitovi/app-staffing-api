@@ -1,7 +1,7 @@
-import { ScaffoldModel, DataTypes } from "bitscaffold"
+import { ScaffoldModel, DataTypes } from 'bitscaffold'
 
 export const Assignment: ScaffoldModel = {
-  name: "Assignment",
+  name: 'Assignment',
   attributes: {
     id: {
       type: DataTypes.UUID,
@@ -12,30 +12,31 @@ export const Assignment: ScaffoldModel = {
     start_date: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: new Date(),
     },
     end_date: DataTypes.DATE,
   },
   belongsTo: [
     {
-      target: "Role",
-      options: { as: "role", foreignKey: "role_id", keyType: DataTypes.UUID },
+      target: 'Role',
+      options: { as: 'role', foreignKey: 'role_id', keyType: DataTypes.UUID },
     },
     {
-      target: "Employee",
+      target: 'Employee',
       options: {
-        as: "employee",
-        foreignKey: "employee_id",
+        as: 'employee',
+        foreignKey: 'employee_id',
         keyType: DataTypes.UUID,
       },
     },
   ],
   belongsToMany: [
     {
-      target: "Project",
-      options: { as: "projects", through: { model: "Role" } },
+      target: 'Project',
+      options: { as: 'projects', through: { model: 'Role' } },
     },
   ],
-};
+}
 
 /*
 -- public."assignment" definition

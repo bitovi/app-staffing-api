@@ -2,7 +2,7 @@ import { statusCodes } from '../constants'
 import { GeneralError, UniqueConstraintError, ValidationError } from '../errors'
 
 const databaseErrorHandlers = (error) => {
-  const { name, message, status, statusCode } = error
+  const { name, message } = error
 
   if (name === 'SequelizeValidationError') {
     const pointer = error.errors[0].path
@@ -10,8 +10,8 @@ const databaseErrorHandlers = (error) => {
     if (error.errors[0].type === 'notNull Violation') {
       error = new ValidationError({
         title: `${error.errors[0].path} is required.`,
-        status: statusCodes.BAD_REQUEST,
-        pointer,
+        status: statusCodes.UNPROCESSABLE_ENTITY,
+        pointer
       })
     }
   } else {
@@ -21,7 +21,7 @@ const databaseErrorHandlers = (error) => {
 
         error = new UniqueConstraintError({
           title: `Record with ${pointer} already exists`,
-          pointer,
+          pointer
         })
 
         break
@@ -30,7 +30,7 @@ const databaseErrorHandlers = (error) => {
         error = new GeneralError({
           title: 'Foreign key constraint violation',
           status: statusCodes.CONFLICT,
-          pointer: error.parent.constraint.split('_')[1],
+          pointer: error.parent.constraint.split('_')[1]
         })
         break
 
@@ -38,7 +38,7 @@ const databaseErrorHandlers = (error) => {
       default:
         error = new GeneralError({
           title: message,
-          status: statusCodes.INTERNAL_SERVER_ERROR,
+          status: statusCodes.INTERNAL_SERVER_ERROR
         })
         break
     }

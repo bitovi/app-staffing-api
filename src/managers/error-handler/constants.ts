@@ -19,4 +19,4 @@ const statusCodes = {
     INTERNAL_SERVER_ERROR: 500
 }
 
-module.exports = { codes, statusCodes }
+export { codes, statusCodes }

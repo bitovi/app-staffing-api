@@ -1,51 +1,51 @@
-import { ScaffoldModel, DataTypes } from "bitscaffold"
+import { ScaffoldModel, DataTypes } from 'bitscaffold'
 
 export const Role: ScaffoldModel = {
-  name: "Role",
+  name: 'Role',
   attributes: {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
-      allowNull: false,
+      allowNull: false
     },
     start_date: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: false
     },
     end_date: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATE
     },
     start_confidence: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: false
     },
     end_confidence: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.FLOAT
     },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
-    },
+      unique: true
+    }
   },
   hasMany: [
     {
-      target: "Assignment",
-      options: { as: "assignments", foreignKey: "id", keyType: DataTypes.UUID },
-    },
+      target: 'Assignment',
+      options: { as: 'assignments', foreignKey: 'id', keyType: DataTypes.UUID }
+    }
   ],
   belongsTo: [
-    { target: "Project", options: { as: "project", foreignKey: "project_id" } },
+    { target: 'Project', options: { as: 'project', foreignKey: 'project_id' } }
   ],
   belongsToMany: [
     {
-      target: "Employee",
-      options: { through: "role__employee", as: "employees" },
+      target: 'Employee',
+      options: { through: 'role__employee', as: 'employees' }
     },
-    { target: "Skill", options: { through: "role__skill", as: "skills" } },
-  ],
-};
+    { target: 'Skill', options: { through: 'role__skill', as: 'skills' } }
+  ]
+}
 
 /*
 

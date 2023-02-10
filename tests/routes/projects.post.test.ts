@@ -1,0 +1,38 @@
+import Chance from 'chance'
+import request from 'supertest'
+import Serializer from '../../src/utils/json-api-serializer'
+
+const chance = new Chance()
+
+const serialize = (body) => {
+  return Serializer.serialize('projects', body)
+}
+
+const post = async (payload) => {
+  const response = await request(global.app.callback())
+    .post('/api/Project')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .send(serialize(payload))
+
+  return response
+}
+
+describe('POST /api/Project', function () {
+  test('should return 200 and create project with description', async function () {
+    const { Assignment, Employee, Project, Role, Skill } = global.model
+
+    const project = {
+      name: chance.word(),
+      description: chance.sentence()
+    }
+
+    const { statusCode, body } = await post(project)
+    expect(statusCode).toBe(200)
+
+    const dbProject = await Project.findByPk(body.data.id)
+
+    expect(dbProject.name).toEqual(project.name)
+    expect(dbProject.description).toEqual(project.description)
+  })
+})

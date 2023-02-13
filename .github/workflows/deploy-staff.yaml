@@ -19,6 +19,6 @@ jobs:
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY_SANDBOX }}
         aws_default_region: us-east-1
         dot_env: ${{ secrets.DOT_ENV }}
-        domain_name: bitovi-staffing.com
+        domain_name: bitovi-sandbox.com
         sub_domain: scaffold
         lb_healthcheck: "HTTP:4000/"

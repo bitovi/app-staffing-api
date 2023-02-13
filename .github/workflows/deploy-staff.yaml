@@ -20,5 +20,5 @@ jobs:
         aws_default_region: us-east-1
         dot_env: ${{ secrets.DOT_ENV }}
         domain_name: bitovi-staffing.com
-        subdomain: scaffold
+        sub_domain: scaffold
         lb_healthcheck: "HTTP:4000/"

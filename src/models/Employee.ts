@@ -17,11 +17,11 @@ export const Employee: ScaffoldModel = {
     end_date: DataTypes.DATE,
   },
   validation: {
-    startDateBeforeEndDate() {
-      if (this.start_date && this.end_date && this.start_date < this.end_date) {
-        throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
-      }
-    },
+    // startDateBeforeEndDate() {
+    //   if (this.start_date && this.end_date && this.start_date < this.end_date) {
+    //     throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
+    //   }
+    // },
     endDateAfterStartDate() {
       if (
         this.start_date &&

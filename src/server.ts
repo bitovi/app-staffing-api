@@ -1,4 +1,4 @@
-import { Scaffold } from "bitscaffold";
+import { DataTypes, Scaffold  } from "bitscaffold";
 import Koa, { Context } from "koa";
 import signale from "signale";
 import KoaRouter from "@koa/router";
@@ -28,6 +28,7 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
+      logging: false,
     }
   });
 

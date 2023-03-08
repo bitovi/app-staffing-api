@@ -2,9 +2,9 @@ name: Test and deploy
 
 on:
   push:
-    branches: [main]
+    branches: [scaffold-staffing]
   pull_request:
-    branches: [main]
+    branches: [scaffold-staffing]
 
 jobs:
   test:

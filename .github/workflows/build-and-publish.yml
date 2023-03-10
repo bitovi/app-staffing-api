@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch: {}
 
 jobs:
   # This job will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
@@ -39,6 +40,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+          persist-credentials: false
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v2
       with:

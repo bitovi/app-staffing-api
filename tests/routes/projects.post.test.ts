@@ -10,7 +10,7 @@ const serialize = (body) => {
 
 const post = async (payload) => {
   const response = await request(global.app.callback())
-    .post('/api/Project')
+    .post('/api/projects')
     .set('Accept', 'application/vnd.api+json')
     .set('Content-Type', 'application/vnd.api+json')
     .send(serialize(payload))
@@ -18,7 +18,7 @@ const post = async (payload) => {
   return response
 }
 
-describe('POST /api/Project', function () {
+describe('POST /api/projects', function () {
   test('should return 200 and create project with description', async function () {
     const { Assignment, Employee, Project, Role, Skill } = global.model
 

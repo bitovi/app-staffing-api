@@ -7,35 +7,35 @@ export const Assignment: ScaffoldModel = {
       type: DataTypes.UUID,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
-      allowNull: false,
+      allowNull: false
     },
     start_date: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: new Date(),
+      defaultValue: new Date()
     },
-    end_date: DataTypes.DATE,
+    end_date: DataTypes.DATE
   },
   belongsTo: [
     {
       target: 'Role',
-      options: { as: 'role', foreignKey: 'role_id', keyType: DataTypes.UUID },
+      options: { as: 'role', foreignKey: 'role_id', keyType: DataTypes.UUID }
     },
     {
       target: 'Employee',
       options: {
         as: 'employee',
         foreignKey: 'employee_id',
-        keyType: DataTypes.UUID,
-      },
-    },
+        keyType: DataTypes.UUID
+      }
+    }
   ],
   belongsToMany: [
     {
       target: 'Project',
-      options: { as: 'projects', through: { model: 'Role' } },
-    },
-  ],
+      options: { as: 'projects', through: { model: 'Role' } }
+    }
+  ]
 }
 
 /*

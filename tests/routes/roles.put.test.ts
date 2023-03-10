@@ -6,10 +6,10 @@ import { dateGenerator } from '../../src/utils/date'
 
 const chance = new Chance()
 
-describe('PUT /api/Role/:id', function () {
+describe('PUT /api/roles/:id', function () {
   const put = async (id, payload) => {
     const response = await request(global.app.callback())
-      .put(`/api/Role/${id}`)
+      .put(`/api/roles/${id}`)
       .set('Accept', 'application/vnd.api+json')
       .set('Content-Type', 'application/vnd.api+json')
       .send(serialize(payload))

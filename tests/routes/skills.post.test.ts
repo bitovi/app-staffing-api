@@ -10,7 +10,7 @@ const serialize = (body) => {
 
 const post = async (payload) => {
   const response = await request(global.app.callback())
-    .post('/api/Skill')
+    .post('/api/skills')
     .set('Accept', 'application/vnd.api+json')
     .set('Content-Type', 'application/vnd.api+json')
     .send(serialize(payload))

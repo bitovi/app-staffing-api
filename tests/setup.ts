@@ -1,14 +1,15 @@
 import { createStaffingAppInstance } from '../src/server'
 
-const [app, scaffold] = createStaffingAppInstance()
+beforeAll(async () => {
+  const [app, scaffold] = createStaffingAppInstance()
 
-global.beforeAll(async () => {
   await scaffold.createDatabase()
 
   global.app = app
+  global.scaffold = scaffold
   global.model = scaffold.model
 })
 
-global.afterAll(() => {
-  scaffold.orm.close()
-})
+// afterAll(() => {
+//   global.scaffold.orm.close()
+// })

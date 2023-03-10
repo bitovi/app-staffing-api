@@ -5,10 +5,10 @@ import { dateGenerator } from '../../src/utils/date'
 
 const chance = new Chance()
 
-describe('PUT /api/Assignment/:id', () => {
+describe('PUT /api/assignments/:id', () => {
   const put = async (id, payload) => {
     const response = await request(global.app.callback())
-      .put(`/api/Assignment/${id}`)
+      .put(`/api/assignments/${id}`)
       .set('Accept', 'application/vnd.api+json')
       .set('Content-Type', 'application/vnd.api+json')
       .send(serialize(payload))

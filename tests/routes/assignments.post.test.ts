@@ -12,7 +12,7 @@ const serialize = (body) => {
 
 const post = async (payload) => {
   const response = await request(global.app.callback())
-    .post('/api/Assignment')
+    .post('/api/assignments')
     .set('Accept', 'application/vnd.api+json')
     .set('Content-Type', 'application/vnd.api+json')
     .send(serialize(payload))
@@ -20,7 +20,7 @@ const post = async (payload) => {
   return response
 }
 
-describe('POST /api/Assignment', () => {
+describe('POST /api/assignments', () => {
   test('should return 422 for payload with startDate after endDate', async () => {
     const dates = dateGenerator()
 

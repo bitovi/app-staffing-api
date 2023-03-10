@@ -8,10 +8,10 @@ import cloneDeep from 'lodash/cloneDeep'
 
 const chance = new Chance()
 
-describe('PUT /api/Employee/:id', () => {
+describe('PUT /api/employees/:id', () => {
   const put = async (id, payload) => {
     const response = await request(global.app.callback())
-      .put(`/api/Employee/${id}`)
+      .put(`/api/employees/${id}`)
       .set('Accept', 'application/vnd.api+json')
       .set('Content-Type', 'application/vnd.api+json')
       .send(serialize(payload))

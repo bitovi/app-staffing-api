@@ -4,10 +4,10 @@ import Serializer from '../../src/utils/json-api-serializer'
 
 const chance = new Chance()
 
-describe('PUT /api/Skill/:id', () => {
+describe('PUT /api/skills/:id', () => {
   const put = async (id, payload) => {
     const response = await request(global.app.callback())
-      .put(`/api/Skill/${id}`)
+      .put(`/api/skills/${id}`)
       .set('Accept', 'application/vnd.api+json')
       .set('Content-Type', 'application/vnd.api+json')
       .send(serialize(payload))

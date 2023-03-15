@@ -8,7 +8,11 @@
     "build:watch": "tsc --watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "start": "node dist/app.js"
+    "start": "node dist/app.js",
+    "start:dev": "nodemon",
+    "test": "jest --verbose --debug",
+    "test:watch": "jest --watch",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
   "repository": {
     "type": "git",
@@ -24,19 +28,29 @@
   "dependencies": {
     "@koa/cors": "^4.0.0",
     "@koa/router": "^12.0.0",
-    "@types/prettier": "^2.7.2",
     "bitscaffold": "github:bitovi/bitscaffold",
+    "chance": "^1.1.9",
     "dotenv": "^16.0.3",
+    "faker": "^6.6.6",
+    "jest": "^29.4.1",
+    "json-api-serializer": "^2.6.6",
     "koa": "^2.14.1",
-    "pg": "^8.8.0",
+    "lodash": "^4.17.21",
+    "pg": "^8.9.0",
+    "sequelize": "^6.28.0",
     "signale": "^1.4.0"
   },
   "devDependencies": {
+    "@types/faker": "^6.6.9",
+    "@types/jest": "^29.4.0",
     "@types/koa": "^2.13.5",
     "@types/koa__router": "^12.0.0",
     "@types/koa-compose": "^3.2.5",
+    "@types/lodash": "^4.14.191",
     "@types/signale": "^1.4.4",
-    "prettier": "^2.8.4",
+    "nodemon": "^2.0.20",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1"
   }
 }

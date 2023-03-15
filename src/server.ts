@@ -4,12 +4,13 @@ import signale from 'signale'
 import KoaRouter from '@koa/router'
 import dotenv from 'dotenv'
 import cors from '@koa/cors'
-
 import { Assignment } from './models/Assignment'
 import { Employee } from './models/Employee'
 import { Project } from './models/Project'
 import { Role } from './models/Role'
 import { Skill } from './models/Skill'
+import modelBehaviours from './models/ModelBehaviours'
+import errorHandler from './managers/error-handler'
 
 dotenv.config()
 
@@ -17,6 +18,8 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
   // Create a basic Koa application
   const app = new Koa()
   const router = new KoaRouter()
+
+  app.use(errorHandler)
 
   app.use(cors())
 
@@ -35,6 +38,8 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
     }
   })
 
+  modelBehaviours(scaffold.model)
+
   // Set up your Koa app as normal, for example, a logging middleware
   app.use(async (ctx, next) => {
     signale.info('Incoming Request: ', ctx.method, ctx.path)
@@ -50,7 +55,7 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
 
   // Set up any other Koa routes, middleware, etc, that you want.
   app.use(async (ctx) => {
-    ctx.body = { response: 'up' }
+    ctx.body = { response: 'Default Router Hit, HEALTH CHECK!!' }
   })
 
   return [app, scaffold]

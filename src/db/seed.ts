@@ -1,156 +1,131 @@
-import { Project }from '../models/Project';
-const faker = require('faker')
-const _ = require('lodash')
-const Skill = require('../models/Skill')
-const { dateGenerator } = require('../../src/utils/date-utils')
+import { Scaffold } from "bitscaffold";
+import Chance from 'chance'
 
+import { dateGenerator } from '../utils/date'
+
+const chance = new Chance()
 const NUMBER_OF_RECORDS_TO_INSERT = 15
 
-const fakesCache = new Map()
-const dates = dateGenerator()
-function generateAndCacheFake (keyPrefix, key, generator) {
-  const prefixedKey = `${keyPrefix}.${key}`
-  let value
+const seedData = async (scaffold: Scaffold) => {
+    await scaffold.model['Project'].destroy({where: {}});
+    await scaffold.model['Assignment'].destroy({where: {}});
+    await scaffold.model['Employee'].destroy({where: {}});
+    await scaffold.model['Role'].destroy({where: {}});
+    await scaffold.model['Skill'].destroy({where: {}});
 
-  // retrieve value from cache by key (if provided)
-  if (key) {
-    value = fakesCache.get(prefixedKey)
-  }
 
-  // generate fake value via provided generator (if needed)
-  if (!value) {
-    value = generator()
-  }
+    const skillIds = await createSkills(scaffold);
+    const projectIds = await createProject(scaffold);
+    const roleIds = await createRole(scaffold, projectIds, skillIds);
+    const employeeIds = await createEmployee(scaffold, skillIds);
+    await createAssignment(scaffold, employeeIds, roleIds);
+};
 
-  // cache value by key (if provided)
-  if (key) {
-    fakesCache.set(prefixedKey, value)
-  }
-
-  return value
+async function createSkills (scaffold: Scaffold) {
+    const skillList = [
+      { name: 'Product Design' },
+      { name: 'Project Management' },
+      { name: 'React' },
+      { name: 'Angular' },
+      { name: 'Backend' },
+      { name: 'DevOps' }
+    ]
+    const skills = await scaffold.model['Skill'].bulkCreate(skillList);
+    const idList: Array<string> = []
+    skills.forEach((e: any) => {
+      idList.push(e.id)
+    })
+    return idList
 }
-async function createSkills () {
-  const skillList = [
-    { name: 'Product Design' },
-    { name: 'Project Management' },
-    { name: 'React' },
-    { name: 'Angular' },
-    { name: 'Backend' },
-    { name: 'DevOps' }
-  ]
-  const skills = await Skill.
-  const idList = []
-  skills.forEach((e) => {
+
+async function createProject (scaffold: Scaffold) {    
+    const projectList: Array<any> = []; 
+    for (let index = 0; index < NUMBER_OF_RECORDS_TO_INSERT; index++) {
+      projectList.push(
+        {
+          name: chance.word(),
+          description: chance.sentence()
+        }
+        )
+      }
+    const idList: Array<string> = [];
+      const projects = await scaffold.model['Project'].bulkCreate(projectList);
+      projects.forEach((e: any) => {
+        idList.push(e.id)
+      })
+      return idList
+}
+
+async function createRole(scaffold, projectIds: Array<string>, skillIds: Array<string>) {
+    const roleList: Array<any> = [];
+    for (let index = 0; index < NUMBER_OF_RECORDS_TO_INSERT; index++) {
+      const dates = dateGenerator()
+      roleList.push(
+        {
+          name: chance.word(),
+          start_confidence: chance.floating({ min: 0, max: 1 }),
+          end_confidence: chance.floating({ min: 0, max: 1 }),
+          start_date: dates.startDate,
+          end_date: dates.beforeStartDate,
+          project: {
+            id: projectIds[chance.integer({min: 0, max: 14})]
+          },
+          skills: [
+            {
+              id: skillIds[chance.integer({min: 0, max: 5})]
+            }
+          ]
+        }
+        )
+      }
+    const idList: Array<string> = [];
+    const roles = await scaffold.model['Role'].bulkCreate(roleList);
+    roles.forEach((e: any) => {
+      idList.push(e.id)
+    })
+    return idList
+}
+
+async function createEmployee(scaffold: Scaffold, skillIds: Array<string> ) {
+  const employeeList: Array<any> = [];
+  for (let index = 0; index < NUMBER_OF_RECORDS_TO_INSERT; index++) {
+    const dates = dateGenerator();
+    employeeList.push({
+      name: chance.name(),
+      start_date: dates.startDate,
+      end_date: dates.endDate,
+      skills: [
+        {
+          id: skillIds[chance.integer({min: 0, max: 5})]
+        }
+      ]
+    })
+  }
+  const idList: Array<string> = [];
+  const employees = await scaffold.model['Employee'].bulkCreate(employeeList);
+  employees.forEach((e: any) => {
     idList.push(e.id)
   })
   return idList
 }
-function getSkill (skills) {
-  const rnd = _.random(5)
-  return skills[rnd]
-}
-function fakeEmployee (key) {
-  return generateAndCacheFake('employee', key, () =>
-    faker.fake('{{name.firstName}} {{name.lastName}}')
-  )
-}
 
-function fakeProject (key) {
-  return generateAndCacheFake('project', key, () =>
-    faker.company.companyName()
-  )
-}
-
-function fakeRole (key, mixin = {}) {
-  return generateAndCacheFake('role', key, () =>
-    Object.assign({}, mixin, {
-      start_date: dates.startDate,
-      start_confidence: faker.datatype.float({ min: 0, max: 1 }),
-      end_date: dates.endDate,
-      end_confidence: faker.datatype.float({ min: 0, max: 1 })
+async function createAssignment(scaffold: Scaffold, employeeIds: Array<string>, roleIds: Array<string>) {
+  const assignmentList: Array<any> = [];
+  for (let index = 0; index < NUMBER_OF_RECORDS_TO_INSERT; index++) {
+    const dates = dateGenerator();
+    assignmentList.push({
+      start_date: dates.startAssignmentDate,
+      end_date: dates.endAssignmentDate,
+      employee: { id: employeeIds[chance.integer({min: 0, max: 5})] },
+      role: { id: roleIds[chance.integer({min: 0, max: 5})] }
     })
-  )
-}
-
-const seed = async (knex) => {
-  // Give the knex instance to Objection
-  Model.knex(knex)
-
-  // delete data in reverse dependency order to avoid fk issues
-  await knex('assignment').del()
-  await knex('role__skill').del()
-  await knex('role').del()
-  await knex('project').del()
-  await knex('employee__skill').del()
-  await knex('employee').del()
-  await knex('skill').del()
-
-  // Generate skills
-  const skillList = await createSkills()
-  for (let i = 0; i < NUMBER_OF_RECORDS_TO_INSERT; i++) {
-    // insert seed data
-    const skill = getSkill(skillList)
-    const dates = dateGenerator()
-    await Project.query().insertGraph(
-      [
-        {
-          name: fakeProject(i + 1),
-          description: faker.lorem.sentences(),
-
-          roles: [
-            {
-              start_date: dates.startDate,
-              start_confidence: faker.datatype.float({
-                min: 0,
-                max: 1,
-                precision: 0.1
-              }),
-              end_date: dates.endDate,
-              end_confidence: faker.datatype.float({
-                min: 0,
-                max: 1,
-                precision: 0.1
-              }),
-
-              skills: [
-                {
-                  id: skill
-                }
-              ],
-
-              assignments: [
-                {
-                  start_date: dates.startAssignmentDate,
-                  end_date: dates.endAssignmentDate,
-
-                  employee: {
-                    name: fakeEmployee(i),
-                    start_date: dates.startDate,
-                    end_date: null,
-
-                    skills: [
-                      {
-                        id: skill
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          ]
-        }
-      ],
-      {
-        allowRefs: true,
-        relate: true
-      }
-    )
   }
+  const idList: Array<string> = [];
+  const assignment = await scaffold.model['Assignment'].bulkCreate(assignmentList);
+  assignment.forEach((e: any) => {
+    idList.push(e.id)
+  })
+  return idList
 }
 
-module.exports = {
-  fakeEmployee,
-  fakeProject,
-  fakeRole,
-  seed
-}
+export default seedData;

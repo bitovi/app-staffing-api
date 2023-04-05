@@ -1,7 +1,7 @@
-import { ScaffoldModel, DataTypes } from "bitscaffold"
+import { ScaffoldModel, DataTypes } from 'bitscaffold'
 
 export const Skill: ScaffoldModel = {
-  name: "Skill",
+  name: 'Skill',
   attributes: {
     id: {
       type: DataTypes.UUID,
@@ -16,9 +16,9 @@ export const Skill: ScaffoldModel = {
     },
   },
   belongsToMany: [
-    { target: "Role", options: { through: "role__skill", as: "roles" } },
+    { target: 'Role', options: { through: 'role__skill', as: 'roles' } },
   ],
-};
+}
 
 /*
 -- public.skill definition

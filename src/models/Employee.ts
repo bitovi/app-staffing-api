@@ -1,7 +1,7 @@
-import { ScaffoldModel, DataTypes } from "bitscaffold"
+import { ScaffoldModel, DataTypes } from 'bitscaffold'
 
 export const Employee: ScaffoldModel = {
-  name: "Employee",
+  name: 'Employee',
   attributes: {
     id: {
       type: DataTypes.UUID,
@@ -16,33 +16,17 @@ export const Employee: ScaffoldModel = {
     start_date: DataTypes.DATE,
     end_date: DataTypes.DATE,
   },
-  validation: {
-    // startDateBeforeEndDate() {
-    //   if (this.start_date && this.end_date && this.start_date < this.end_date) {
-    //     throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
-    //   }
-    // },
-    endDateAfterStartDate() {
-      if (
-        this.start_date &&
-        this.end_date &&
-        this.start_date >= this.end_date
-      ) {
-        throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
-      }
-    },
-  },
   belongsToMany: [
-    { target: "Role", options: { through: "role__employee", as: "roles" } },
+    { target: 'Role', options: { through: 'role__employee', as: 'roles' } },
   ],
-};
+}
 
 /*
 -- public.employee definition
 
 -- Drop table
 
--- DROP TABLE employee;
+-- DROP TABLE employee;w
 
 CREATE TABLE employee (
     id uuid NOT NULL DEFAULT uuid_generate_v4(),

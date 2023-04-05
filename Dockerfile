@@ -7,9 +7,5 @@ COPY . .
 COPY package.json .
 RUN npm install
 
-#Build
-FROM base
-RUN npm run build
-
 EXPOSE $PORT
-CMD npm run start
+RUN npm run build

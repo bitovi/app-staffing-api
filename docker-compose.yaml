@@ -1,0 +1,40 @@
+version: '3.5'
+networks:
+  app-staffing-backend-network: {}
+services:
+  db:
+    container_name: app-staffing-backend-db
+    image: postgres
+    ports:
+      - 5440:5432
+    volumes:
+      - ./db/staffing:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_USER: ${DB_USERNAME} 
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    networks:
+      - app-staffing-backend-network
+
+  api:
+    container_name: app-staffing-backend-api
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src
+      - ./db:/app/db
+      - /app/node_modules
+    build:
+      context: .
+    environment:
+      PORT: 3000
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: app-staffing-backend-db
+    ports:
+      - 3000:3000
+    command: >
+      node dist/app.js
+    networks:
+      - app-staffing-backend-network

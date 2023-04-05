@@ -5,7 +5,7 @@ import {
 } from '../../managers/error-handler/errors'
 import { compareDates } from '../../utils/date'
 
-const validateRoleOverlap = async ({ body, Role, transaction }) => {
+const validateRoleOverlap = async ({ body, Role }) => {
   if (body.role_id) {
     const role = await Role.findOne({
       where: { id: body.role_id },
@@ -15,7 +15,6 @@ const validateRoleOverlap = async ({ body, Role, transaction }) => {
         'start_confidence',
         'end_confidence'
       ],
-      transaction
     })
 
     if (!role) {
@@ -30,8 +29,6 @@ const validateRoleOverlap = async ({ body, Role, transaction }) => {
     const roleEnd = role.end_date
     const startConfidence = role.start_confidence
     const endConfidence = role.end_confidence
-
-    console.log('okay e reach')
 
     const isFullyConfident = (confidence) => confidence === 1
 

@@ -1,7 +1,7 @@
 import { ValidationError } from '../../managers/error-handler/errors'
 import { Op, Sequelize } from 'sequelize'
 
-const validateAssignmentOverlap = async ({ body, transaction, Assignment }) => {
+const validateAssignmentOverlap = async ({ body, Assignment }) => {
   if (body.employee_id) {
     let assignmentList
 
@@ -10,8 +10,6 @@ const validateAssignmentOverlap = async ({ body, transaction, Assignment }) => {
         where: {
           employee_id: body.employee_id,
         },
-        transaction,
-        lock: transaction.LOCK.UPDATE,
       })
 
       if (body.end_date) {
@@ -48,7 +46,6 @@ const validateAssignmentOverlap = async ({ body, transaction, Assignment }) => {
         throw new Error('Overlap')
       }
     } catch (e) {
-      await transaction.rollback()
       throw new ValidationError({
         title: 'Employee already assigned',
         status: 409,

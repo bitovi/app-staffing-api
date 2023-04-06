@@ -1,5 +1,6 @@
 import { createStaffingAppInstance } from './server'
 
+
 async function init() {
   const [app, scaffold] = await createStaffingAppInstance()
 

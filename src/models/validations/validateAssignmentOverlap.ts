@@ -1,58 +1,64 @@
+import { Scaffold } from 'bitscaffold'
 import { ValidationError } from '../../managers/error-handler/errors'
 import { Op, Sequelize } from 'sequelize'
+import { codes, statusCodes } from '../../managers/error-handler/constants'
 
-const validateAssignmentOverlap = async ({ body, transaction, Assignment }) => {
+function dateRangeOverlaps(
+  firstStartDate,
+  firstEndDate,
+  secondStartDate,
+  secondEndDate
+) {
+  if (firstStartDate < secondStartDate && secondStartDate < firstEndDate)
+    return true // second starts in first
+  if (firstStartDate < secondEndDate && secondEndDate < firstEndDate)
+    return true // second ends in first
+  if (secondStartDate < firstStartDate && firstEndDate < secondEndDate)
+    return true // first in second
+  return false
+}
+
+const validateAssignmentOverlap = async ({ body, Employee }) => {
   if (body.employee_id) {
-    let assignmentList
-
     try {
-      await Assignment.findOne({
+      const employee = await Employee.findOne({
         where: {
-          employee_id: body.employee_id,
-        },
-        transaction,
-        lock: transaction.LOCK.UPDATE,
+          id: body.employee_id
+        }
       })
 
-      if (body.end_date) {
-        assignmentList = await Assignment.findOne({
-          where: {
-            [Op.and]: [
-              { employee_id: body.employee_id },
-              Sequelize.literal(
-                `(${body.start_date}, ${body.end_date}) OVERLAPS ("start_date", "end_date")`
-              ),
-            ],
-          },
-        })
+      if (employee) {
+        // ensure the employee
+        const employeeEndDate = employee.end_date ?? Infinity
+        if (
+          dateRangeOverlaps(
+            body.start_date,
+            body.end_date,
+            employee.start_date,
+            employeeEndDate
+          )
+        ) {
+          throw Scaffold.createError({
+            title: 'Employee already assigned',
+            code: codes.ERR_CONFLICT,
+            status: statusCodes.CONFLICT,
+            pointer: 'employee/id'
+          })
+        }
       } else {
-        // If end_date is entered is blank or null
-
-        assignmentList = await Assignment.findOne({
-          where: {
-            [Op.and]: [
-              { employee_id: body.employee_id },
-              Sequelize.literal(
-                `(${body.start_date}, \'infinity\') OVERLAPS ("start_date", "end_date")`
-              ),
-            ],
-          },
+        throw Scaffold.createError({
+          title: 'Employee not found',
+          code: codes.ERR_NOT_FOUND,
+          status: statusCodes.NOT_FOUND,
+          pointer: 'employee/id'
         })
-      }
-
-      if (body.id) {
-        assignmentList = assignmentList.filter((e) => e.id !== body.id)
-      }
-
-      if (assignmentList.length > 0) {
-        throw new Error('Overlap')
       }
     } catch (e) {
-      await transaction.rollback()
-      throw new ValidationError({
-        title: 'Employee already assigned',
-        status: 409,
-        pointer: 'employee/id',
+      throw Scaffold.createError({
+        title: e.message,
+        code: codes.ERR_CONFLICT,
+        status: statusCodes.CONFLICT,
+        pointer: 'employee/id'
       })
     }
   }

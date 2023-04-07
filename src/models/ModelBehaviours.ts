@@ -9,19 +9,18 @@ const modelBehaviours = (model) => {
     {
       model: Assignment,
       hooks: [
-        async function beforeValidate({ dataValues }, options) {
+        async function beforeValidate({ dataValues }) {
           validateStartDate(dataValues)
 
           await validateRoleOverlap({
             body: dataValues,
             Role,
-            transaction: options.transaction
           })
 
           await validateAssignmentOverlap({
             body: dataValues,
             Assignment,
-            transaction: options.transaction
+            Employee
           })
         }
       ]

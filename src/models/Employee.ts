@@ -7,18 +7,18 @@ export const Employee: ScaffoldModel = {
       type: DataTypes.UUID,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
-      allowNull: false,
+      allowNull: false
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: false
     },
     start_date: DataTypes.DATE,
-    end_date: DataTypes.DATE,
+    end_date: DataTypes.DATE
   },
   belongsToMany: [
-    { target: 'Role', options: { through: 'role__employee', as: 'roles' } },
-  ],
+    { target: 'Role', options: { through: 'role__employee', as: 'roles' } }
+  ]
 }
 
 /*
@@ -26,7 +26,7 @@ export const Employee: ScaffoldModel = {
 
 -- Drop table
 
--- DROP TABLE employee;w
+-- DROP TABLE employee;
 
 CREATE TABLE employee (
     id uuid NOT NULL DEFAULT uuid_generate_v4(),

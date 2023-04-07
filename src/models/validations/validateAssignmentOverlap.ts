@@ -1,38 +1,64 @@
+import { Scaffold } from 'bitscaffold'
 import { ValidationError } from '../../managers/error-handler/errors'
 import { Op, Sequelize } from 'sequelize'
+import { codes, statusCodes } from '../../managers/error-handler/constants'
 
-function dateRangeOverlaps(a_start, a_end, b_start, b_end) {
-  if (a_start < b_start && b_start < a_end) return true; // b starts in a
-  if (a_start < b_end   && b_end   < a_end) return true; // b ends in a
-  if (b_start <  a_start && a_end   <  b_end) return true; // a in b
-  return false;
+function dateRangeOverlaps(
+  firstStartDate,
+  firstEndDate,
+  secondStartDate,
+  secondEndDate
+) {
+  if (firstStartDate < secondStartDate && secondStartDate < firstEndDate)
+    return true // second starts in first
+  if (firstStartDate < secondEndDate && secondEndDate < firstEndDate)
+    return true // second ends in first
+  if (secondStartDate < firstStartDate && firstEndDate < secondEndDate)
+    return true // first in second
+  return false
 }
 
-
-const validateAssignmentOverlap = async ({ body, Assignment, Employee }) => {
+const validateAssignmentOverlap = async ({ body, Employee }) => {
   if (body.employee_id) {
-
     try {
       const employee = await Employee.findOne({
         where: {
-          id: body.employee_id,
+          id: body.employee_id
         }
-      });
+      })
 
       if (employee) {
         // ensure the employee
         const employeeEndDate = employee.end_date ?? Infinity
-        if (dateRangeOverlaps(body.start_date, body.end_date, employee.start_date, employeeEndDate)){
-          throw new Error('Employee already assigned');
+        if (
+          dateRangeOverlaps(
+            body.start_date,
+            body.end_date,
+            employee.start_date,
+            employeeEndDate
+          )
+        ) {
+          throw Scaffold.createError({
+            title: 'Employee already assigned',
+            code: codes.ERR_CONFLICT,
+            status: statusCodes.CONFLICT,
+            pointer: 'employee/id'
+          })
         }
       } else {
-        throw new Error('Employee is Invalid')
+        throw Scaffold.createError({
+          title: 'Employee not found',
+          code: codes.ERR_NOT_FOUND,
+          status: statusCodes.NOT_FOUND,
+          pointer: 'employee/id'
+        })
       }
     } catch (e) {
-      throw new ValidationError({
+      throw Scaffold.createError({
         title: e.message,
-        status: 409,
-        pointer: 'employee/id',
+        code: codes.ERR_CONFLICT,
+        status: statusCodes.CONFLICT,
+        pointer: 'employee/id'
       })
     }
   }

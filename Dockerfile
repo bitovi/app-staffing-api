@@ -5,7 +5,9 @@ WORKDIR app
 COPY . .
 
 COPY package.json .
-RUN npm install
+COPY package-lock.json .
+
+RUN npm ci
 
 EXPOSE $PORT
 RUN npm run build

@@ -1,3 +1,4 @@
+
 import { Scaffold } from 'bitscaffold'
 import Koa from 'koa'
 import signale from 'signale'
@@ -34,7 +35,7 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      logging: false
+      logging: false,
     }
   })
 

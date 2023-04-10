@@ -2,7 +2,7 @@ name: Basic deploy
 
 on:
   push:
-    branches: [main]
+    branches: [scaffold-staffing]
 
 jobs:
   EC2-Deploy:

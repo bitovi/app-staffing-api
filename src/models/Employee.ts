@@ -16,8 +16,11 @@ export const Employee: ScaffoldModel = {
     start_date: DataTypes.DATE,
     end_date: DataTypes.DATE
   },
+  hasMany: [
+    { target: 'Assignment', options: { as: 'assignments' } },
+  ],
   belongsToMany: [
-    { target: 'Role', options: { through: 'role__employee', as: 'roles' } }
+    { target: "Skill", options: { through: 'employee__skill', as: "skills" } }
   ]
 }
 

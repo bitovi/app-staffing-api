@@ -17,6 +17,7 @@ export const Skill: ScaffoldModel = {
   },
   belongsToMany: [
     { target: 'Role', options: { through: 'role__skill', as: 'roles' } },
+    { target: 'Employee', options: { through: 'employee__skill', as: 'employees' } },
   ],
 }
 

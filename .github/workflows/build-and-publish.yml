@@ -2,9 +2,9 @@ name: Build and Publish
 
 on:
   push:
-    branches: [ main ]
+    branches: [ legacy-objection ]
   pull_request:
-    branches: [ main ]
+    branches: [ legacy-objection ]
   workflow_dispatch: {}
 
 jobs:
@@ -85,5 +85,5 @@ jobs:
         github-token: ${{ secrets.OPERATIONS_REPO_TOKEN }}
         org: bitovi
         repo: operations-staffing-app
-        branch: main
+        branch: legacy-objection
         workflow: deploy-trigger.yaml

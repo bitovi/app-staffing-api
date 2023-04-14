@@ -116,8 +116,8 @@ async function createAssignment(scaffold: Scaffold, employeeIds: Array<string>, 
     assignmentList.push({
       start_date: dates.startAssignmentDate,
       end_date: dates.endAssignmentDate,
-      employee: { id: employeeIds[chance.integer({min: 0, max: 5})] },
-      role: { id: roleIds[chance.integer({min: 0, max: 5})] }
+      employee: { id: employeeIds[index] },
+      role: { id: roleIds[index] }
     })
   }
   const idList: Array<string> = [];

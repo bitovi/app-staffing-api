@@ -26,7 +26,14 @@ export const Role: ScaffoldModel = {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true
+      unique: true,
+    },
+    projectName: {
+      type: DataTypes.VIRTUAL,
+      include: ['project'],
+      get() {
+        return this.projectName
+      }
     }
   },
   hasMany: [

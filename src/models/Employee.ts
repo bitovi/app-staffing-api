@@ -14,7 +14,17 @@ export const Employee: ScaffoldModel = {
       allowNull: false
     },
     start_date: DataTypes.DATE,
-    end_date: DataTypes.DATE
+    end_date: DataTypes.DATE,
+    currentProject: {
+      type: DataTypes.VIRTUAL,
+      include: ['roles'],
+      get() {
+        return this.roles.find((role) => {
+          const now = Date.now();
+          return role.start_date < now && role.end_date > now;
+        }).projectName
+      }
+    }
   },
   belongsToMany: [
     { target: 'Role', options: { through: 'role__employee', as: 'roles' } }

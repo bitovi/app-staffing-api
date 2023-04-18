@@ -18,14 +18,20 @@ export const Project: ScaffoldModel = {
       allowNull: true,
     },
   },
-  hasMany: [{ target: "Role", options: { as: "roles" } }],
+  hasMany: [
+    { target: "Role", options: { as: "roles" } },
+    {
+      target: "Employee",
+      options: { as: "employees" },
+    }
+  ],
   belongsToMany: [
     {
       target: "Assignment",
-      options: { as: "assignments", through: { model: "Role" } },
-    },
-  ],
-};
+      options: { as: "assignments", through: { model: "Role" } }
+    }
+  ]
+}
 
 /*
 -- public.project definition

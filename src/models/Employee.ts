@@ -14,11 +14,30 @@ export const Employee: ScaffoldModel = {
       allowNull: false
     },
     start_date: DataTypes.DATE,
-    end_date: DataTypes.DATE
+    end_date: DataTypes.DATE,
+    currentProject: {
+      type: DataTypes.VIRTUAL(DataTypes.INTEGER),
+      include: ["assignments.role.project"],
+      get() {
+        if(this.assignments){
+          const project = this.assignments.find(assignment => {
+            const now = new Date;
+            return (new Date(assignment?.role.start_date) < now) && (new Date(assignment?.role.end_date) > now);
+          })?.role?.project;
+          return {
+            id: project.id,
+            name: project.name
+          }
+        }
+        return null;
+      },
+    },
   },
-  hasMany: [{ target: "Assignment", options: { as: "assignments" } }],
+  hasMany: [
+    { target: 'Assignment', options: { as: 'assignments' } },
+  ],
   belongsToMany: [
-    { target: 'Skill', options: { through: 'employee__skill', as: 'skills' } },
+    { target: "Skill", options: { through: 'employee__skill', as: "skills" } }
   ]
 }
 

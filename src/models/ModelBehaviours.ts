@@ -19,7 +19,7 @@ const modelBehaviours = (model) => {
 
           await validateAssignmentOverlap({
             body: dataValues,
-            Employee
+            Assignment,
           })
         }
       ]

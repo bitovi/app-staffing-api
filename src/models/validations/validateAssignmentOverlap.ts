@@ -19,7 +19,7 @@ function dateRangeOverlaps(
 const validateAssignmentOverlap = async ({ body, Assignment }) => {
   if (body.employee_id) {
     try {
-      const assignments = await Assignment.find({
+      const assignments = await Assignment.findAll({
         where: {
           employee_id: body.employee_id,
         },
@@ -44,6 +44,7 @@ const validateAssignmentOverlap = async ({ body, Assignment }) => {
         }
       });
     } catch (e) {
+      console.error("error", e);
       throw Scaffold.createError({
         title: e.message,
         code: codes.ERR_CONFLICT,

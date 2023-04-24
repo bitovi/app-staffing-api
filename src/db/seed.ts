@@ -4,7 +4,7 @@ import Chance from 'chance'
 import { dateGenerator } from '../utils/date'
 
 const chance = new Chance()
-const NUMBER_OF_RECORDS_TO_INSERT = 8
+const NUMBER_OF_RECORDS_TO_INSERT = 10
 
 const seedData = async (scaffold: Scaffold) => {
     await scaffold.model['Project'].destroy({where: {}});
@@ -94,6 +94,7 @@ async function createEmployee(scaffold: Scaffold, skillIds: Array<string> ) {
       name: chance.name(),
       start_date: dates.startDate,
       end_date: dates.endDate,
+      
       skills: [
         {
           id: skillIds[chance.integer({min: 0, max: 5})]

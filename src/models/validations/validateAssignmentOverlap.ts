@@ -26,10 +26,15 @@ const validateAssignmentOverlap = async ({ body, Employee }) => {
           id: body.employee_id
         }
       })
+      console.log("emp", body.employee_id)
+      console.log("emp", employee)
 
       if (employee) {
         // ensure the employee
         const employeeEndDate = employee.end_date ?? Infinity
+        console.log('bod',body)
+        console.log('employ',employee.start_date)
+        console.log('employ',employeeEndDate);
         if (
           dateRangeOverlaps(
             body.start_date,
@@ -45,6 +50,7 @@ const validateAssignmentOverlap = async ({ body, Employee }) => {
             pointer: 'employee/id'
           })
         }
+        return;
       } else {
         throw Scaffold.createError({
           title: 'Employee not found',
@@ -54,6 +60,7 @@ const validateAssignmentOverlap = async ({ body, Employee }) => {
         })
       }
     } catch (e) {
+      console.error(e)
       throw Scaffold.createError({
         title: e.message,
         code: codes.ERR_CONFLICT,

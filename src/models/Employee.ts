@@ -24,6 +24,7 @@ export const Employee: ScaffoldModel = {
             const now = new Date;
             return (new Date(assignment?.role.start_date) < now) && (new Date(assignment?.role.end_date) > now);
           })?.role?.project;
+          if(!project) return null;
           return {
             id: project.id,
             name: project.name

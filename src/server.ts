@@ -1,4 +1,3 @@
-
 import { Scaffold } from 'bitscaffold'
 import Koa from 'koa'
 import signale from 'signale'

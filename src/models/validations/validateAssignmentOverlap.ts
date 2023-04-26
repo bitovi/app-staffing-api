@@ -1,6 +1,7 @@
 import { Scaffold } from 'bitscaffold'
 import { codes, statusCodes } from '../../managers/error-handler/constants'
 
+<<<<<<< HEAD
 function dateRangeOverlaps(
   firstStartDate,
   firstEndDate,
@@ -16,6 +17,8 @@ function dateRangeOverlaps(
   return false
 }
 
+=======
+>>>>>>> bd0844f (added assignment overlap)
 const validateAssignmentOverlap = async ({ body, Assignment }) => {
   if (body.employee_id) {
     try {
@@ -23,7 +26,11 @@ const validateAssignmentOverlap = async ({ body, Assignment }) => {
         where: {
           employee_id: body.employee_id,
         },
+<<<<<<< HEAD
       });
+=======
+      })
+>>>>>>> bd0844f (added assignment overlap)
 
       assignments.forEach(assignment => {
         const employeeEndDate = assignment.end_date ?? Infinity
@@ -44,12 +51,19 @@ const validateAssignmentOverlap = async ({ body, Assignment }) => {
         }
       });
     } catch (e) {
+<<<<<<< HEAD
       console.error("error", e);
       throw Scaffold.createError({
         title: e.message,
         code: codes.ERR_CONFLICT,
         status: statusCodes.CONFLICT,
         pointer: 'employee/id'
+=======
+      throw new ValidationError({
+        title: 'Employee already assigned',
+        status: 409,
+        pointer: 'employee/id',
+>>>>>>> bd0844f (added assignment overlap)
       })
     }
   }

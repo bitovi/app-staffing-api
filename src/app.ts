@@ -1,7 +1,6 @@
 import { createStaffingAppInstance } from './server'
 import seedData from './db/seed'
 
-
 async function init() {
   const [app, scaffold] = await createStaffingAppInstance()
 

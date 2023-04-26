@@ -2,7 +2,6 @@ import Chance from "chance";
 import request from "supertest";
 import { dateGenerator } from "../../src/utils/date";
 import Serializer from "../../src/utils/json-api-serializer";
-import { isString } from "../../src/utils/validation";
 
 const chance = new Chance();
 
@@ -27,44 +26,41 @@ describe("GET /api/employees", () => {
 
     const dates = dateGenerator();
 
-    const project: any = await Project.create({
-      name: chance.word(),
-    });
+    const projectName = chance.word();
 
+    const project: any = await Project.create({
+      name: projectName,
+    });
+    
+    const employee = await Employee.create({
+      name: chance.name(),
+      start_date: dates.startDate,
+      end_date: dates.endDate
+    });
+    
     const role = await Role.create({
       name: chance.word(),
       start_date: dates.past,
       start_confidence: chance.floating({ min: 0, max: 0.9 }),
       end_date: dates.endDate,
       end_confidence: chance.floating({ min: 0, max: 0.9 }),
-      project_id: project.id,
-    });
-    
-    const employee = await Employee.create({
-      name: chance.name(),
-      start_date: dates.startDate,
-      end_date: dates.endDate,
-      project_id: project.id,
+      project_id: project.id
     });
 
-    console.log(employee);
-    
-    const assignment = await Assignment.create({
+    await Assignment.create({
       start_date: dates.startDate,
       end_date: dates.endDate,
       employee_id: employee.id,
-      role_id: role.id,
+      role_id: role.id
     });
-    // await assignment.addEmployee(employee);
-    // await assignment.addRole(role);
-    // await employee.addRole(role.id);
 
-    const { body, statusCode } = await get(`employees/${employee.id}`);
-
-    const rolesTest: any = await Role.findByPk(role.id, { include: "project" });
+    const { body, statusCode } = await get(`employees/${employee.id}?fields[Employee]=currentProject`);
 
     expect(statusCode).toEqual(200);
     expect(body.data.type).toEqual("Employee");
-    expect(body.data.attributes.currentProject).toEqual("hm");
+    expect(body.data.attributes.currentProject).toStrictEqual({
+      id: project.id,
+      name: projectName
+    });
   });
 });

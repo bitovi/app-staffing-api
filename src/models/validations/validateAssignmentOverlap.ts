@@ -1,6 +1,4 @@
 import { Scaffold } from 'bitscaffold'
-import { ValidationError } from '../../managers/error-handler/errors'
-import { Op, Sequelize } from 'sequelize'
 import { codes, statusCodes } from '../../managers/error-handler/constants'
 
 function dateRangeOverlaps(
@@ -18,11 +16,12 @@ function dateRangeOverlaps(
   return false
 }
 
-const validateAssignmentOverlap = async ({ body, Employee }) => {
+const validateAssignmentOverlap = async ({ body, Assignment }) => {
   if (body.employee_id) {
     try {
-      const employee = await Employee.findOne({
+      const assignments = await Assignment.findAll({
         where: {
+<<<<<<< HEAD
           id: body.employee_id
         }
       })
@@ -35,11 +34,19 @@ const validateAssignmentOverlap = async ({ body, Employee }) => {
         console.log('bod',body)
         console.log('employ',employee.start_date)
         console.log('employ',employeeEndDate);
+=======
+          employee_id: body.employee_id,
+        },
+      });
+
+      assignments.forEach(assignment => {
+        const employeeEndDate = assignment.end_date ?? Infinity
+>>>>>>> feat/currentProjectVirtual
         if (
           dateRangeOverlaps(
             body.start_date,
             body.end_date,
-            employee.start_date,
+            assignment.start_date,
             employeeEndDate
           )
         ) {
@@ -50,6 +57,7 @@ const validateAssignmentOverlap = async ({ body, Employee }) => {
             pointer: 'employee/id'
           })
         }
+<<<<<<< HEAD
         return;
       } else {
         throw Scaffold.createError({
@@ -61,6 +69,11 @@ const validateAssignmentOverlap = async ({ body, Employee }) => {
       }
     } catch (e) {
       console.error(e)
+=======
+      });
+    } catch (e) {
+      console.error("error", e);
+>>>>>>> feat/currentProjectVirtual
       throw Scaffold.createError({
         title: e.message,
         code: codes.ERR_CONFLICT,

@@ -32,16 +32,16 @@ export const Role: ScaffoldModel = {
   hasMany: [
     {
       target: 'Assignment',
-      options: { as: 'assignments', foreignKey: 'id', keyType: DataTypes.UUID }
+      options: { as: 'assignments'  }
     }
   ],
   belongsTo: [
-    { target: 'Project', options: { as: 'project', foreignKey: 'project_id' } }
+    { target: 'Project', options: { as: 'project', foreignKey: "project_id" } }
   ],
   belongsToMany: [
     {
       target: 'Employee',
-      options: { through: { model: "Assignment" }, as: 'employees' }
+      options: { through: { model: 'Assignment' }, as: 'employees' }
     },
     { target: 'Skill', options: { through: 'role__skill', as: 'skills' } }
   ]

@@ -6,7 +6,7 @@ async function init() {
 
   await scaffold.createDatabase()
 
-  // await seedData(scaffold)
+  await seedData(scaffold)
 
   app.listen(3000, () => {
     console.log('Scaffold Started')

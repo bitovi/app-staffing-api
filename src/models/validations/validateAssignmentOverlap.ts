@@ -36,10 +36,10 @@ const validateAssignmentOverlap = async ({ body, Assignment }) => {
           )
         ) {
           throw Scaffold.createError({
-            title: 'Employee already assigned',
+            title: 'Employee is already assigned for the same date',
             code: codes.ERR_CONFLICT,
             status: statusCodes.CONFLICT,
-            pointer: 'employee/id'
+            pointer: 'employee/start_date'
           })
         }
       });

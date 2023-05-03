@@ -128,7 +128,6 @@ describe('POST /api/assignments', () => {
     })
 
     const role = await Role.create({
-      name: chance.word(),
       start_date: dates.startDate,
       start_confidence: chance.floating({ min: 0, max: 1 }),
       end_date: dates.endDate,

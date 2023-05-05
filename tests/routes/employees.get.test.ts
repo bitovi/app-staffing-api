@@ -39,7 +39,6 @@ describe("GET /api/employees", () => {
     });
     
     const role = await Role.create({
-      name: chance.word(),
       start_date: dates.past,
       start_confidence: chance.floating({ min: 0, max: 0.9 }),
       end_date: dates.endDate,

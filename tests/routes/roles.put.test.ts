@@ -26,10 +26,7 @@ describe('PUT /api/roles/:id', function () {
 
     const dates = dateGenerator()
 
-    const updatedName = 'Updated name'
-
     const roleData = {
-      name: chance.name(),
       start_date: dates.startDate,
       end_date: dates.endDate,
       start_confidence: chance.floating({ min: 0, max: 1 }),
@@ -38,12 +35,12 @@ describe('PUT /api/roles/:id', function () {
 
     const role = await Role.create(roleData)
 
-    const { statusCode } = await put(role.id, { name: updatedName })
+    const { statusCode } = await put(role.id, { start_confidence: 0.3 })
     expect(statusCode).toEqual(200)
 
     const updatedRole = await Role.findByPk(role.id)
 
-    expect(updatedRole.dataValues.name).toEqual(updatedName)
+    expect(updatedRole.dataValues.start_confidence).toEqual(0.3)
   })
 
   test('should allow end_date / end_confidence updates to null', async function () {
@@ -56,7 +53,6 @@ describe('PUT /api/roles/:id', function () {
     })
 
     const roleData = {
-      name: chance.word(),
       start_date: dates.startDate,
       end_date: dates.endDate,
       start_confidence: chance.floating({ min: 0, max: 1 }),

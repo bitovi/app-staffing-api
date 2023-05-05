@@ -62,13 +62,12 @@ async function createRole(scaffold, projectIds: Array<string>, skillIds: Array<s
       const dates = dateGenerator()
       roleList.push(
         {
-          name: chance.word(),
-          start_confidence: chance.floating({ min: 0, max: 1 }),
-          end_confidence: chance.floating({ min: 0, max: 1 }),
+          start_confidence: chance.integer({min:0 , max: 10})/10,
+          end_confidence: chance.integer({min:0 , max: 10})/10,
           start_date: dates.startDate,
           end_date: dates.beforeStartDate,
           project: {
-            id: projectIds[chance.integer({min: 0, max: NUMBER_OF_RECORDS_TO_INSERT - 1})]
+            id: projectIds[index]
           },
           skills: [
             {

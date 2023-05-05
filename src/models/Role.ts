@@ -22,11 +22,6 @@ export const Role: ScaffoldModel = {
     },
     end_confidence: {
       type: DataTypes.FLOAT
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
     }
   },
   hasMany: [

@@ -9,12 +9,7 @@ export const Assignment: ScaffoldModel = {
       defaultValue: DataTypes.UUIDV4,
       allowNull: false
     },
-    start_date: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW
-    },
-    // start_date: DataTypes.DATE,
+    start_date: DataTypes.DATE,
     end_date: DataTypes.DATE
   },
   belongsTo: [

@@ -13,6 +13,9 @@ export const Skill: ScaffoldModel = {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+      validate: {
+        is: ['^[a-z].*?$','i']
+      }
     },
   },
   belongsToMany: [

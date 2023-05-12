@@ -11,7 +11,10 @@ export const Employee: ScaffoldModel = {
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        is: ['^[a-z].*?$','i']
+      }
     },
     start_date: DataTypes.DATE,
     end_date: DataTypes.DATE,

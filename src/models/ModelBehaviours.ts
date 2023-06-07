@@ -1,6 +1,6 @@
-import { validateStartDate } from '../utils/validation'
-import validateAssignmentOverlap from './validations/validateAssignmentOverlap'
-import validateRoleOverlap from './validations/validateRoleOverlap'
+import validateAssignmentOverlap from "./validations/validateAssignmentOverlap"
+import validateRoleOverlap from "./validations/validateRoleOverlap"
+import { validateStartDate } from "../utils/validation"
 
 const modelBehaviours = (model) => {
   const { Assignment, Employee, Role } = model
@@ -21,25 +21,25 @@ const modelBehaviours = (model) => {
             body: dataValues,
             Assignment,
           })
-        }
-      ]
+        },
+      ],
     },
     {
       model: Employee,
       hooks: [
         function beforeValidate({ dataValues }) {
           validateStartDate(dataValues)
-        }
-      ]
+        },
+      ],
     },
     {
       model: Role,
       hooks: [
         function beforeValidate({ dataValues }) {
           validateStartDate(dataValues)
-        }
-      ]
-    }
+        },
+      ],
+    },
   ]
 
   modelHooks.forEach((modelHook) => {

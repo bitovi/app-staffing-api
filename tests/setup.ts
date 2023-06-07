@@ -1,15 +1,15 @@
-import { createStaffingAppInstance } from '../src/server'
+import { createStaffingAppInstance } from "../src/server"
 
 beforeAll(async () => {
-  const [app, scaffold] = createStaffingAppInstance()
+  const [app, hatchedKoa] = createStaffingAppInstance()
 
-  await scaffold.createDatabase()
+  await hatchedKoa.createDatabase()
 
   global.app = app
-  global.scaffold = scaffold
-  global.model = scaffold.model
+  global.hatchedKoa = hatchedKoa
+  global.model = hatchedKoa.model
 })
 
 // afterAll(() => {
-//   global.scaffold.orm.close()
+//   global.hatchedKoa.orm.close()
 // })

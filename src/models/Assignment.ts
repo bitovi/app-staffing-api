@@ -1,33 +1,35 @@
-import { ScaffoldModel, DataTypes } from 'bitscaffold'
+import type { HatchifyModel } from "@hatchifyjs/koa"
+import { DataTypes } from "@hatchifyjs/koa"
 
-export const Assignment: ScaffoldModel = {
-  name: 'Assignment',
+export const Assignment: HatchifyModel = {
+  name: "Assignment",
   attributes: {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
-      allowNull: false
+      allowNull: false,
     },
     start_date: DataTypes.DATE,
-    end_date: DataTypes.DATE
+    end_date: DataTypes.DATE,
   },
   belongsTo: [
     {
-      target: 'Role',
-      options: { as: 'role', foreignKey: 'role_id' }
+      target: "Role",
+      options: { as: "role", foreignKey: "role_id" },
     },
     {
-      target: 'Employee',
+      target: "Employee",
       options: {
-        as: 'employee', foreignKey: 'employee_id'
-      }
-    }
+        as: "employee",
+        foreignKey: "employee_id",
+      },
+    },
   ],
   belongsToMany: [
     {
-      target: 'Project',
-      options: { as: 'projects', through: { model: 'Role' } }
-    }
-  ]
+      target: "Project",
+      options: { as: "projects", through: { model: "Role" } },
+    },
+  ],
 }

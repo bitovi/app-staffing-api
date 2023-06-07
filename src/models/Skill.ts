@@ -1,7 +1,8 @@
-import { ScaffoldModel, DataTypes } from 'bitscaffold'
+import type { HatchifyModel } from "@hatchifyjs/koa"
+import { DataTypes } from "@hatchifyjs/koa"
 
-export const Skill: ScaffoldModel = {
-  name: 'Skill',
+export const Skill: HatchifyModel = {
+  name: "Skill",
   attributes: {
     id: {
       type: DataTypes.UUID,
@@ -14,13 +15,16 @@ export const Skill: ScaffoldModel = {
       allowNull: false,
       unique: true,
       validate: {
-        is: ['^[a-z].*?$','i']
-      }
+        is: ["^[a-z].*?$", "i"],
+      },
     },
   },
   belongsToMany: [
-    { target: 'Role', options: { through: 'role__skill', as: 'roles' } },
-    { target: 'Employee', options: { through: 'employee__skill', as: 'employees' } },
+    { target: "Role", options: { through: "role__skill", as: "roles" } },
+    {
+      target: "Employee",
+      options: { through: "employee__skill", as: "employees" },
+    },
   ],
 }
 

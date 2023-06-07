@@ -1,20 +1,21 @@
-import { ScaffoldModel, DataTypes } from 'bitscaffold'
+import type { HatchifyModel } from "@hatchifyjs/koa"
+import { DataTypes } from "@hatchifyjs/koa"
 
-export const Employee: ScaffoldModel = {
-  name: 'Employee',
+export const Employee: HatchifyModel = {
+  name: "Employee",
   attributes: {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
-      allowNull: false
+      allowNull: false,
     },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        is: ['^[a-z].*?$','i']
-      }
+        is: ["^[a-z].*?$", "i"],
+      },
     },
     start_date: DataTypes.DATE,
     end_date: DataTypes.DATE,
@@ -22,27 +23,28 @@ export const Employee: ScaffoldModel = {
       type: DataTypes.VIRTUAL(DataTypes.INTEGER),
       include: ["assignments.role.project"],
       get() {
-        if(this.assignments){
-          const project = this.assignments.find(assignment => {
-            const now = new Date;
-            return (new Date(assignment?.role.start_date) < now) && (new Date(assignment?.role.end_date) > now);
-          })?.role?.project;
-          if(!project) return null;
+        if (this.assignments) {
+          const project = this.assignments.find((assignment) => {
+            const now = new Date()
+            return (
+              new Date(assignment?.role.start_date) < now &&
+              new Date(assignment?.role.end_date) > now
+            )
+          })?.role?.project
+          if (!project) return null
           return {
             id: project.id,
-            name: project.name
+            name: project.name,
           }
         }
-        return null;
+        return null
       },
     },
   },
-  hasMany: [
-    { target: 'Assignment', options: { as: 'assignments' } },
-  ],
+  hasMany: [{ target: "Assignment", options: { as: "assignments" } }],
   belongsToMany: [
-    { target: "Skill", options: { through: 'employee__skill', as: "skills" } }
-  ]
+    { target: "Skill", options: { through: "employee__skill", as: "skills" } },
+  ],
 }
 
 /*

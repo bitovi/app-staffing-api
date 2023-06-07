@@ -1,13 +1,13 @@
-import { statusCodes } from '../managers/error-handler/constants'
-import { ValidationError } from '../managers/error-handler/errors'
-import { compareDates } from './date'
+import { compareDates } from "./date"
+import { statusCodes } from "../managers/error-handler/constants"
+import { ValidationError } from "../managers/error-handler/errors"
 
 const validateStartDate = (body) => {
   if (compareDates(body.end_date, body.start_date)) {
     throw new ValidationError({
-      title: 'startDate is after endDate',
+      title: "startDate is after endDate",
       status: statusCodes.UNPROCESSABLE_ENTITY,
-      pointer: 'start_date'
+      pointer: "start_date",
     })
   }
 }
@@ -18,13 +18,13 @@ const validateDateFormat = (body) => {
     (body.end_date && body.end_date.length > 10)
   ) {
     throw new ValidationError({
-      title: 'incorrect date format',
+      title: "incorrect date format",
       statusCode: statusCodes.UNPROCESSABLE_ENTITY,
-      pointer: 'start_date'
+      pointer: "start_date",
     })
   }
 }
 
-const isString = (str) => typeof str === 'string'
+const isString = (str) => typeof str === "string"
 
 export { validateStartDate, validateDateFormat, isString }

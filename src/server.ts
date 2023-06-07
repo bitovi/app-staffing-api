@@ -1,20 +1,21 @@
-import { Scaffold } from 'bitscaffold'
-import Koa from 'koa'
-import signale from 'signale'
-import KoaRouter from '@koa/router'
-import dotenv from 'dotenv'
-import cors from '@koa/cors'
-import { Assignment } from './models/Assignment'
-import { Employee } from './models/Employee'
-import { Project } from './models/Project'
-import { Role } from './models/Role'
-import { Skill } from './models/Skill'
-import modelBehaviours from './models/ModelBehaviours'
-import errorHandler from './managers/error-handler'
+import { hatchifyKoa } from "@hatchifyjs/koa"
+import type { Hatchify } from "@hatchifyjs/koa"
+import cors from "@koa/cors"
+import KoaRouter from "@koa/router"
+import dotenv from "dotenv"
+import Koa from "koa"
+
+import errorHandler from "./managers/error-handler"
+import { Assignment } from "./models/Assignment"
+import { Employee } from "./models/Employee"
+import modelBehaviours from "./models/ModelBehaviours"
+import { Project } from "./models/Project"
+import { Role } from "./models/Role"
+import { Skill } from "./models/Skill"
 
 dotenv.config()
 
-export function createStaffingAppInstance(): [Koa, Scaffold] {
+export function createStaffingAppInstance(): [Koa, Hatchify] {
   // Create a basic Koa application
   const app = new Koa()
   const router = new KoaRouter()
@@ -23,26 +24,26 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
 
   app.use(cors())
 
-  // Create a Scaffold instance containing your Models
-  const scaffold = new Scaffold([Assignment, Employee, Project, Role, Skill], {
-    prefix: '/api',
+  // Create a Hatchify instance containing your Models
+  const hatchedKoa = hatchifyKoa([Assignment, Employee, Project, Role, Skill], {
+    prefix: "/api",
     expose: true,
     database: {
-      dialect: 'postgres',
-      host: process.env.DB_HOST ?? 'localhost',
+      dialect: "postgres",
+      host: process.env.DB_HOST ?? "localhost",
       port: Number(process.env.DB_PORT) ?? 5432,
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      logging: false
-    }
+      logging: false,
+    },
   })
 
-  modelBehaviours(scaffold.model)
+  modelBehaviours(hatchedKoa.model)
 
   // Set up your Koa app as normal, for example, a logging middleware
   app.use(async (ctx, next) => {
-    signale.info('Incoming Request: ', ctx.method, ctx.path)
+    console.info("Incoming Request: ", ctx.method, ctx.path)
     await next()
   })
 
@@ -50,13 +51,13 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
   app.use(router.routes())
   app.use(router.allowedMethods())
 
-  // Attach the Scaffold default middleware to your Koa application
-  app.use(scaffold.middleware.allModels.all)
+  // Attach the Hatchify default middleware to your Koa application
+  app.use(hatchedKoa.middleware.allModels.all)
 
   // Set up any other Koa routes, middleware, etc, that you want.
   app.use(async (ctx) => {
-    ctx.body = { response: 'Default Router Hit, HEALTH CHECK!!' }
+    ctx.body = { response: "Default Router Hit, HEALTH CHECK!!" }
   })
 
-  return [app, scaffold]
+  return [app, hatchedKoa]
 }

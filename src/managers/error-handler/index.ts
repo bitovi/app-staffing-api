@@ -1,20 +1,20 @@
-import { statusCodes } from './constants'
-import databaseErrorHandlers from './types/database-errors'
-import generalErrorHandler from './types/general-errors'
+import { statusCodes } from "./constants"
+import databaseErrorHandlers from "./types/database-errors"
+import generalErrorHandler from "./types/general-errors"
 
 const errorHandler = async (ctx, next) => {
   try {
     await next()
   } catch (error) {
-    let errors: any[] = []
+    const errors: any[] = []
     let status = statusCodes.INTERNAL_SERVER_ERROR
 
     if (
       [
-        'SequelizeDatabaseError',
-        'SequelizeUniqueConstraintError',
-        'SequelizeValidationError',
-        'SequelizeForeignKeyConstraintError'
+        "SequelizeDatabaseError",
+        "SequelizeUniqueConstraintError",
+        "SequelizeValidationError",
+        "SequelizeForeignKeyConstraintError",
       ].includes(error.name)
     ) {
       errors.push(databaseErrorHandlers(error))

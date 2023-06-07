@@ -1,45 +1,46 @@
-import { ScaffoldModel, DataTypes } from 'bitscaffold'
+import type { HatchifyModel } from "@hatchifyjs/koa"
+import { DataTypes } from "@hatchifyjs/koa"
 
-export const Role: ScaffoldModel = {
-  name: 'Role',
+export const Role: HatchifyModel = {
+  name: "Role",
   attributes: {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
-      allowNull: false
+      allowNull: false,
     },
     start_date: {
       type: DataTypes.DATE,
-      allowNull: false
+      allowNull: false,
     },
     end_date: {
-      type: DataTypes.DATE
+      type: DataTypes.DATE,
     },
     start_confidence: {
       type: DataTypes.FLOAT,
-      allowNull: false
+      allowNull: false,
     },
     end_confidence: {
-      type: DataTypes.FLOAT
-    }
+      type: DataTypes.FLOAT,
+    },
   },
   hasMany: [
     {
-      target: 'Assignment',
-      options: { as: 'assignments'  }
-    }
+      target: "Assignment",
+      options: { as: "assignments" },
+    },
   ],
   belongsTo: [
-    { target: 'Project', options: { as: 'project', foreignKey: "project_id" } }
+    { target: "Project", options: { as: "project", foreignKey: "project_id" } },
   ],
   belongsToMany: [
     {
-      target: 'Employee',
-      options: { through: { model: 'Assignment' }, as: 'employees' }
+      target: "Employee",
+      options: { through: { model: "Assignment" }, as: "employees" },
     },
-    { target: 'Skill', options: { through: 'role__skill', as: 'skills' } }
-  ]
+    { target: "Skill", options: { through: "role__skill", as: "skills" } },
+  ],
 }
 
 /*

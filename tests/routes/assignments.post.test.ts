@@ -1,52 +1,53 @@
-import request from 'supertest'
-import Serializer from '../../src/utils/json-api-serializer'
-import { dateGenerator } from '../../src/utils/date'
-import Chance from 'chance'
-import { isString } from '../../src/utils/validation'
+import Chance from "chance"
+import request from "supertest"
+
+import { dateGenerator } from "../../src/utils/date"
+import Serializer from "../../src/utils/json-api-serializer"
+import { isString } from "../../src/utils/validation"
 
 const chance = new Chance()
 
 const serialize = (body) => {
-  return Serializer.serialize('assignments', body)
+  return Serializer.serialize("assignments", body)
 }
 
 const post = async (payload) => {
   const response = await request(global.app.callback())
-    .post('/api/assignments')
-    .set('Accept', 'application/vnd.api+json')
-    .set('Content-Type', 'application/vnd.api+json')
+    .post("/api/assignments")
+    .set("Accept", "application/vnd.api+json")
+    .set("Content-Type", "application/vnd.api+json")
     .send(serialize(payload))
 
   return response
 }
 
-describe('POST /api/assignments', () => {
-  test('should return 422 for payload with startDate after endDate', async () => {
+describe("POST /api/assignments", () => {
+  it("should return 422 for payload with startDate after endDate", async () => {
     const dates = dateGenerator()
 
     const response = await post({
       start_date: dates.afterEndDate,
       employee: { id: chance.guid() },
       role: { id: chance.guid() },
-      end_date: dates.startDate
+      end_date: dates.startDate,
     })
 
     expect(response.statusCode).toBe(422)
   })
 
-  test('should return 200 for payload dates out of range of role, assignment date before roles and start date is not confident', async () => {
-    const { Assignment, Employee, Project, Role, Skill } = global.model
+  it("should return 200 for payload dates out of range of role, assignment date before roles and start date is not confident", async () => {
+    const { Employee, Project, Role } = global.model
 
     const dates = dateGenerator()
     const project = await Project.create({
       name: chance.company(),
-      description: chance.sentence()
+      description: chance.sentence(),
     })
 
     const employee = await Employee.create({
       name: chance.name(),
       start_date: dates.startDate,
-      end_date: dates.endDate
+      end_date: dates.endDate,
     })
 
     const role = await Role.create({
@@ -55,14 +56,14 @@ describe('POST /api/assignments', () => {
       start_confidence: chance.floating({ min: 0, max: 0.9 }),
       end_date: dates.endDate,
       end_confidence: chance.floating({ min: 0, max: 0.9 }),
-      project_id: project.id
+      project_id: project.id,
     })
 
     const newAssignment = {
       start_date: dates.beforeStartDate,
       end_date: dates.endAssignmentDate,
       employee: { id: employee.id },
-      role: { id: role.id }
+      role: { id: role.id },
     }
 
     const payload = serialize(newAssignment)
@@ -72,20 +73,20 @@ describe('POST /api/assignments', () => {
     expect(response.statusCode).toEqual(200)
   })
 
-  test('should return 200 for payload dates out of range of role, assignment dates after roles and end date is not confident', async () => {
-    const { Assignment, Employee, Project, Role, Skill } = global.model
+  it("should return 200 for payload dates out of range of role, assignment dates after roles and end date is not confident", async () => {
+    const { Employee, Project, Role } = global.model
 
     const dates = dateGenerator()
 
     const project = await Project.create({
       name: chance.company(),
-      description: chance.sentence()
+      description: chance.sentence(),
     })
 
     const employee = await Employee.create({
       name: chance.name(),
       start_date: dates.startDate,
-      end_date: dates.endDate
+      end_date: dates.endDate,
     })
 
     const role = await Role.create({
@@ -94,14 +95,14 @@ describe('POST /api/assignments', () => {
       start_confidence: chance.floating({ min: 0, max: 0.9 }),
       end_date: dates.endDate,
       end_confidence: chance.floating({ min: 0, max: 0.9 }),
-      project_id: project.id
+      project_id: project.id,
     })
 
     const newAssignment = {
       start_date: dates.startAssignmentDate,
       end_date: dates.afterEndDate,
       employee: { id: employee.id },
-      role: { id: role.id }
+      role: { id: role.id },
     }
 
     const payload = serialize(newAssignment)
@@ -111,20 +112,20 @@ describe('POST /api/assignments', () => {
     expect(response.statusCode).toEqual(200)
   })
 
-  test('should return 200 for valid payload with end_date', async () => {
-    const { Assignment, Employee, Project, Role, Skill } = global.model
+  it("should return 200 for valid payload with end_date", async () => {
+    const { Assignment, Employee, Project, Role } = global.model
 
     const dates = dateGenerator()
 
     const project = await Project.create({
       name: chance.company(),
-      description: chance.sentence({ words: 2 })
+      description: chance.sentence({ words: 2 }),
     })
 
     const employee = await Employee.create({
       name: chance.name(),
       start_date: dates.startDate,
-      end_date: dates.endDate
+      end_date: dates.endDate,
     })
 
     const role = await Role.create({
@@ -132,14 +133,14 @@ describe('POST /api/assignments', () => {
       start_confidence: chance.floating({ min: 0, max: 1 }),
       end_date: dates.endDate,
       end_confidence: chance.floating({ min: 0, max: 1 }),
-      project_id: project.id
+      project_id: project.id,
     })
 
     const newAssignment = {
       start_date: dates.startAssignmentDate,
       end_date: dates.endAssignmentDate,
       employee: { id: employee.id },
-      role: { id: role.id }
+      role: { id: role.id },
     }
 
     const { body, statusCode } = await post(newAssignment)
@@ -154,22 +155,22 @@ describe('POST /api/assignments', () => {
     // expect(savedAssignment.role_id).toEqual(role.id)
   })
 
-  test('should return 200 for valid payload without end_date', async () => {
+  it("should return 200 for valid payload without end_date", async () => {
     // TODO: move destructuring to the top
 
-    const { Assignment, Employee, Project, Role, Skill } = global.model
+    const { Assignment, Employee, Project, Role } = global.model
 
     const dates = dateGenerator()
 
     const project = await Project.create({
       name: chance.company(),
-      description: chance.sentence({ words: 2 })
+      description: chance.sentence({ words: 2 }),
     })
 
     const employee = await Employee.create({
       name: chance.name(),
       start_date: dates.startDate,
-      end_date: dates.endDate
+      end_date: dates.endDate,
     })
 
     const role = await Role.create({
@@ -178,13 +179,13 @@ describe('POST /api/assignments', () => {
       start_confidence: chance.floating({ min: 0, max: 1 }),
       end_date: dates.endDate,
       end_confidence: chance.floating({ min: 0, max: 1 }),
-      project_id: project.id
+      project_id: project.id,
     })
 
     const newAssignment = {
       start_date: dates.startAssignmentDate,
       employee: { id: employee.id },
-      role: { id: role.id }
+      role: { id: role.id },
     }
 
     const { body, statusCode } = await post(newAssignment)

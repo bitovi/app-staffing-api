@@ -1,4 +1,4 @@
-import JSONAPISerializer from 'json-api-serializer'
+import JSONAPISerializer from "json-api-serializer"
 
 const Serializer = new JSONAPISerializer()
 
@@ -11,24 +11,24 @@ const deserialize = (data) => {
 }
 
 const buildPagingUrl = (urlParts, params, number) => {
-  if (params.has('page[number]')) {
-    params.set('page[number]', number)
+  if (params.has("page[number]")) {
+    params.set("page[number]", number)
   }
 
-  return urlParts[0] + '?' + decodeURIComponent(params.toString())
+  return urlParts[0] + "?" + decodeURIComponent(params.toString())
 }
 
 // @TODO: fix paging for page > lastPage
 const topLevelLinksfn = ({ page, pageSize, count, url }) => {
-  url = url || ''
+  url = url || ""
   if (page === undefined) return { self: url }
   const lastPage = Math.round(count / pageSize) - 1
   const hasPages = page < lastPage
   const isLastPage = page === lastPage
   const isFirstPage = page === 0
   const hasNextPage = count > pageSize * (page + 1) && !isLastPage
-  const urlParts = url.split('?')
-  const query = urlParts[1] || ''
+  const urlParts = url.split("?")
+  const query = urlParts[1] || ""
   const params = new URLSearchParams(query)
 
   const linksObj = {
@@ -45,56 +45,56 @@ const topLevelLinksfn = ({ page, pageSize, count, url }) => {
     prev: !isFirstPage ? buildPagingUrl(urlParts, params, page - 1) : null,
   }
   Object.keys(linksObj).forEach(
-    (key) => linksObj[key] == null && delete linksObj[key]
+    (key) => linksObj[key] == null && delete linksObj[key],
   )
   return linksObj
 }
 
-Serializer.register('employees', {
-  id: 'id',
+Serializer.register("employees", {
+  id: "id",
   relationships: {
-    roles: { type: 'roles', deserialize },
-    skills: { type: 'skills', deserialize },
-    assignments: { type: 'assignments', deserialize },
+    roles: { type: "roles", deserialize },
+    skills: { type: "skills", deserialize },
+    assignments: { type: "assignments", deserialize },
   },
   topLevelLinks: topLevelLinksfn,
 })
 
-Serializer.register('roles', {
-  id: 'id',
+Serializer.register("roles", {
+  id: "id",
   relationships: {
-    assignments: { type: 'assignments', deserialize },
-    project: { type: 'projects', deserialize },
-    skills: { type: 'skills', deserialize },
-    employees: { type: 'employees', deserialize },
+    assignments: { type: "assignments", deserialize },
+    project: { type: "projects", deserialize },
+    skills: { type: "skills", deserialize },
+    employees: { type: "employees", deserialize },
   },
   topLevelLinks: topLevelLinksfn,
 })
 
-Serializer.register('skills', {
-  id: 'id',
+Serializer.register("skills", {
+  id: "id",
   relationships: {
-    roles: { type: 'roles', deserialize },
-    employees: { type: 'employees', deserialize },
+    roles: { type: "roles", deserialize },
+    employees: { type: "employees", deserialize },
   },
   topLevelLinks: topLevelLinksfn,
 })
 
-Serializer.register('projects', {
-  id: 'id',
+Serializer.register("projects", {
+  id: "id",
   relationships: {
-    roles: { type: 'roles', deserialize },
-    assignments: { type: 'assignments', deserialize },
+    roles: { type: "roles", deserialize },
+    assignments: { type: "assignments", deserialize },
   },
   topLevelLinks: topLevelLinksfn,
 })
 
-Serializer.register('assignments', {
-  id: 'id',
+Serializer.register("assignments", {
+  id: "id",
   relationships: {
-    employee: { type: 'employees', deserialize },
-    role: { type: 'roles', deserialize },
-    projects: { type: 'projects', deserialize },
+    employee: { type: "employees", deserialize },
+    role: { type: "roles", deserialize },
+    projects: { type: "projects", deserialize },
   },
   topLevelLinks: topLevelLinksfn,
 })

@@ -1,6 +1,18 @@
-import { ScaffoldModel, DataTypes } from "bitscaffold"
+import { DataTypes } from "@hatchifyjs/koa"
+import type { HatchifyModel } from "@hatchifyjs/koa"
 
-export const Project: ScaffoldModel = {
+/**
+ * 
+ export const User = {
+  name: "User",
+  attributes: {
+    name: "STRING",
+  },
+  hasMany: [{ target: "Todo", options: { as: "todos" } }], // 👀
+};
+
+ */
+export const Project: HatchifyModel = {
   name: "Project",
   attributes: {
     id: {
@@ -22,10 +34,10 @@ export const Project: ScaffoldModel = {
   belongsToMany: [
     {
       target: "Assignment",
-      options: { as: "assignments", through: { model: 'Role' } } ,
+      options: { as: "assignments", through: { model: "Role" } },
     },
   ],
-};
+}
 
 /*
 -- public.project definition

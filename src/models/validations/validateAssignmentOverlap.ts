@@ -1,11 +1,12 @@
-import { Scaffold } from 'bitscaffold'
-import { codes, statusCodes } from '../../managers/error-handler/constants'
+import { Hatchify } from "@hatchifyjs/koa"
+
+import { codes, statusCodes } from "../../managers/error-handler/constants"
 
 function dateRangeOverlaps(
   firstStartDate,
   firstEndDate,
   secondStartDate,
-  secondEndDate
+  secondEndDate,
 ) {
   if (firstStartDate < secondStartDate && secondStartDate < firstEndDate)
     return true // second starts in first
@@ -23,32 +24,32 @@ const validateAssignmentOverlap = async ({ body, Assignment }) => {
         where: {
           employee_id: body.employee_id,
         },
-      });
+      })
 
-      assignments.forEach(assignment => {
+      assignments.forEach((assignment) => {
         const employeeEndDate = assignment.end_date ?? Infinity
         if (
           dateRangeOverlaps(
             body.start_date,
             body.end_date,
             assignment.start_date,
-            employeeEndDate
+            employeeEndDate,
           )
         ) {
-          throw Scaffold.createError({
-            title: 'Employee is already assigned for the same date',
+          throw Hatchify.createError({
+            title: "Employee is already assigned for the same date",
             code: codes.ERR_CONFLICT,
             status: statusCodes.CONFLICT,
-            pointer: 'employee/start_date'
+            pointer: "employee/start_date",
           })
         }
-      });
+      })
     } catch (e) {
-      throw Scaffold.createError({
+      throw Hatchify.createError({
         title: e.message,
         code: codes.ERR_CONFLICT,
         status: statusCodes.CONFLICT,
-        pointer: 'employee/id'
+        pointer: "employee/id",
       })
     }
   }

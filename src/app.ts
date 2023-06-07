@@ -1,15 +1,15 @@
-import { createStaffingAppInstance } from './server'
-import seedData from './db/seed'
+import seedData from "./db/seed"
+import { createStaffingAppInstance } from "./server"
 
 async function init() {
-  const [app, scaffold] = await createStaffingAppInstance()
+  const [app, hatchedKoa] = await createStaffingAppInstance()
 
-  await scaffold.createDatabase()
+  await hatchedKoa.createDatabase()
 
-  await seedData(scaffold)
+  await seedData(hatchedKoa)
 
   app.listen(3000, () => {
-    console.log('Scaffold Started')
+    console.log("Hatchify Started")
   })
 }
 

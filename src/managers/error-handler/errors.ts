@@ -1,4 +1,4 @@
-const { statusCodes, codes } = require('./constants')
+import { codes, statusCodes } from "./constants"
 
 // interface ErrorComponent {
 //   pointer?: string
@@ -15,7 +15,7 @@ class Source {
   parameter: string
 
   constructor(pointer, parameter) {
-    this.pointer = pointer && '/data/attributes/' + pointer
+    this.pointer = pointer && "/data/attributes/" + pointer
     this.parameter = parameter
   }
 }
@@ -48,7 +48,7 @@ class GeneralError extends Error {
     this.code = code
     this.detail = detail
     this.source = new Source(pointer, parameter)
-    this.title = title || 'Server Error ocurred'
+    this.title = title || "Server Error ocurred"
   }
 }
 
@@ -62,7 +62,7 @@ class ValidationError extends GeneralError {
 class NotFoundError extends GeneralError {
   constructor(params) {
     super(params)
-    this.title = params.title || 'Not found'
+    this.title = params.title || "Not found"
     this.code = codes.ERR_NOT_FOUND
     this.status = statusCodes.NOT_FOUND
   }
@@ -71,7 +71,7 @@ class NotFoundError extends GeneralError {
 class UniqueConstraintError extends GeneralError {
   constructor(params) {
     super(params)
-    this.title = params.title || 'Conflict'
+    this.title = params.title || "Conflict"
     this.code = codes.ERR_CONFLICT
     this.status = statusCodes.CONFLICT
   }
@@ -80,7 +80,7 @@ class UniqueConstraintError extends GeneralError {
 class ConflictError extends GeneralError {
   constructor(params) {
     super(params)
-    this.title = params.title || 'Conflict'
+    this.title = params.title || "Conflict"
     this.code = codes.ERR_CONFLICT
     this.status = statusCodes.CONFLICT
   }

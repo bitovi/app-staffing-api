@@ -1,4 +1,4 @@
-import Chance from 'chance'
+import Chance from "chance"
 
 const chance = new Chance()
 
@@ -14,7 +14,7 @@ const toDateFormat = (date) => {
 
 const addDaysToDate = (
   date,
-  days = chance.integer({ min: 10, max: 365 * 2 })
+  days = chance.integer({ min: 10, max: 365 * 2 }),
 ) => {
   date = new Date(date)
 
@@ -49,7 +49,7 @@ const dateGenerator = function () {
     endAfterAssignmentDate,
     endDate,
     afterEndDate,
-    future
+    future,
   }
 }
 

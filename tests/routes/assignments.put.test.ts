@@ -6,10 +6,10 @@ import Serializer from "../../src/utils/json-api-serializer"
 
 const chance = new Chance()
 
-describe("PUT /api/assignments/:id", () => {
-  const put = async (id, payload) => {
+describe("PATCH /api/assignments/:id", () => {
+  const patch = async (id, payload) => {
     const response = await request(global.app.callback())
-      .put(`/api/assignments/${id}`)
+      .patch(`/api/assignments/${id}`)
       .set("Accept", "application/vnd.api+json")
       .set("Content-Type", "application/vnd.api+json")
       .send(serialize(payload))
@@ -55,7 +55,7 @@ describe("PUT /api/assignments/:id", () => {
 
     const assignment = await Assignment.create(newAssignment)
 
-    const response = await put(assignment.dataValues.id, {
+    const response = await patch(assignment.dataValues.id, {
       ...newAssignment,
       start_date: dates.endAssignmentDate,
       end_date: dates.startAssignmentDate,
@@ -95,7 +95,7 @@ describe("PUT /api/assignments/:id", () => {
     }
     const assignment = await Assignment.create(newAssignment)
 
-    const { statusCode } = await put(assignment.dataValues.id, {
+    const { statusCode } = await patch(assignment.dataValues.id, {
       ...newAssignment,
       end_date: null,
     })
@@ -146,7 +146,7 @@ describe("PUT /api/assignments/:id", () => {
       end_date: dates.endAssignmentDate,
     })
 
-    const response = await put(assignment.id, {
+    const response = await patch(assignment.id, {
       ...newAssignment,
       employee: { id: newAssociatedEmployee.id },
       start_date: dates.startAssignmentDate,
@@ -189,7 +189,7 @@ describe("PUT /api/assignments/:id", () => {
     }
     const assignment = await Assignment.create(newAssignment)
 
-    const response = await put(assignment.id, {
+    const response = await patch(assignment.id, {
       ...newAssignment,
       start_date: dates.beforeStartDate,
       end_date: dates.endAssignmentDate,
@@ -236,7 +236,7 @@ describe("PUT /api/assignments/:id", () => {
       start_date: dates.startAssignmentDate,
       end_date: dates.afterEndDate,
     })
-    const response = await put(assignment.id, payload)
+    const response = await patch(assignment.id, payload)
 
     expect(response.statusCode).toBe(200)
   })

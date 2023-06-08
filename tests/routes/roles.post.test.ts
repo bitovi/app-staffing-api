@@ -71,7 +71,7 @@ describe("POST /Role", function () {
   })
 
   it("should return 200 for valid payload with skills", async function () {
-    const { Project, Role, Skill } = global.model
+    const { Project, Role } = global.model
 
     const dates = dateGenerator()
 
@@ -80,16 +80,11 @@ describe("POST /Role", function () {
       description: chance.sentence(),
     })
 
-    const skill = await Skill.create({
-      name: chance.word(),
-    })
-
     const newRole = {
       start_date: dates.startDate,
       name: chance.word(),
       start_confidence: chance.floating({ min: 0, max: 1 }),
-      project: { id: project.dataValues.id },
-      skills: [skill],
+      project_id: project.id,
     }
 
     const { body, statusCode } = await post(newRole)

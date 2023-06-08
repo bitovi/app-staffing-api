@@ -6,10 +6,10 @@ import Serializer from "../../src/utils/json-api-serializer"
 
 const chance = new Chance()
 
-describe("PUT /api/employees/:id", () => {
-  const put = async (id, payload) => {
+describe("PATCH /api/employees/:id", () => {
+  const patch = async (id, payload) => {
     const response = await request(global.app.callback())
-      .put(`/api/employees/${id}`)
+      .patch(`/api/employees/${id}`)
       .set("Accept", "application/vnd.api+json")
       .set("Content-Type", "application/vnd.api+json")
       .send(serialize(payload))
@@ -32,7 +32,7 @@ describe("PUT /api/employees/:id", () => {
       end_date: dates.endDate,
     })
 
-    const response = await put(employee.id, {
+    const response = await patch(employee.id, {
       start_date: null,
       end_date: null,
     })
@@ -58,7 +58,7 @@ describe("PUT /api/employees/:id", () => {
       end_date: dates.endDate,
     })
 
-    const response = await put(employee.id, {
+    const response = await patch(employee.id, {
       start_date: dates.afterEndDate,
       end_date: dates.beforeStartDate,
     })
@@ -77,7 +77,7 @@ describe("PUT /api/employees/:id", () => {
       end_date: dates.future,
     })
 
-    const response = await put(employee.id, {
+    const response = await patch(employee.id, {
       start_date: dates.future,
       end_date: dates.past,
     })

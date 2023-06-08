@@ -15,7 +15,7 @@ import { Skill } from "./models/Skill"
 
 dotenv.config()
 
-export function createStaffingAppInstance(inMemory = false): [Koa, Hatchify] {
+export function createStaffingAppInstance(useFile = false): [Koa, Hatchify] {
   // Create a basic Koa application
   const app = new Koa()
   const router = new KoaRouter()
@@ -27,12 +27,12 @@ export function createStaffingAppInstance(inMemory = false): [Koa, Hatchify] {
   // Create a Hatchify instance containing your Models
   const hatchedKoa = hatchifyKoa([Assignment, Employee, Project, Role, Skill], {
     prefix: "/api",
-    ...(inMemory
+    ...(useFile
       ? {
           database: {
-            logging: false,
             dialect: "sqlite",
             storage: "example.sqlite",
+            logging: false,
           },
         }
       : {

@@ -21,11 +21,15 @@ const post = async (payload) => {
 
 describe("POST /Skill", function () {
   it("should return 200 for valid payload", async function () {
-    const payload = serialize({
-      name: chance.word(),
-    })
-
-    const response = await post(payload)
+    const response = await request(global.app.callback())
+      .post("/api/skills")
+      .set("Accept", "application/vnd.api+json")
+      .set("Content-Type", "application/vnd.api+json")
+      .send(
+        serialize({
+          name: chance.word(),
+        }),
+      )
 
     expect(response.statusCode).toBe(200)
   })

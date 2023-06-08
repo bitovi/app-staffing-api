@@ -31,9 +31,9 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
-      DB_HOST: app-staffing-backend-db
+      DB_HOST: db
     ports:
-      - 3000:3000
+      - 3001:3000
     command: >
       node dist/app.js
     networks:

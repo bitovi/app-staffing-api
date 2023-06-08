@@ -5,10 +5,10 @@ import Serializer from "../../src/utils/json-api-serializer"
 
 const chance = new Chance()
 
-describe("PUT /api/skills/:id", () => {
-  const put = async (id, payload) => {
+describe("PATCH /api/skills/:id", () => {
+  const patch = async (id, payload) => {
     const response = await request(global.app.callback())
-      .put(`/api/skills/${id}`)
+      .patch(`/api/skills/${id}`)
       .set("Accept", "application/vnd.api+json")
       .set("Content-Type", "application/vnd.api+json")
       .send(serialize(payload))
@@ -28,7 +28,7 @@ describe("PUT /api/skills/:id", () => {
     const payload = serialize({
       name: chance.word(),
     })
-    const response = await put(oldSkill.id, payload)
+    const response = await patch(oldSkill.id, payload)
     expect(response.statusCode).toBe(200)
   })
 
@@ -39,7 +39,7 @@ describe("PUT /api/skills/:id", () => {
 
     const skill = await Skill.create({ name: chance.word() })
 
-    const response = await put(oldSkill.id, {
+    const response = await patch(oldSkill.id, {
       name: skill.name,
     })
 

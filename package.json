@@ -10,7 +10,7 @@
     "lint:fix": "eslint . --fix",
     "start": "node dist/app.js",
     "start:dev": "nodemon",
-    "test": "jest --coverage --verbose --debug",
+    "test": "jest --coverage",
     "test:watch": "jest --watch",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
@@ -25,8 +25,12 @@
     "url": "https://github.com/bitovi/app-staffing-api/issues"
   },
   "homepage": "https://github.com/bitovi/app-staffing-api#readme",
+  "prettier": {
+    "semi": false,
+    "trailingComma": "all"
+  },
   "dependencies": {
-    "@hatchifyjs/koa": "^0.0.3",
+    "@hatchifyjs/koa": "^0.0.4",
     "@koa/cors": "^4.0.0",
     "@koa/router": "^12.0.0",
     "chance": "^1.1.11",
@@ -38,8 +42,8 @@
     "@bitovi/eslint-config": "^1.6.0",
     "@types/jest": "^29.5.2",
     "@types/koa": "^2.13.6",
-    "@types/koa-compose": "^3.2.5",
     "@types/koa__router": "^12.0.0",
+    "@types/koa-compose": "^3.2.5",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",

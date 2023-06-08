@@ -6,10 +6,10 @@ import Serializer from "../../src/utils/json-api-serializer"
 
 const chance = new Chance()
 
-describe("PUT /api/roles/:id", function () {
-  const put = async (id, payload) => {
+describe("PATCH /api/roles/:id", function () {
+  const patch = async (id, payload) => {
     const response = await request(global.app.callback())
-      .put(`/api/roles/${id}`)
+      .patch(`/api/roles/${id}`)
       .set("Accept", "application/vnd.api+json")
       .set("Content-Type", "application/vnd.api+json")
       .send(serialize(payload))
@@ -35,7 +35,7 @@ describe("PUT /api/roles/:id", function () {
 
     const role = await Role.create(roleData)
 
-    const { statusCode } = await put(role.id, { start_confidence: 0.3 })
+    const { statusCode } = await patch(role.id, { start_confidence: 0.3 })
     expect(statusCode).toEqual(200)
 
     const updatedRole = await Role.findByPk(role.id)
@@ -62,7 +62,7 @@ describe("PUT /api/roles/:id", function () {
 
     const role = await Role.create(roleData)
 
-    const response = await put(role.id, {
+    const response = await patch(role.id, {
       end_date: null,
       end_confidence: null,
     })
@@ -90,7 +90,7 @@ describe("PUT /api/roles/:id", function () {
 
     const role = await Role.create(roleData)
 
-    const response = await put(role.id, {
+    const response = await patch(role.id, {
       start_date: dates.endDate,
       end_date: dates.startDate,
     })

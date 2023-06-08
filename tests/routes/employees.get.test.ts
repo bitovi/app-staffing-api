@@ -5,9 +5,9 @@ import { dateGenerator } from "../../src/utils/date"
 
 const chance = new Chance()
 
-const get = async (route) => {
+const get = async (url: string) => {
   const response = await request(global.app.callback())
-    .get(`/api/${route}`)
+    .get(url)
     .set("Accept", "application/vnd.api+json")
     .set("Content-Type", "application/vnd.api+json")
 
@@ -48,7 +48,7 @@ describe("GET /api/employees", () => {
     })
 
     const { body, statusCode } = await get(
-      `employees/${employee.id}?fields[Employee]=currentProject`,
+      `/api/employees/${employee.id}?fields[employees]=currentProject&include=assignments.role.project`,
     )
 
     expect(statusCode).toEqual(200)

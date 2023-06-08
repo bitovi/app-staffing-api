@@ -1,7 +1,7 @@
 import { createStaffingAppInstance } from "../src/server"
 
 beforeAll(async () => {
-  const [app, hatchedKoa] = createStaffingAppInstance()
+  const [app, hatchedKoa] = createStaffingAppInstance(true)
 
   await hatchedKoa.createDatabase()
 

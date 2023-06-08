@@ -15,7 +15,7 @@ import { Skill } from "./models/Skill"
 
 dotenv.config()
 
-export function createStaffingAppInstance(): [Koa, Hatchify] {
+export function createStaffingAppInstance(inMemory = false): [Koa, Hatchify] {
   // Create a basic Koa application
   const app = new Koa()
   const router = new KoaRouter()
@@ -27,16 +27,26 @@ export function createStaffingAppInstance(): [Koa, Hatchify] {
   // Create a Hatchify instance containing your Models
   const hatchedKoa = hatchifyKoa([Assignment, Employee, Project, Role, Skill], {
     prefix: "/api",
-    expose: true,
-    database: {
-      dialect: "postgres",
-      host: process.env.DB_HOST ?? "localhost",
-      port: Number(process.env.DB_PORT) ?? 5432,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      logging: false,
-    },
+    ...(inMemory
+      ? {
+          database: {
+            logging: false,
+            dialect: "sqlite",
+            storage: "example.sqlite",
+          },
+        }
+      : {
+          expose: true,
+          database: {
+            dialect: "postgres",
+            host: process.env.DB_HOST ?? "localhost",
+            port: Number(process.env.DB_PORT) ?? 5432,
+            username: process.env.DB_USERNAME,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME,
+            logging: false,
+          },
+        }),
   })
 
   modelBehaviours(hatchedKoa.model)

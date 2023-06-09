@@ -33,7 +33,7 @@ services:
       DB_NAME: ${DB_NAME}
       DB_HOST: db
     ports:
-      - 3001:3000
+      - 3000:3000
     command: >
       node dist/app.js
     networks:

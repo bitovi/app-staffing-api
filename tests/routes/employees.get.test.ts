@@ -3,18 +3,18 @@ import request from "supertest"
 
 import { dateGenerator } from "../../src/utils/date"
 
-const chance = new Chance()
-
-const get = async (url: string) => {
-  const response = await request(global.app.callback())
-    .get(url)
-    .set("Accept", "application/vnd.api+json")
-    .set("Content-Type", "application/vnd.api+json")
-
-  return response
-}
-
 describe("GET /api/employees", () => {
+  const chance = new Chance()
+
+  const get = async (url: string) => {
+    const response = await request(global.app.callback())
+      .get(url)
+      .set("Accept", "application/vnd.api+json")
+      .set("Content-Type", "application/vnd.api+json")
+
+    return response
+  }
+
   it("should HMMMM", async function () {
     const { Assignment, Employee, Project, Role } = global.model
 

@@ -5,23 +5,23 @@ import { dateGenerator } from "../../src/utils/date"
 import Serializer from "../../src/utils/json-api-serializer"
 import { isString } from "../../src/utils/validation"
 
-const chance = new Chance()
-
-const serialize = (body) => {
-  return Serializer.serialize("roles", body)
-}
-
-const post = async (payload) => {
-  const response = await request(global.app.callback())
-    .post("/api/roles")
-    .set("Accept", "application/vnd.api+json")
-    .set("Content-Type", "application/vnd.api+json")
-    .send(serialize(payload))
-
-  return response
-}
-
 describe("POST /Role", function () {
+  const chance = new Chance()
+
+  const serialize = (body) => {
+    return Serializer.serialize("roles", body)
+  }
+
+  const post = async (payload) => {
+    const response = await request(global.app.callback())
+      .post("/api/roles")
+      .set("Accept", "application/vnd.api+json")
+      .set("Content-Type", "application/vnd.api+json")
+      .send(serialize(payload))
+
+    return response
+  }
+
   it("should return 422 if payload is missing start_date", async function () {
     const { statusCode } = await post({
       start_confidence: chance.floating({ min: 0, max: 1 }),

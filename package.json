@@ -37,7 +37,7 @@
     "dotenv": "^16.1.4",
     "koa": "^2.14.2",
     "pg": "^8.11.0",
-    "sequelize": "^6.32.1",
+    "sequelize": "6.32.0",
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {

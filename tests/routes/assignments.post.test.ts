@@ -5,23 +5,23 @@ import { dateGenerator } from "../../src/utils/date"
 import Serializer from "../../src/utils/json-api-serializer"
 import { isString } from "../../src/utils/validation"
 
-const chance = new Chance()
-
-const serialize = (body) => {
-  return Serializer.serialize("assignments", body)
-}
-
-const post = async (payload) => {
-  const response = await request(global.app.callback())
-    .post("/api/assignments")
-    .set("Accept", "application/vnd.api+json")
-    .set("Content-Type", "application/vnd.api+json")
-    .send(serialize(payload))
-
-  return response
-}
-
 describe("POST /api/assignments", () => {
+  const chance = new Chance()
+
+  const serialize = (body) => {
+    return Serializer.serialize("assignments", body)
+  }
+
+  const post = async (payload) => {
+    const response = await request(global.app.callback())
+      .post("/api/assignments")
+      .set("Accept", "application/vnd.api+json")
+      .set("Content-Type", "application/vnd.api+json")
+      .send(serialize(payload))
+
+    return response
+  }
+
   it("should return 422 for payload with startDate after endDate", async () => {
     const dates = dateGenerator()
 

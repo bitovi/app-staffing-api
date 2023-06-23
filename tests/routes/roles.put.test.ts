@@ -4,9 +4,9 @@ import request from "supertest"
 import { dateGenerator } from "../../src/utils/date"
 import Serializer from "../../src/utils/json-api-serializer"
 
-const chance = new Chance()
-
 describe("PATCH /api/roles/:id", function () {
+  const chance = new Chance()
+
   const patch = async (id, payload) => {
     const response = await request(global.app.callback())
       .patch(`/api/roles/${id}`)

@@ -3,23 +3,23 @@ import request from "supertest"
 
 import Serializer from "../../src/utils/json-api-serializer"
 
-const chance = new Chance()
-
-const serialize = (body) => {
-  return Serializer.serialize("skills", body)
-}
-
-const post = async (payload) => {
-  const response = await request(global.app.callback())
-    .post("/api/skills")
-    .set("Accept", "application/vnd.api+json")
-    .set("Content-Type", "application/vnd.api+json")
-    .send(serialize(payload))
-
-  return response
-}
-
 describe("POST /Skill", function () {
+  const chance = new Chance()
+
+  const serialize = (body) => {
+    return Serializer.serialize("skills", body)
+  }
+
+  const post = async (payload) => {
+    const response = await request(global.app.callback())
+      .post("/api/skills")
+      .set("Accept", "application/vnd.api+json")
+      .set("Content-Type", "application/vnd.api+json")
+      .send(serialize(payload))
+
+    return response
+  }
+
   it("should return 200 for valid payload", async function () {
     const response = await request(global.app.callback())
       .post("/api/skills")

@@ -61,7 +61,7 @@ async function createRole(hatchify, projectIds: string[], skillIds: string[]) {
       start_confidence: chance.integer({ min: 0, max: 10 }) / 10,
       end_confidence: chance.integer({ min: 0, max: 10 }) / 10,
       start_date: dates.startDate,
-      end_date: dates.beforeStartDate,
+      end_date: dates.endDate,
       project: {
         id: projectIds[index],
       },

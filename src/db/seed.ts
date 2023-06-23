@@ -6,6 +6,8 @@ import { dateGenerator } from "../utils/date"
 const chance = new Chance()
 const NUMBER_OF_RECORDS_TO_INSERT = 10
 
+let dateCache: ReturnType<typeof dateGenerator>
+
 const seedData = async (hatchify: Hatchify) => {
   await hatchify.model["Project"].destroy({ where: {} })
   await hatchify.model["Assignment"].destroy({ where: {} })
@@ -57,6 +59,7 @@ async function createRole(hatchify, projectIds: string[], skillIds: string[]) {
   const roleList: any[] = []
   for (let index = 0; index < NUMBER_OF_RECORDS_TO_INSERT; index++) {
     const dates = dateGenerator()
+    dateCache = dates
     roleList.push({
       start_confidence: chance.integer({ min: 0, max: 10 }) / 10,
       end_confidence: chance.integer({ min: 0, max: 10 }) / 10,
@@ -83,7 +86,7 @@ async function createRole(hatchify, projectIds: string[], skillIds: string[]) {
 async function createEmployee(hatchify: Hatchify, skillIds: string[]) {
   const employeeList: any[] = []
   for (let index = 0; index < NUMBER_OF_RECORDS_TO_INSERT; index++) {
-    const dates = dateGenerator()
+    const dates = dateCache
     employeeList.push({
       name: chance.name(),
       start_date: dates.startDate,
@@ -111,7 +114,7 @@ async function createAssignment(
 ) {
   const assignmentList: any[] = []
   for (let index = 0; index < NUMBER_OF_RECORDS_TO_INSERT; index++) {
-    const dates = dateGenerator()
+    const dates = dateCache
     assignmentList.push({
       start_date: dates.startAssignmentDate,
       end_date: dates.endAssignmentDate,
